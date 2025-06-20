@@ -86,7 +86,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    const feeds = data.feeds.reverse(); // Últimos datos primero
+                    const feeds = data.feeds; // Sin reverse(), del más antiguo al más reciente
                     if (!feeds || feeds.length === 0) throw new Error('No hay datos disponibles');
 
                     const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
@@ -141,7 +141,7 @@
                     }
 
                     // Actualiza los valores en pantalla con el dato más reciente, con manejo de errores
-                    const latestData = feeds[0] || {};
+                    const latestData = feeds[feeds.length - 1] || {}; // Último dato (más reciente)
                     document.getElementById('realParticles').textContent = `Partículas Reales: ${latestData.field1 !== undefined ? latestData.field1 : 'N/A'}`;
                     document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${latestData.field2 !== undefined ? latestData.field2 : 'N/A'}`;
                     document.getElementById('molecularPhysics').textContent = `Física Molecular: ${latestData.field3 !== undefined ? latestData.field3 : 'N/A'}`;
