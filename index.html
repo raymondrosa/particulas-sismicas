@@ -30,6 +30,7 @@
             margin: 20px auto; 
             border: 2px solid #FFFFFF; /* Borde blanco para resaltar */
             border-radius: 10px;
+            background-color: rgba(255, 255, 255, 0.8); /* Fondo claro para contraste */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -57,11 +58,13 @@
     <script>
         const channelID = 2439912; // Tu Channel ID
         const readAPIKey = 'BCX6UVTLQZ7VMK4F'; // Tu Read API Key
-        // Calcular fecha de hace 7 días
+        // Calcular fecha de hace 7 días y hora actual
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
         const startDate = oneWeekAgo.toISOString().slice(0, 10); // Formato YYYY-MM-DD
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=2025-06-20T13:40:00&results=8000`; // Última semana, hasta ahora
+        const now = new Date();
+        const endDate = now.toISOString().slice(0, 19); // Formato YYYY-MM-DDTHH:MM:SS
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=${endDate}&results=8000`; // Última semana, hasta ahora
 
         // Datos para los gráficos
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
@@ -78,9 +81,14 @@
 
         function updateCharts() {
             fetch(url)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en la respuesta de la API');
+                    return response.json();
+                })
                 .then(data => {
                     const feeds = data.feeds.reverse(); // Últimos datos primero
+                    if (!feeds || feeds.length === 0) throw new Error('No hay datos disponibles');
+
                     const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
 
                     // Filtra datos no nulos y no cero para cada variable
@@ -132,17 +140,29 @@
                         seismicParticlesChart.update();
                     }
 
-                    // Actualiza los valores en pantalla con el dato más reciente (sin filtrar ceros)
-                    document.getElementById('realParticles').textContent = `Partículas Reales: ${feeds[0].field1 || 'N/A'}`;
-                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${feeds[0].field2 || 'N/A'}`;
-                    document.getElementById('molecularPhysics').textContent = `Física Molecular: ${feeds[0].field3 || 'N/A'}`;
-                    document.getElementById('x').textContent = `x: ${feeds[0].field4 || 'N/A'}`;
-                    document.getElementById('y').textContent = `y: ${feeds[0].field5 || 'N/A'}`;
-                    document.getElementById('z').textContent = `z: ${feeds[0].field6 || 'N/A'}`;
-                    document.getElementById('angle').textContent = `Ángulo: ${feeds[0].field7 || 'N/A'}`;
-                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: ${feeds[0].field8 || 'N/A'}`;
+                    // Actualiza los valores en pantalla con el dato más reciente, con manejo de errores
+                    const latestData = feeds[0] || {};
+                    document.getElementById('realParticles').textContent = `Partículas Reales: ${latestData.field1 !== undefined ? latestData.field1 : 'N/A'}`;
+                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${latestData.field2 !== undefined ? latestData.field2 : 'N/A'}`;
+                    document.getElementById('molecularPhysics').textContent = `Física Molecular: ${latestData.field3 !== undefined ? latestData.field3 : 'N/A'}`;
+                    document.getElementById('x').textContent = `x: ${latestData.field4 !== undefined ? latestData.field4 : 'N/A'}`;
+                    document.getElementById('y').textContent = `y: ${latestData.field5 !== undefined ? latestData.field5 : 'N/A'}`;
+                    document.getElementById('z').textContent = `z: ${latestData.field6 !== undefined ? latestData.field6 : 'N/A'}`;
+                    document.getElementById('angle').textContent = `Ángulo: ${latestData.field7 !== undefined ? latestData.field7 : 'N/A'}`;
+                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: ${latestData.field8 !== undefined ? latestData.field8 : 'N/A'}`;
                 })
-                .catch(error => console.error('Error:', error));
+                .catch(error => {
+                    console.error('Error al obtener datos:', error);
+                    // Mostrar N/A si hay un error
+                    document.getElementById('realParticles').textContent = `Partículas Reales: N/A`;
+                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: N/A`;
+                    document.getElementById('molecularPhysics').textContent = `Física Molecular: N/A`;
+                    document.getElementById('x').textContent = `x: N/A`;
+                    document.getElementById('y').textContent = `y: N/A`;
+                    document.getElementById('z').textContent = `z: N/A`;
+                    document.getElementById('angle').textContent = `Ángulo: N/A`;
+                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: N/A`;
+                });
         }
 
         // Actualiza cada 15 segundos (límite gratuito de ThingSpeak)
