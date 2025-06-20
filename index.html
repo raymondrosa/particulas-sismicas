@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partículas Sísmicas - Prof. Rosa</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f0f0f0; }
+        .data { font-size: 1.5em; margin: 10px; padding: 10px; background-color: #fff; border-radius: 5px; }
+        h1 { color: #2c3e50; }
+    </style>
+</head>
+<body>
+    <h1>Partículas Sísmicas - Datos en Tiempo Real</h1>
+    <div class="data" id="voltage">Voltaje: Cargando...</div>
+    <div class="data" id="current">Amperaje: Cargando...</div>
+    <div class="data" id="resistance">Resistencia: Cargando...</div>
+    <div class="data" id="temp">Temperatura (Sensor): Cargando...</div>
+    <div class="data" id="humidity">Humedad Relativa: Cargando...</div>
+
+    <script>
+        const channelID = 2439912; // Tu Channel ID
+        const readAPIKey = 'BCX6UVTLQZ7VMK4F'; // Reemplaza con tu Read API Key
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&results=1`;
+
+        function updateData() {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const feed = data.feeds[0];
+                    document.getElementById('voltage').textContent = `Voltaje: ${feed.field1 || 'N/A'} V`;
+                    document.getElementById('current').textContent = `Amperaje: ${feed.field2 || 'N/A'} mA`;
+                    document.getElementById('resistance').textContent = `Resistencia: ${feed.field3 || 'N/A'} Ω`;
+                    document.getElementById('temp').textContent = `Temperatura (Sensor): ${feed.field4 || 'N/A'} °C`;
+                    document.getElementById('humidity').textContent = `Humedad Relativa: ${feed.field5 || 'N/A'} %`;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Actualiza cada 15 segundos (límite gratuito de ThingSpeak)
+        setInterval(updateData, 15000);
+        updateData(); // Primera carga inmediata
+    </script>
+</body>
+</html>
