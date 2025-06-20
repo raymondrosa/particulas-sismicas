@@ -8,38 +8,110 @@
         body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f0f0f0; }
         .data { font-size: 1.5em; margin: 10px; padding: 10px; background-color: #fff; border-radius: 5px; }
         h1 { color: #2c3e50; }
+        canvas { max-width: 100%; margin: 20px auto; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <h1>Partículas Sísmicas - Datos en Tiempo Real</h1>
-    <div class="data" id="voltage">Voltaje: Cargando...</div>
-    <div class="data" id="current">Amperaje: Cargando...</div>
-    <div class="data" id="resistance">Resistencia: Cargando...</div>
-    <div class="data" id="temp">Temperatura (Sensor): Cargando...</div>
-    <div class="data" id="humidity">Humedad Relativa: Cargando...</div>
+    <div class="data" id="realParticles">Partículas Reales: Cargando...</div>
+    <div class="data" id="imaginaryParticles">Partículas Imaginarias: Cargando...</div>
+    <div class="data" id="molecularPhysics">Física Molecular: Cargando...</div>
+    <div class="data" id="x">x: Cargando...</div>
+    <div class="data" id="y">y: Cargando...</div>
+    <div class="data" id="z">z: Cargando...</div>
+    <div class="data" id="angle">Ángulo: Cargando...</div>
+    <div class="data" id="seismicParticles">Partículas Sísmicas: Cargando...</div>
+
+    <canvas id="realParticlesChart" width="400" height="200"></canvas>
+    <canvas id="imaginaryParticlesChart" width="400" height="200"></canvas>
+    <canvas id="molecularPhysicsChart" width="400" height="200"></canvas>
+    <canvas id="xChart" width="400" height="200"></canvas>
+    <canvas id="yChart" width="400" height="200"></canvas>
+    <canvas id="zChart" width="400" height="200"></canvas>
+    <canvas id="angleChart" width="400" height="200"></canvas>
+    <canvas id="seismicParticlesChart" width="400" height="200"></canvas>
 
     <script>
         const channelID = 2439912; // Tu Channel ID
-        const readAPIKey = 'TU_READ_API_KEY'; // Reemplaza con tu Read API Key
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&results=1`;
+        const readAPIKey = 'BCX6UVTLQZ7VMK4F'; // Tu Read API Key
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&results=100`; // Últimos 100 datos
 
-        function updateData() {
+        // Datos para los gráficos
+        let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
+        let imaginaryParticlesData = { labels: [], datasets: [{ label: 'Partículas Imaginarias', data: [], borderColor: '#FF6384', fill: false }] };
+        let molecularPhysicsData = { labels: [], datasets: [{ label: 'Física Molecular', data: [], borderColor: '#4BC0C0', fill: false }] };
+        let xData = { labels: [], datasets: [{ label: 'x', data: [], borderColor: '#FF9F40', fill: false }] };
+        let yData = { labels: [], datasets: [{ label: 'y', data: [], borderColor: '#9966FF', fill: false }] };
+        let zData = { labels: [], datasets: [{ label: 'z', data: [], borderColor: '#FFCD56', fill: false }] };
+        let angleData = { labels: [], datasets: [{ label: 'Ángulo', data: [], borderColor: '#C9CBCF', fill: false }] };
+        let seismicParticlesData = { labels: [], datasets: [{ label: 'Partículas Sísmicas', data: [], borderColor: '#36A2EB', fill: false }] }; // Reutilizo color para destacar
+
+        // Inicialización de los gráficos
+        let realParticlesChart, imaginaryParticlesChart, molecularPhysicsChart, xChart, yChart, zChart, angleChart, seismicParticlesChart;
+
+        function updateCharts() {
             fetch(url)
                 .then(response => response.json())
                 .then(data => {
-                    const feed = data.feeds[0];
-                    document.getElementById('voltage').textContent = `Voltaje: ${feed.field1 || 'N/A'} V`;
-                    document.getElementById('current').textContent = `Amperaje: ${feed.field2 || 'N/A'} mA`;
-                    document.getElementById('resistance').textContent = `Resistencia: ${feed.field3 || 'N/A'} Ω`;
-                    document.getElementById('temp').textContent = `Temperatura (Sensor): ${feed.field4 || 'N/A'} °C`;
-                    document.getElementById('humidity').textContent = `Humedad Relativa: ${feed.field5 || 'N/A'} %`;
+                    const feeds = data.feeds.reverse(); // Últimos datos primero
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleTimeString());
+
+                    // Actualiza datos para cada variable
+                    realParticlesData.labels = labels;
+                    realParticlesData.datasets[0].data = feeds.map(f => f.field1 || 0);
+                    imaginaryParticlesData.labels = labels;
+                    imaginaryParticlesData.datasets[0].data = feeds.map(f => f.field2 || 0);
+                    molecularPhysicsData.labels = labels;
+                    molecularPhysicsData.datasets[0].data = feeds.map(f => f.field3 || 0);
+                    xData.labels = labels;
+                    xData.datasets[0].data = feeds.map(f => f.field4 || 0);
+                    yData.labels = labels;
+                    yData.datasets[0].data = feeds.map(f => f.field5 || 0);
+                    zData.labels = labels;
+                    zData.datasets[0].data = feeds.map(f => f.field6 || 0);
+                    angleData.labels = labels;
+                    angleData.datasets[0].data = feeds.map(f => f.field7 || 0);
+                    seismicParticlesData.labels = labels;
+                    seismicParticlesData.datasets[0].data = feeds.map(f => f.field8 || 0);
+
+                    // Inicializa o actualiza los gráficos
+                    if (!realParticlesChart) {
+                        realParticlesChart = new Chart(document.getElementById('realParticlesChart').getContext('2d'), { type: 'line', data: realParticlesData });
+                        imaginaryParticlesChart = new Chart(document.getElementById('imaginaryParticlesChart').getContext('2d'), { type: 'line', data: imaginaryParticlesData });
+                        molecularPhysicsChart = new Chart(document.getElementById('molecularPhysicsChart').getContext('2d'), { type: 'line', data: molecularPhysicsData });
+                        xChart = new Chart(document.getElementById('xChart').getContext('2d'), { type: 'line', data: xData });
+                        yChart = new Chart(document.getElementById('yChart').getContext('2d'), { type: 'line', data: yData });
+                        zChart = new Chart(document.getElementById('zChart').getContext('2d'), { type: 'line', data: zData });
+                        angleChart = new Chart(document.getElementById('angleChart').getContext('2d'), { type: 'line', data: angleData });
+                        seismicParticlesChart = new Chart(document.getElementById('seismicParticlesChart').getContext('2d'), { type: 'line', data: seismicParticlesData });
+                    } else {
+                        realParticlesChart.update();
+                        imaginaryParticlesChart.update();
+                        molecularPhysicsChart.update();
+                        xChart.update();
+                        yChart.update();
+                        zChart.update();
+                        angleChart.update();
+                        seismicParticlesChart.update();
+                    }
+
+                    // Actualiza los valores en pantalla
+                    document.getElementById('realParticles').textContent = `Partículas Reales: ${feeds[0].field1 || 'N/A'}`;
+                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${feeds[0].field2 || 'N/A'}`;
+                    document.getElementById('molecularPhysics').textContent = `Física Molecular: ${feeds[0].field3 || 'N/A'}`;
+                    document.getElementById('x').textContent = `x: ${feeds[0].field4 || 'N/A'}`;
+                    document.getElementById('y').textContent = `y: ${feeds[0].field5 || 'N/A'}`;
+                    document.getElementById('z').textContent = `z: ${feeds[0].field6 || 'N/A'}`;
+                    document.getElementById('angle').textContent = `Ángulo: ${feeds[0].field7 || 'N/A'}`;
+                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: ${feeds[0].field8 || 'N/A'}`;
                 })
                 .catch(error => console.error('Error:', error));
         }
 
         // Actualiza cada 15 segundos (límite gratuito de ThingSpeak)
-        setInterval(updateData, 15000);
-        updateData(); // Primera carga inmediata
+        setInterval(updateCharts, 15000);
+        updateCharts(); // Primera carga inmediata
     </script>
 </body>
 </html>
