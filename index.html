@@ -9,28 +9,28 @@
             font-family: Georgia, "Times New Roman", serif; 
             text-align: center; 
             margin-top: 50px; 
-            background-color: #87CEEB; /* Fondo azul celeste */
-            color: #FFFFFF; /* Letras blancas para contraste */
+            background-color: #1E90FF; /* Azul Dodger para mayor contraste */
+            color: #FFFFFF; /* Letras blancas */
         }
         .data { 
-            font-size: 1.8em; /* Tamaño de letra aumentado para estética */
+            font-size: 1.8em; 
             margin: 15px; 
             padding: 15px; 
-            background-color: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente para legibilidad */
+            background-color: rgba(255, 255, 255, 0.3); /* Fondo semi-transparente más oscuro */
             border-radius: 10px; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto 3D */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Sombra más pronunciada */
         }
         h1 { 
             color: #FFFFFF; 
-            font-size: 2.5em; /* Título más grande y elegante */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Sombra suave en el título */
+            font-size: 2.5em; 
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5); /* Sombra más fuerte para contraste */
         }
         canvas { 
             max-width: 100%; 
             margin: 20px auto; 
-            border: 2px solid #FFFFFF; /* Borde blanco para resaltar */
+            border: 3px solid #FFFFFF; /* Borde blanco más grueso */
             border-radius: 10px;
-            background-color: rgba(255, 255, 255, 0.8); /* Fondo claro para contraste */
+            background-color: #FFFFFF; /* Fondo blanco opaco para máximo contraste */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -58,13 +58,13 @@
     <script>
         const channelID = 2439912; // Tu Channel ID
         const readAPIKey = 'BCX6UVTLQZ7VMK4F'; // Tu Read API Key
-        // Calcular fecha de hace 7 días y hora actual
-        const oneWeekAgo = new Date();
-        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-        const startDate = oneWeekAgo.toISOString().slice(0, 10); // Formato YYYY-MM-DD
+        // Calcular fecha de hace 30 días y hora actual
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const startDate = thirtyDaysAgo.toISOString().slice(0, 10); // Formato YYYY-MM-DD
         const now = new Date();
         const endDate = now.toISOString().slice(0, 19); // Formato YYYY-MM-DDTHH:MM:SS
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=${endDate}&results=8000`; // Última semana, hasta ahora
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=${endDate}&results=8000`; // Últimos 30 días, hasta ahora
 
         // Datos para los gráficos
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
