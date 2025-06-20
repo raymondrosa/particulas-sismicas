@@ -5,10 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f0f0f0; }
-        .data { font-size: 1.5em; margin: 10px; padding: 10px; background-color: #fff; border-radius: 5px; }
-        h1 { color: #2c3e50; }
-        canvas { max-width: 100%; margin: 20px auto; }
+        body { 
+            font-family: Georgia, "Times New Roman", serif; 
+            text-align: center; 
+            margin-top: 50px; 
+            background-color: #87CEEB; /* Fondo azul celeste */
+            color: #FFFFFF; /* Letras blancas para contraste */
+        }
+        .data { 
+            font-size: 1.8em; /* Tamaño de letra aumentado para estética */
+            margin: 15px; 
+            padding: 15px; 
+            background-color: rgba(255, 255, 255, 0.2); /* Fondo semi-transparente para legibilidad */
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra para efecto 3D */
+        }
+        h1 { 
+            color: #FFFFFF; 
+            font-size: 2.5em; /* Título más grande y elegante */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Sombra suave en el título */
+        }
+        canvas { 
+            max-width: 100%; 
+            margin: 20px auto; 
+            border: 2px solid #FFFFFF; /* Borde blanco para resaltar */
+            border-radius: 10px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
@@ -39,7 +61,7 @@
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
         const startDate = oneWeekAgo.toISOString().slice(0, 10); // Formato YYYY-MM-DD
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=2025-06-20T13:35:00&results=8000`; // Última semana, hasta ahora
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=2025-06-20T13:40:00&results=8000`; // Última semana, hasta ahora
 
         // Datos para los gráficos
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
@@ -110,7 +132,7 @@
                         seismicParticlesChart.update();
                     }
 
-                    // Actualiza los valores en pantalla
+                    // Actualiza los valores en pantalla con el dato más reciente (sin filtrar ceros)
                     document.getElementById('realParticles').textContent = `Partículas Reales: ${feeds[0].field1 || 'N/A'}`;
                     document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${feeds[0].field2 || 'N/A'}`;
                     document.getElementById('molecularPhysics').textContent = `Física Molecular: ${feeds[0].field3 || 'N/A'}`;
