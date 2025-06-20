@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Partículas Sísmicas - Datos en Tiempo Real</h1>
+    <h1>Partículas Sísmicas - Datos en Tiempo Real (Última Semana)</h1>
     <div class="data" id="realParticles">Partículas Reales: Cargando...</div>
     <div class="data" id="imaginaryParticles">Partículas Imaginarias: Cargando...</div>
     <div class="data" id="molecularPhysics">Física Molecular: Cargando...</div>
@@ -23,19 +23,23 @@
     <div class="data" id="angle">Ángulo: Cargando...</div>
     <div class="data" id="seismicParticles">Partículas Sísmicas: Cargando...</div>
 
-    <canvas id="realParticlesChart" width="400" height="200"></canvas>
-    <canvas id="imaginaryParticlesChart" width="400" height="200"></canvas>
-    <canvas id="molecularPhysicsChart" width="400" height="200"></canvas>
-    <canvas id="xChart" width="400" height="200"></canvas>
-    <canvas id="yChart" width="400" height="200"></canvas>
-    <canvas id="zChart" width="400" height="200"></canvas>
-    <canvas id="angleChart" width="400" height="200"></canvas>
-    <canvas id="seismicParticlesChart" width="400" height="200"></canvas>
+    <canvas id="realParticlesChart" width="800" height="400"></canvas>
+    <canvas id="imaginaryParticlesChart" width="800" height="400"></canvas>
+    <canvas id="molecularPhysicsChart" width="800" height="400"></canvas>
+    <canvas id="xChart" width="800" height="400"></canvas>
+    <canvas id="yChart" width="800" height="400"></canvas>
+    <canvas id="zChart" width="800" height="400"></canvas>
+    <canvas id="angleChart" width="800" height="400"></canvas>
+    <canvas id="seismicParticlesChart" width="800" height="400"></canvas>
 
     <script>
         const channelID = 2439912; // Tu Channel ID
         const readAPIKey = 'BCX6UVTLQZ7VMK4F'; // Tu Read API Key
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&results=100`; // Últimos 100 datos
+        // Calcular fecha de hace 7 días
+        const oneWeekAgo = new Date();
+        oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+        const startDate = oneWeekAgo.toISOString().slice(0, 10); // Formato YYYY-MM-DD
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=2025-06-20T13:31:00&results=8000`; // Última semana, hasta ahora
 
         // Datos para los gráficos
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
@@ -55,7 +59,7 @@
                 .then(response => response.json())
                 .then(data => {
                     const feeds = data.feeds.reverse(); // Últimos datos primero
-                    const labels = feeds.map(f => new Date(f.created_at).toLocaleTimeString());
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
 
                     // Actualiza datos para cada variable
                     realParticlesData.labels = labels;
