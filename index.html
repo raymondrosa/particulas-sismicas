@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partículas Sísmicas - Prof. Rosa</title>
+    <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f0f0f0; }
         .data { font-size: 1.5em; margin: 10px; padding: 10px; background-color: #fff; border-radius: 5px; }
@@ -13,7 +13,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Partículas Sísmicas - Datos en Tiempo Real (Última Semana)</h1>
+    <h1>Observatorio de Partículas del TOA - Datos en Tiempo Real (Última Semana)</h1>
     <div class="data" id="realParticles">Partículas Reales: Cargando...</div>
     <div class="data" id="imaginaryParticles">Partículas Imaginarias: Cargando...</div>
     <div class="data" id="molecularPhysics">Física Molecular: Cargando...</div>
@@ -39,7 +39,7 @@
         const oneWeekAgo = new Date();
         oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
         const startDate = oneWeekAgo.toISOString().slice(0, 10); // Formato YYYY-MM-DD
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=2025-06-20T13:31:00&results=8000`; // Última semana, hasta ahora
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=2025-06-20T13:35:00&results=8000`; // Última semana, hasta ahora
 
         // Datos para los gráficos
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
@@ -59,25 +59,35 @@
                 .then(response => response.json())
                 .then(data => {
                     const feeds = data.feeds.reverse(); // Últimos datos primero
-                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
 
-                    // Actualiza datos para cada variable
+                    // Filtra datos no nulos y no cero para cada variable
                     realParticlesData.labels = labels;
-                    realParticlesData.datasets[0].data = feeds.map(f => f.field1 || 0);
+                    realParticlesData.datasets[0].data = feeds.map(f => f.field1).filter(v => v && v !== 0);
                     imaginaryParticlesData.labels = labels;
-                    imaginaryParticlesData.datasets[0].data = feeds.map(f => f.field2 || 0);
+                    imaginaryParticlesData.datasets[0].data = feeds.map(f => f.field2).filter(v => v && v !== 0);
                     molecularPhysicsData.labels = labels;
-                    molecularPhysicsData.datasets[0].data = feeds.map(f => f.field3 || 0);
+                    molecularPhysicsData.datasets[0].data = feeds.map(f => f.field3).filter(v => v && v !== 0);
                     xData.labels = labels;
-                    xData.datasets[0].data = feeds.map(f => f.field4 || 0);
+                    xData.datasets[0].data = feeds.map(f => f.field4).filter(v => v && v !== 0);
                     yData.labels = labels;
-                    yData.datasets[0].data = feeds.map(f => f.field5 || 0);
+                    yData.datasets[0].data = feeds.map(f => f.field5).filter(v => v && v !== 0);
                     zData.labels = labels;
-                    zData.datasets[0].data = feeds.map(f => f.field6 || 0);
+                    zData.datasets[0].data = feeds.map(f => f.field6).filter(v => v && v !== 0);
                     angleData.labels = labels;
-                    angleData.datasets[0].data = feeds.map(f => f.field7 || 0);
+                    angleData.datasets[0].data = feeds.map(f => f.field7).filter(v => v && v !== 0);
                     seismicParticlesData.labels = labels;
-                    seismicParticlesData.datasets[0].data = feeds.map(f => f.field8 || 0);
+                    seismicParticlesData.datasets[0].data = feeds.map(f => f.field8).filter(v => v && v !== 0);
+
+                    // Asegura que las etiquetas coincidan con los datos filtrados
+                    realParticlesData.labels = realParticlesData.labels.slice(0, realParticlesData.datasets[0].data.length);
+                    imaginaryParticlesData.labels = imaginaryParticlesData.labels.slice(0, imaginaryParticlesData.datasets[0].data.length);
+                    molecularPhysicsData.labels = molecularPhysicsData.labels.slice(0, molecularPhysicsData.datasets[0].data.length);
+                    xData.labels = xData.labels.slice(0, xData.datasets[0].data.length);
+                    yData.labels = yData.labels.slice(0, yData.datasets[0].data.length);
+                    zData.labels = zData.labels.slice(0, zData.datasets[0].data.length);
+                    angleData.labels = angleData.labels.slice(0, angleData.datasets[0].data.length);
+                    seismicParticlesData.labels = seismicParticlesData.labels.slice(0, seismicParticlesData.datasets[0].data.length);
 
                     // Inicializa o actualiza los gráficos
                     if (!realParticlesChart) {
