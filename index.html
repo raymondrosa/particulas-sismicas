@@ -29,9 +29,9 @@
         <div class="data" id="realParticles">Partículas Reales: Cargando...</div>
         <div class="data" id="imaginaryParticles">Partículas Imaginarias: Cargando...</div>
         <div class="data" id="molecularPhysics">Física Molecular: Cargando...</div>
-        <div class="data" id="x">x: Cargando...</div>
-        <div class="data" id="y">y: Cargando...</div>
-        <div class="data" id="z">z: Cargando...</div>
+        <div class="data" id="x">Coordenada x: Cargando...</div>
+        <div class="data" id="y">Coordenada y: Cargando...</div>
+        <div class="data" id="z">Coordenada z: Cargando...</div>
         <div class="data" id="angle">Ángulo: Cargando...</div>
         <div class="data" id="seismicParticles">Partículas Sísmicas: Cargando...</div>
         <div class="data" id="accelX">Aceleración en X: Cargando...</div>
@@ -67,9 +67,9 @@
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
         let imaginaryParticlesData = { labels: [], datasets: [{ label: 'Partículas Imaginarias', data: [], borderColor: '#FF6384', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
         let molecularPhysicsData = { labels: [], datasets: [{ label: 'Física Molecular', data: [], borderColor: '#4BC0C0', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
-        let xData = { labels: [], datasets: [{ label: 'x', data: [], borderColor: '#FF9F40', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
-        let yData = { labels: [], datasets: [{ label: 'y', data: [], borderColor: '#9966FF', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
-        let zData = { labels: [], datasets: [{ label: 'z', data: [], borderColor: '#FFCD56', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
+        let xData = { labels: [], datasets: [{ label: 'Coordenada x', data: [], borderColor: '#FF9F40', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
+        let yData = { labels: [], datasets: [{ label: 'Coordenada y', data: [], borderColor: '#9966FF', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
+        let zData = { labels: [], datasets: [{ label: 'Coordenada z', data: [], borderColor: '#FFCD56', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
         let angleData = { labels: [], datasets: [{ label: 'Ángulo', data: [], borderColor: '#C9CBCF', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
         let seismicParticlesData = { labels: [], datasets: [{ label: 'Partículas Sísmicas', data: [], borderColor: '#36A2EB', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
         let accelXData = { labels: [], datasets: [{ label: 'Aceleración en X', data: [], borderColor: '#FF5733', borderWidth: 1, pointRadius: 1, pointHoverRadius: 2, fill: false }] };
@@ -101,7 +101,7 @@
                         const value = latestData1[`field${i + 1}`] !== undefined && latestData1[`field${i + 1}`] !== null && latestData1[`field${i + 1}`] !== '' ? latestData1[`field${i + 1}`] : 'En Reposo';
                         document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${value}`;
                     });
-                    updateStatus(dataElements.some(id => document.getElementById(id).textContent.includes('En Reposo')));
+                    updateStatus(latestData1.field1 !== undefined && latestData1.field1 !== null && latestData1.field1 !== '' && latestData1.field1 !== '0');
                 })
                 .catch(e => console.error('Error canal 1:', e));
 
@@ -124,7 +124,6 @@
                         const value = latestData2[`field${i + 1}`] !== undefined && latestData2[`field${i + 1}`] !== null && latestData2[`field${i + 1}`] !== '' ? latestData2[`field${i + 1}`] : 'En Reposo';
                         document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${value}`;
                     });
-                    updateStatus(dataElements.some(id => document.getElementById(id).textContent.includes('En Reposo')));
                 })
                 .catch(e => console.error('Error canal 2:', e));
 
@@ -149,9 +148,9 @@
             }
         }
 
-        function updateStatus(anyReposo) {
+        function updateStatus(active) {
             const status = document.getElementById('stationStatus');
-            status.innerHTML = `Estado: <span class="status-circle" style="background-color: ${anyReposo ? '#FF0000' : '#00FF00'}"></span>${anyReposo ? 'En Reposo' : 'Monitoreo Activo'}`;
+            status.innerHTML = `Estado: <span class="status-circle" style="background-color: ${active ? '#00FF00' : '#FF0000'}"></span>${active ? 'En Monitoreo Activo' : 'En Reposo'}`;
         }
 
         setInterval(updateCharts, 15000); updateCharts();
