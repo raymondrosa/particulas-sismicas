@@ -58,13 +58,12 @@
     <script>
         const channelID = 2439912; // Tu Channel ID
         const readAPIKey = 'BCX6UVTLQZ7VMK4F'; // Tu Read API Key
-        // Calcular fecha de hace 30 días y hora actual
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        const startDate = thirtyDaysAgo.toISOString().slice(0, 10); // Formato YYYY-MM-DD
+        // Calcular fecha de 1 de marzo de 2025 y hora actual
+        const marchStart = new Date('2025-03-01T00:00:00');
+        const startDate = marchStart.toISOString().slice(0, 10); // Formato YYYY-MM-DD
         const now = new Date();
         const endDate = now.toISOString().slice(0, 19); // Formato YYYY-MM-DDTHH:MM:SS
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=${endDate}&results=8000`; // Últimos 30 días, hasta ahora
+        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=${endDate}&results=8000`; // Desde 1 de marzo hasta ahora
 
         // Datos para los gráficos
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
@@ -86,7 +85,7 @@
                     return response.json();
                 })
                 .then(data => {
-                    const feeds = data.feeds; // Sin reverse(), del más antiguo al más reciente
+                    const feeds = data.feeds; // Del más antiguo al más reciente
                     if (!feeds || feeds.length === 0) throw new Error('No hay datos disponibles');
 
                     const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
@@ -140,28 +139,28 @@
                         seismicParticlesChart.update();
                     }
 
-                    // Actualiza los valores en pantalla con el dato más reciente, con manejo de errores
-                    const latestData = feeds[feeds.length - 1] || {}; // Último dato (más reciente)
-                    document.getElementById('realParticles').textContent = `Partículas Reales: ${latestData.field1 !== undefined ? latestData.field1 : 'N/A'}`;
-                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${latestData.field2 !== undefined ? latestData.field2 : 'N/A'}`;
-                    document.getElementById('molecularPhysics').textContent = `Física Molecular: ${latestData.field3 !== undefined ? latestData.field3 : 'N/A'}`;
-                    document.getElementById('x').textContent = `x: ${latestData.field4 !== undefined ? latestData.field4 : 'N/A'}`;
-                    document.getElementById('y').textContent = `y: ${latestData.field5 !== undefined ? latestData.field5 : 'N/A'}`;
-                    document.getElementById('z').textContent = `z: ${latestData.field6 !== undefined ? latestData.field6 : 'N/A'}`;
-                    document.getElementById('angle').textContent = `Ángulo: ${latestData.field7 !== undefined ? latestData.field7 : 'N/A'}`;
-                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: ${latestData.field8 !== undefined ? latestData.field8 : 'N/A'}`;
+                    // Actualiza los valores en pantalla con el dato más reciente, mostrando "Estación en reposo" si no hay datos
+                    const latestData = feeds[feeds.length - 1] || {};
+                    document.getElementById('realParticles').textContent = `Partículas Reales: ${latestData.field1 !== undefined && latestData.field1 !== null && latestData.field1 !== '' ? latestData.field1 : 'Estación en reposo'}`;
+                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${latestData.field2 !== undefined && latestData.field2 !== null && latestData.field2 !== '' ? latestData.field2 : 'Estación en reposo'}`;
+                    document.getElementById('molecularPhysics').textContent = `Física Molecular: ${latestData.field3 !== undefined && latestData.field3 !== null && latestData.field3 !== '' ? latestData.field3 : 'Estación en reposo'}`;
+                    document.getElementById('x').textContent = `x: ${latestData.field4 !== undefined && latestData.field4 !== null && latestData.field4 !== '' ? latestData.field4 : 'Estación en reposo'}`;
+                    document.getElementById('y').textContent = `y: ${latestData.field5 !== undefined && latestData.field5 !== null && latestData.field5 !== '' ? latestData.field5 : 'Estación en reposo'}`;
+                    document.getElementById('z').textContent = `z: ${latestData.field6 !== undefined && latestData.field6 !== null && latestData.field6 !== '' ? latestData.field6 : 'Estación en reposo'}`;
+                    document.getElementById('angle').textContent = `Ángulo: ${latestData.field7 !== undefined && latestData.field7 !== null && latestData.field7 !== '' ? latestData.field7 : 'Estación en reposo'}`;
+                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: ${latestData.field8 !== undefined && latestData.field8 !== null && latestData.field8 !== '' ? latestData.field8 : 'Estación en reposo'}`;
                 })
                 .catch(error => {
                     console.error('Error al obtener datos:', error);
-                    // Mostrar N/A si hay un error
-                    document.getElementById('realParticles').textContent = `Partículas Reales: N/A`;
-                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: N/A`;
-                    document.getElementById('molecularPhysics').textContent = `Física Molecular: N/A`;
-                    document.getElementById('x').textContent = `x: N/A`;
-                    document.getElementById('y').textContent = `y: N/A`;
-                    document.getElementById('z').textContent = `z: N/A`;
-                    document.getElementById('angle').textContent = `Ángulo: N/A`;
-                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: N/A`;
+                    // Mostrar "Estación en reposo" si hay un error o no hay datos
+                    document.getElementById('realParticles').textContent = `Partículas Reales: Estación en reposo`;
+                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: Estación en reposo`;
+                    document.getElementById('molecularPhysics').textContent = `Física Molecular: Estación en reposo`;
+                    document.getElementById('x').textContent = `x: Estación en reposo`;
+                    document.getElementById('y').textContent = `y: Estación en reposo`;
+                    document.getElementById('z').textContent = `z: Estación en reposo`;
+                    document.getElementById('angle').textContent = `Ángulo: Estación en reposo`;
+                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: Estación en reposo`;
                 });
         }
 
