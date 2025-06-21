@@ -8,9 +8,17 @@
         body { 
             font-family: Georgia, "Times New Roman", serif; 
             text-align: center; 
-            margin-top: 50px; 
+            margin-top: 20px; /* Menos margen superior por el logo */
             background-color: #1E90FF; /* Azul Dodger para mayor contraste */
             color: #FFFFFF; /* Letras blancas */
+        }
+        .header-container {
+            margin-bottom: 20px; /* Espacio después del logo y título */
+        }
+        .logo {
+            max-width: 300px; /* Tamaño máximo del logo */
+            height: auto; /* Mantiene la proporción */
+            margin-bottom: 10px; /* Espacio entre logo y título */
         }
         .data-container {
             display: flex;
@@ -21,19 +29,20 @@
             margin: 0 auto;
         }
         .data { 
-            font-size: 1.5em; /* Fuente un poco más pequeña pero legible */
-            padding: 10px; /* Menos padding */
-            margin: 5px; /* Menos margen */
+            font-size: 1.5em; /* Fuente legible */
+            padding: 10px; 
+            margin: 5px; 
             background-color: rgba(255, 255, 255, 0.3); /* Fondo semi-transparente */
             border-radius: 10px; 
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra más ligera */
-            flex: 1 1 200px; /* Ajuste flexible para agrupación */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra ligera */
+            flex: 1 1 200px; /* Ajuste flexible */
             min-width: 0; /* Evita desbordamiento */
         }
         h1 { 
             color: #FFFFFF; 
             font-size: 2.5em; 
             text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.5); /* Sombra fuerte */
+            margin: 0; /* Sin margen adicional */
         }
         canvas { 
             max-width: 100%; 
@@ -41,14 +50,18 @@
             border: 3px solid #FFFFFF; /* Borde blanco */
             border-radius: 10px;
             background-color: #FFFFFF; /* Fondo blanco opaco */
-            width: 1000px; /* Gráficas más grandes */
-            height: 500px; /* Gráficas más altas */
+            width: 1000px; /* Gráficas grandes */
+            height: 500px; /* Gráficas altas */
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Observatorio de Partículas del TOA - Datos en Tiempo Real</h1>
+    <!-- Contenedor para logo y título -->
+    <div class="header-container">
+        <img src="logo.png" alt="Logo Observatorio de Partículas del TOA" class="logo">
+        <h1>Observatorio de Partículas del TOA - Datos en Tiempo Real</h1>
+    </div>
     <!-- Contenedor para agrupar los recuadros -->
     <div class="data-container">
         <!-- Datos del primer canal -->
