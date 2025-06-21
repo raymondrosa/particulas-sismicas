@@ -37,6 +37,7 @@
 </head>
 <body>
     <h1>Observatorio de Partículas del TOA - Datos en Tiempo Real</h1>
+    <!-- Datos del primer canal -->
     <div class="data" id="realParticles">Partículas Reales: Cargando...</div>
     <div class="data" id="imaginaryParticles">Partículas Imaginarias: Cargando...</div>
     <div class="data" id="molecularPhysics">Física Molecular: Cargando...</div>
@@ -45,7 +46,14 @@
     <div class="data" id="z">z: Cargando...</div>
     <div class="data" id="angle">Ángulo: Cargando...</div>
     <div class="data" id="seismicParticles">Partículas Sísmicas: Cargando...</div>
+    <!-- Datos del segundo canal -->
+    <div class="data" id="accelX">Aceleración en X: Cargando...</div>
+    <div class="data" id="accelY">Aceleración en Y: Cargando...</div>
+    <div class="data" id="accelZ">Aceleración en Z: Cargando...</div>
+    <div class="data" id="accelResult">Aceleración Resultante (m/s²): Cargando...</div>
+    <div class="data" id="seismicMag">Magnitud Sísmica Local Estimada en Toa Alta: Cargando...</div>
 
+    <!-- Gráficas del primer canal -->
     <canvas id="realParticlesChart" width="800" height="400"></canvas>
     <canvas id="imaginaryParticlesChart" width="800" height="400"></canvas>
     <canvas id="molecularPhysicsChart" width="800" height="400"></canvas>
@@ -54,18 +62,26 @@
     <canvas id="zChart" width="800" height="400"></canvas>
     <canvas id="angleChart" width="800" height="400"></canvas>
     <canvas id="seismicParticlesChart" width="800" height="400"></canvas>
+    <!-- Gráficas del segundo canal -->
+    <canvas id="accelXChart" width="800" height="400"></canvas>
+    <canvas id="accelYChart" width="800" height="400"></canvas>
+    <canvas id="accelZChart" width="800" height="400"></canvas>
+    <canvas id="accelResultChart" width="800" height="400"></canvas>
+    <canvas id="seismicMagChart" width="800" height="400"></canvas>
 
     <script>
-        const channelID = 2439912; // Tu Channel ID
-        const readAPIKey = 'BCX6UVTLQZ7VMK4F'; // Tu Read API Key
-        // Calcular fecha de 1 de marzo de 2025 y hora actual
+        const channelID1 = 2439912; // Primer canal
+        const readAPIKey1 = 'BCX6UVTLQZ7VMK4F'; // Read API Key del primer canal
+        const channelID2 = 2972050; // Segundo canal
+        const readAPIKey2 = '8LMMRSTHHX26Z4MI'; // Read API Key del segundo canal
         const marchStart = new Date('2025-03-01T00:00:00');
-        const startDate = marchStart.toISOString().slice(0, 10); // Formato YYYY-MM-DD
+        const startDate = marchStart.toISOString().slice(0, 10);
         const now = new Date();
-        const endDate = now.toISOString().slice(0, 19); // Formato YYYY-MM-DDTHH:MM:SS
-        const url = `https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&start=${startDate}T00:00:00&end=${endDate}&results=8000`; // Desde 1 de marzo hasta ahora
+        const endDate = now.toISOString().slice(0, 19);
+        const url1 = `https://api.thingspeak.com/channels/${channelID1}/feeds.json?api_key=${readAPIKey1}&start=${startDate}T00:00:00&end=${endDate}&results=8000`;
+        const url2 = `https://api.thingspeak.com/channels/${channelID2}/feeds.json?api_key=${readAPIKey2}&start=${startDate}T00:00:00&end=${endDate}&results=8000`;
 
-        // Datos para los gráficos
+        // Datos para los gráficos del primer canal
         let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
         let imaginaryParticlesData = { labels: [], datasets: [{ label: 'Partículas Imaginarias', data: [], borderColor: '#FF6384', fill: false }] };
         let molecularPhysicsData = { labels: [], datasets: [{ label: 'Física Molecular', data: [], borderColor: '#4BC0C0', fill: false }] };
@@ -73,26 +89,31 @@
         let yData = { labels: [], datasets: [{ label: 'y', data: [], borderColor: '#9966FF', fill: false }] };
         let zData = { labels: [], datasets: [{ label: 'z', data: [], borderColor: '#FFCD56', fill: false }] };
         let angleData = { labels: [], datasets: [{ label: 'Ángulo', data: [], borderColor: '#C9CBCF', fill: false }] };
-        let seismicParticlesData = { labels: [], datasets: [{ label: 'Partículas Sísmicas', data: [], borderColor: '#36A2EB', fill: false }] }; // Reutilizo color para destacar
+        let seismicParticlesData = { labels: [], datasets: [{ label: 'Partículas Sísmicas', data: [], borderColor: '#36A2EB', fill: false }] };
 
-        // Inicialización de los gráficos
+        // Datos para los gráficos del segundo canal
+        let accelXData = { labels: [], datasets: [{ label: 'Aceleración en X', data: [], borderColor: '#FF5733', fill: false }] };
+        let accelYData = { labels: [], datasets: [{ label: 'Aceleración en Y', data: [], borderColor: '#33FF57', fill: false }] };
+        let accelZData = { labels: [], datasets: [{ label: 'Aceleración en Z', data: [], borderColor: '#5733FF', fill: false }] };
+        let accelResultData = { labels: [], datasets: [{ label: 'Aceleración Resultante (m/s²)', data: [], borderColor: '#FF33A1', fill: false }] };
+        let seismicMagData = { labels: [], datasets: [{ label: 'Magnitud Sísmica Local Estimada en Toa Alta', data: [], borderColor: '#A1FF33', fill: false }] };
+
         let realParticlesChart, imaginaryParticlesChart, molecularPhysicsChart, xChart, yChart, zChart, angleChart, seismicParticlesChart;
+        let accelXChart, accelYChart, accelZChart, accelResultChart, seismicMagChart;
 
         function updateCharts() {
-            fetch(url)
+            // Actualizar datos del primer canal
+            fetch(url1)
                 .then(response => {
-                    if (!response.ok) throw new Error('Error en la respuesta de la API');
+                    if (!response.ok) throw new Error('Error en el primer canal');
                     return response.json();
                 })
                 .then(data => {
-                    const feeds = data.feeds; // Del más antiguo al más reciente
-                    if (!feeds || feeds.length === 0) throw new Error('No hay datos disponibles');
-
-                    // Obtener todas las etiquetas y filtrar solo las asociadas a datos válidos
-                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
+                    const feeds = data.feeds;
+                    if (!feeds || feeds.length === 0) throw new Error('No hay datos en el primer canal');
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
                     const validIndices = labels.map((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8).map((v, i) => v ? i : -1).filter(i => i !== -1);
 
-                    // Filtrar etiquetas y datos para incluir todos los puntos válidos
                     realParticlesData.labels = validIndices.map(i => labels[i]);
                     realParticlesData.datasets[0].data = feeds.map(f => f.field1).filter(v => v && v !== 0);
                     imaginaryParticlesData.labels = validIndices.map(i => labels[i]);
@@ -110,7 +131,6 @@
                     seismicParticlesData.labels = validIndices.map(i => labels[i]);
                     seismicParticlesData.datasets[0].data = feeds.map(f => f.field8).filter(v => v && v !== 0);
 
-                    // Asegura que las etiquetas coincidan con los datos filtrados
                     realParticlesData.labels = realParticlesData.labels.slice(0, realParticlesData.datasets[0].data.length);
                     imaginaryParticlesData.labels = imaginaryParticlesData.labels.slice(0, imaginaryParticlesData.datasets[0].data.length);
                     molecularPhysicsData.labels = molecularPhysicsData.labels.slice(0, molecularPhysicsData.datasets[0].data.length);
@@ -120,53 +140,94 @@
                     angleData.labels = angleData.labels.slice(0, angleData.datasets[0].data.length);
                     seismicParticlesData.labels = seismicParticlesData.labels.slice(0, seismicParticlesData.datasets[0].data.length);
 
-                    // Inicializa o actualiza los gráficos
-                    if (!realParticlesChart) {
-                        realParticlesChart = new Chart(document.getElementById('realParticlesChart').getContext('2d'), { type: 'line', data: realParticlesData });
-                        imaginaryParticlesChart = new Chart(document.getElementById('imaginaryParticlesChart').getContext('2d'), { type: 'line', data: imaginaryParticlesData });
-                        molecularPhysicsChart = new Chart(document.getElementById('molecularPhysicsChart').getContext('2d'), { type: 'line', data: molecularPhysicsData });
-                        xChart = new Chart(document.getElementById('xChart').getContext('2d'), { type: 'line', data: xData });
-                        yChart = new Chart(document.getElementById('yChart').getContext('2d'), { type: 'line', data: yData });
-                        zChart = new Chart(document.getElementById('zChart').getContext('2d'), { type: 'line', data: zData });
-                        angleChart = new Chart(document.getElementById('angleChart').getContext('2d'), { type: 'line', data: angleData });
-                        seismicParticlesChart = new Chart(document.getElementById('seismicParticlesChart').getContext('2d'), { type: 'line', data: seismicParticlesData });
-                    } else {
-                        realParticlesChart.update();
-                        imaginaryParticlesChart.update();
-                        molecularPhysicsChart.update();
-                        xChart.update();
-                        yChart.update();
-                        zChart.update();
-                        angleChart.update();
-                        seismicParticlesChart.update();
-                    }
-
-                    // Actualiza los valores en pantalla con el dato más reciente, mostrando "Estación en reposo" si no hay datos
-                    const latestData = feeds[feeds.length - 1] || {};
-                    document.getElementById('realParticles').textContent = `Partículas Reales: ${latestData.field1 !== undefined && latestData.field1 !== null && latestData.field1 !== '' ? latestData.field1 : 'Estación en reposo'}`;
-                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${latestData.field2 !== undefined && latestData.field2 !== null && latestData.field2 !== '' ? latestData.field2 : 'Estación en reposo'}`;
-                    document.getElementById('molecularPhysics').textContent = `Física Molecular: ${latestData.field3 !== undefined && latestData.field3 !== null && latestData.field3 !== '' ? latestData.field3 : 'Estación en reposo'}`;
-                    document.getElementById('x').textContent = `x: ${latestData.field4 !== undefined && latestData.field4 !== null && latestData.field4 !== '' ? latestData.field4 : 'Estación en reposo'}`;
-                    document.getElementById('y').textContent = `y: ${latestData.field5 !== undefined && latestData.field5 !== null && latestData.field5 !== '' ? latestData.field5 : 'Estación en reposo'}`;
-                    document.getElementById('z').textContent = `z: ${latestData.field6 !== undefined && latestData.field6 !== null && latestData.field6 !== '' ? latestData.field6 : 'Estación en reposo'}`;
-                    document.getElementById('angle').textContent = `Ángulo: ${latestData.field7 !== undefined && latestData.field7 !== null && latestData.field7 !== '' ? latestData.field7 : 'Estación en reposo'}`;
-                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: ${latestData.field8 !== undefined && latestData.field8 !== null && latestData.field8 !== '' ? latestData.field8 : 'Estación en reposo'}`;
+                    const latestData1 = feeds[feeds.length - 1] || {};
+                    document.getElementById('realParticles').textContent = `Partículas Reales: ${latestData1.field1 !== undefined && latestData1.field1 !== null && latestData1.field1 !== '' ? latestData1.field1 : 'Estación en reposo'}`;
+                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: ${latestData1.field2 !== undefined && latestData1.field2 !== null && latestData1.field2 !== '' ? latestData1.field2 : 'Estación en reposo'}`;
+                    document.getElementById('molecularPhysics').textContent = `Física Molecular: ${latestData1.field3 !== undefined && latestData1.field3 !== null && latestData1.field3 !== '' ? latestData1.field3 : 'Estación en reposo'}`;
+                    document.getElementById('x').textContent = `x: ${latestData1.field4 !== undefined && latestData1.field4 !== null && latestData1.field4 !== '' ? latestData1.field4 : 'Estación en reposo'}`;
+                    document.getElementById('y').textContent = `y: ${latestData1.field5 !== undefined && latestData1.field5 !== null && latestData1.field5 !== '' ? latestData1.field5 : 'Estación en reposo'}`;
+                    document.getElementById('z').textContent = `z: ${latestData1.field6 !== undefined && latestData1.field6 !== null && latestData1.field6 !== '' ? latestData1.field6 : 'Estación en reposo'}`;
+                    document.getElementById('angle').textContent = `Ángulo: ${latestData1.field7 !== undefined && latestData1.field7 !== null && latestData1.field7 !== '' ? latestData1.field7 : 'Estación en reposo'}`;
+                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: ${latestData1.field8 !== undefined && latestData1.field8 !== null && latestData1.field8 !== '' ? latestData1.field8 : 'Estación en reposo'}`;
                 })
-                .catch(error => {
-                    console.error('Error al obtener datos:', error);
-                    // Mostrar "Estación en reposo" si hay un error o no hay datos
-                    document.getElementById('realParticles').textContent = `Partículas Reales: Estación en reposo`;
-                    document.getElementById('imaginaryParticles').textContent = `Partículas Imaginarias: Estación en reposo`;
-                    document.getElementById('molecularPhysics').textContent = `Física Molecular: Estación en reposo`;
-                    document.getElementById('x').textContent = `x: Estación en reposo`;
-                    document.getElementById('y').textContent = `y: Estación en reposo`;
-                    document.getElementById('z').textContent = `z: Estación en reposo`;
-                    document.getElementById('angle').textContent = `Ángulo: Estación en reposo`;
-                    document.getElementById('seismicParticles').textContent = `Partículas Sísmicas: Estación en reposo`;
-                });
+                .catch(error => console.error('Error en el primer canal:', error));
+
+            // Actualizar datos del segundo canal
+            fetch(url2)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error en el segundo canal');
+                    return response.json();
+                })
+                .then(data => {
+                    const feeds = data.feeds;
+                    if (!feeds || feeds.length === 0) throw new Error('No hay datos en el segundo canal');
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5);
+                    const validIndices = labels.map((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5).map((v, i) => v ? i : -1).filter(i => i !== -1);
+
+                    accelXData.labels = validIndices.map(i => labels[i]);
+                    accelXData.datasets[0].data = feeds.map(f => f.field1).filter(v => v && v !== 0);
+                    accelYData.labels = validIndices.map(i => labels[i]);
+                    accelYData.datasets[0].data = feeds.map(f => f.field2).filter(v => v && v !== 0);
+                    accelZData.labels = validIndices.map(i => labels[i]);
+                    accelZData.datasets[0].data = feeds.map(f => f.field3).filter(v => v && v !== 0);
+                    accelResultData.labels = validIndices.map(i => labels[i]);
+                    accelResultData.datasets[0].data = feeds.map(f => f.field4).filter(v => v && v !== 0);
+                    seismicMagData.labels = validIndices.map(i => labels[i]);
+                    seismicMagData.datasets[0].data = feeds.map(f => f.field5).filter(v => v && v !== 0);
+
+                    accelXData.labels = accelXData.labels.slice(0, accelXData.datasets[0].data.length);
+                    accelYData.labels = accelYData.labels.slice(0, accelYData.datasets[0].data.length);
+                    accelZData.labels = accelZData.labels.slice(0, accelZData.datasets[0].data.length);
+                    accelResultData.labels = accelResultData.labels.slice(0, accelResultData.datasets[0].data.length);
+                    seismicMagData.labels = seismicMagData.labels.slice(0, seismicMagData.datasets[0].data.length);
+
+                    const latestData2 = feeds[feeds.length - 1] || {};
+                    document.getElementById('accelX').textContent = `Aceleración en X: ${latestData2.field1 !== undefined && latestData2.field1 !== null && latestData2.field1 !== '' ? latestData2.field1 : 'Estación en reposo'}`;
+                    document.getElementById('accelY').textContent = `Aceleración en Y: ${latestData2.field2 !== undefined && latestData2.field2 !== null && latestData2.field2 !== '' ? latestData2.field2 : 'Estación en reposo'}`;
+                    document.getElementById('accelZ').textContent = `Aceleración en Z: ${latestData2.field3 !== undefined && latestData2.field3 !== null && latestData2.field3 !== '' ? latestData2.field3 : 'Estación en reposo'}`;
+                    document.getElementById('accelResult').textContent = `Aceleración Resultante (m/s²): ${latestData2.field4 !== undefined && latestData2.field4 !== null && latestData2.field4 !== '' ? latestData2.field4 : 'Estación en reposo'}`;
+                    document.getElementById('seismicMag').textContent = `Magnitud Sísmica Local Estimada en Toa Alta: ${latestData2.field5 !== undefined && latestData2.field5 !== null && latestData2.field5 !== '' ? latestData2.field5 : 'Estación en reposo'}`;
+                })
+                .catch(error => console.error('Error en el segundo canal:', error));
+
+            // Inicializar o actualizar gráficos del primer canal
+            if (!realParticlesChart) {
+                realParticlesChart = new Chart(document.getElementById('realParticlesChart').getContext('2d'), { type: 'line', data: realParticlesData });
+                imaginaryParticlesChart = new Chart(document.getElementById('imaginaryParticlesChart').getContext('2d'), { type: 'line', data: imaginaryParticlesData });
+                molecularPhysicsChart = new Chart(document.getElementById('molecularPhysicsChart').getContext('2d'), { type: 'line', data: molecularPhysicsData });
+                xChart = new Chart(document.getElementById('xChart').getContext('2d'), { type: 'line', data: xData });
+                yChart = new Chart(document.getElementById('yChart').getContext('2d'), { type: 'line', data: yData });
+                zChart = new Chart(document.getElementById('zChart').getContext('2d'), { type: 'line', data: zData });
+                angleChart = new Chart(document.getElementById('angleChart').getContext('2d'), { type: 'line', data: angleData });
+                seismicParticlesChart = new Chart(document.getElementById('seismicParticlesChart').getContext('2d'), { type: 'line', data: seismicParticlesData });
+            } else {
+                realParticlesChart.update();
+                imaginaryParticlesChart.update();
+                molecularPhysicsChart.update();
+                xChart.update();
+                yChart.update();
+                zChart.update();
+                angleChart.update();
+                seismicParticlesChart.update();
+            }
+
+            // Inicializar o actualizar gráficos del segundo canal
+            if (!accelXChart) {
+                accelXChart = new Chart(document.getElementById('accelXChart').getContext('2d'), { type: 'line', data: accelXData });
+                accelYChart = new Chart(document.getElementById('accelYChart').getContext('2d'), { type: 'line', data: accelYData });
+                accelZChart = new Chart(document.getElementById('accelZChart').getContext('2d'), { type: 'line', data: accelZData });
+                accelResultChart = new Chart(document.getElementById('accelResultChart').getContext('2d'), { type: 'line', data: accelResultData });
+                seismicMagChart = new Chart(document.getElementById('seismicMagChart').getContext('2d'), { type: 'line', data: seismicMagData });
+            } else {
+                accelXChart.update();
+                accelYChart.update();
+                accelZChart.update();
+                accelResultChart.update();
+                seismicMagChart.update();
+            }
         }
 
-        // Actualiza cada 15 segundos (límite gratuito de ThingSpeak)
+        // Actualiza cada 15 segundos
         setInterval(updateCharts, 15000);
         updateCharts(); // Primera carga inmediata
     </script>
