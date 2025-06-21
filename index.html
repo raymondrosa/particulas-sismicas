@@ -8,17 +8,22 @@
         body { 
             font-family: Georgia, "Times New Roman", serif; 
             text-align: center; 
-            margin-top: 20px; /* Menos margen superior por el logo */
+            margin: 0; /* Sin margen para el logo absoluto */
             background-color: #1E90FF; /* Azul Dodger para mayor contraste */
             color: #FFFFFF; /* Letras blancas */
+            position: relative; /* Para el posicionamiento absoluto del logo */
         }
         .header-container {
-            margin-bottom: 20px; /* Espacio después del logo y título */
+            margin-bottom: 20px; /* Espacio después del título */
+            position: relative; /* Contenedor relativo para el logo */
+            padding-top: 160px; /* Espacio para el logo en la esquina */
         }
         .logo {
-            max-width: 300px; /* Tamaño máximo del logo */
+            max-width: 150px; /* Logo más pequeño */
             height: auto; /* Mantiene la proporción */
-            margin-bottom: 10px; /* Espacio entre logo y título */
+            position: absolute;
+            top: 10px; /* Margen superior */
+            left: 10px; /* Margen izquierdo */
         }
         .data-container {
             display: flex;
@@ -110,21 +115,21 @@
         const url2 = `https://api.thingspeak.com/channels/${channelID2}/feeds.json?api_key=${readAPIKey2}&start=${startDate}T00:00:00&end=${endDate}&results=8000`;
 
         // Datos para los gráficos del primer canal
-        let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', fill: false }] };
-        let imaginaryParticlesData = { labels: [], datasets: [{ label: 'Partículas Imaginarias', data: [], borderColor: '#FF6384', fill: false }] };
-        let molecularPhysicsData = { labels: [], datasets: [{ label: 'Física Molecular', data: [], borderColor: '#4BC0C0', fill: false }] };
-        let xData = { labels: [], datasets: [{ label: 'x', data: [], borderColor: '#FF9F40', fill: false }] };
-        let yData = { labels: [], datasets: [{ label: 'y', data: [], borderColor: '#9966FF', fill: false }] };
-        let zData = { labels: [], datasets: [{ label: 'z', data: [], borderColor: '#FFCD56', fill: false }] };
-        let angleData = { labels: [], datasets: [{ label: 'Ángulo', data: [], borderColor: '#C9CBCF', fill: false }] };
-        let seismicParticlesData = { labels: [], datasets: [{ label: 'Partículas Sísmicas', data: [], borderColor: '#36A2EB', fill: false }] };
+        let realParticlesData = { labels: [], datasets: [{ label: 'Partículas Reales', data: [], borderColor: '#36A2EB', borderWidth: 1, fill: false }] };
+        let imaginaryParticlesData = { labels: [], datasets: [{ label: 'Partículas Imaginarias', data: [], borderColor: '#FF6384', borderWidth: 1, fill: false }] };
+        let molecularPhysicsData = { labels: [], datasets: [{ label: 'Física Molecular', data: [], borderColor: '#4BC0C0', borderWidth: 1, fill: false }] };
+        let xData = { labels: [], datasets: [{ label: 'x', data: [], borderColor: '#FF9F40', borderWidth: 1, fill: false }] };
+        let yData = { labels: [], datasets: [{ label: 'y', data: [], borderColor: '#9966FF', borderWidth: 1, fill: false }] };
+        let zData = { labels: [], datasets: [{ label: 'z', data: [], borderColor: '#FFCD56', borderWidth: 1, fill: false }] };
+        let angleData = { labels: [], datasets: [{ label: 'Ángulo', data: [], borderColor: '#C9CBCF', borderWidth: 1, fill: false }] };
+        let seismicParticlesData = { labels: [], datasets: [{ label: 'Partículas Sísmicas', data: [], borderColor: '#36A2EB', borderWidth: 1, fill: false }] };
 
         // Datos para los gráficos del segundo canal
-        let accelXData = { labels: [], datasets: [{ label: 'Aceleración en X', data: [], borderColor: '#FF5733', fill: false }] };
-        let accelYData = { labels: [], datasets: [{ label: 'Aceleración en Y', data: [], borderColor: '#33FF57', fill: false }] };
-        let accelZData = { labels: [], datasets: [{ label: 'Aceleración en Z', data: [], borderColor: '#5733FF', fill: false }] };
-        let accelResultData = { labels: [], datasets: [{ label: 'Aceleración Resultante (m/s²)', data: [], borderColor: '#FF33A1', fill: false }] };
-        let seismicMagData = { labels: [], datasets: [{ label: 'Magnitud Sísmica Local Estimada en Toa Alta', data: [], borderColor: '#A1FF33', fill: false }] };
+        let accelXData = { labels: [], datasets: [{ label: 'Aceleración en X', data: [], borderColor: '#FF5733', borderWidth: 1, fill: false }] };
+        let accelYData = { labels: [], datasets: [{ label: 'Aceleración en Y', data: [], borderColor: '#33FF57', borderWidth: 1, fill: false }] };
+        let accelZData = { labels: [], datasets: [{ label: 'Aceleración en Z', data: [], borderColor: '#5733FF', borderWidth: 1, fill: false }] };
+        let accelResultData = { labels: [], datasets: [{ label: 'Aceleración Resultante (m/s²)', data: [], borderColor: '#FF33A1', borderWidth: 1, fill: false }] };
+        let seismicMagData = { labels: [], datasets: [{ label: 'Magnitud Sísmica Local Estimada en Toa Alta', data: [], borderColor: '#A1FF33', borderWidth: 1, fill: false }] };
 
         let realParticlesChart, imaginaryParticlesChart, molecularPhysicsChart, xChart, yChart, zChart, angleChart, seismicParticlesChart;
         let accelXChart, accelYChart, accelZChart, accelResultChart, seismicMagChart;
