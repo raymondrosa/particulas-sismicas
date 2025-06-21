@@ -9,7 +9,7 @@
         .header-container { display: flex; flex-direction: column; align-items: flex-start; padding: 10px; }
         .logo { max-width: 150px; height: auto; margin-right: 20px; }
         h1 { font-family: Arial, sans-serif; font-weight: bold; font-size: 2em; margin: 0 20px 10px 0; }
-        .status { margin-left: 170px; } /* Alineado debajo del título */
+        .status { margin-left: 170px; }
         .status-circle { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .data-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 1200px; margin: 0 auto; }
         .data { font-size: 1.5em; padding: 10px; margin: 5px; background-color: rgba(255, 255, 255, 0.3); border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); flex: 1 1 200px; min-width: 0; }
@@ -96,9 +96,12 @@
                     });
 
                     const latestData1 = feeds[feeds.length - 1] || {};
-                    ['realParticles', 'imaginaryParticles', 'molecularPhysics', 'x', 'y', 'z', 'angle', 'seismicParticles'].forEach((id, i) =>
-                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${latestData1[`field${i + 1}`] !== undefined && latestData1[`field${i + 1}`] !== null && latestData1[`field${i + 1}`] !== '' ? latestData1[`field${i + 1}`] : 'Estación en reposo'}`);
-                    updateStatus(Object.values(latestData1).some(v => v && v !== '0' && v !== '' && v !== null));
+                    const dataElements = ['realParticles', 'imaginaryParticles', 'molecularPhysics', 'x', 'y', 'z', 'angle', 'seismicParticles'];
+                    dataElements.forEach((id, i) => {
+                        const value = latestData1[`field${i + 1}`] !== undefined && latestData1[`field${i + 1}`] !== null && latestData1[`field${i + 1}`] !== '' ? latestData1[`field${i + 1}`] : 'En Reposo';
+                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${value}`;
+                    });
+                    updateStatus(dataElements.some(id => document.getElementById(id).textContent.includes('En Reposo')));
                 })
                 .catch(e => console.error('Error canal 1:', e));
 
@@ -116,9 +119,12 @@
                     });
 
                     const latestData2 = feeds[feeds.length - 1] || {};
-                    ['accelX', 'accelY', 'accelZ', 'accelResult', 'seismicMag'].forEach((id, i) =>
-                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${latestData2[`field${i + 1}`] !== undefined && latestData2[`field${i + 1}`] !== null && latestData2[`field${i + 1}`] !== '' ? latestData2[`field${i + 1}`] : 'Estación en reposo'}`);
-                    updateStatus(Object.values(latestData2).some(v => v && v !== '0' && v !== '' && v !== null));
+                    const dataElements = ['accelX', 'accelY', 'accelZ', 'accelResult', 'seismicMag'];
+                    dataElements.forEach((id, i) => {
+                        const value = latestData2[`field${i + 1}`] !== undefined && latestData2[`field${i + 1}`] !== null && latestData2[`field${i + 1}`] !== '' ? latestData2[`field${i + 1}`] : 'En Reposo';
+                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${value}`;
+                    });
+                    updateStatus(dataElements.some(id => document.getElementById(id).textContent.includes('En Reposo')));
                 })
                 .catch(e => console.error('Error canal 2:', e));
 
@@ -143,9 +149,9 @@
             }
         }
 
-        function updateStatus(active) {
+        function updateStatus(anyReposo) {
             const status = document.getElementById('stationStatus');
-            status.innerHTML = `Estado: <span class="status-circle" style="background-color: ${active ? '#00FF00' : '#FF0000'}"></span>${active ? 'Monitoreo Activo' : 'En Reposo'}`;
+            status.innerHTML = `Estado: <span class="status-circle" style="background-color: ${anyReposo ? '#FF0000' : '#00FF00'}"></span>${anyReposo ? 'En Reposo' : 'Monitoreo Activo'}`;
         }
 
         setInterval(updateCharts, 15000); updateCharts();
