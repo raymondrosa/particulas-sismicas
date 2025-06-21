@@ -88,24 +88,26 @@
                     const feeds = data.feeds; // Del más antiguo al más reciente
                     if (!feeds || feeds.length === 0) throw new Error('No hay datos disponibles');
 
-                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
+                    // Obtener todas las etiquetas y filtrar solo las asociadas a datos válidos
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
+                    const validIndices = labels.map((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8).map((v, i) => v ? i : -1).filter(i => i !== -1);
 
-                    // Filtra datos no nulos y no cero para cada variable
-                    realParticlesData.labels = labels;
+                    // Filtrar etiquetas y datos para incluir todos los puntos válidos
+                    realParticlesData.labels = validIndices.map(i => labels[i]);
                     realParticlesData.datasets[0].data = feeds.map(f => f.field1).filter(v => v && v !== 0);
-                    imaginaryParticlesData.labels = labels;
+                    imaginaryParticlesData.labels = validIndices.map(i => labels[i]);
                     imaginaryParticlesData.datasets[0].data = feeds.map(f => f.field2).filter(v => v && v !== 0);
-                    molecularPhysicsData.labels = labels;
+                    molecularPhysicsData.labels = validIndices.map(i => labels[i]);
                     molecularPhysicsData.datasets[0].data = feeds.map(f => f.field3).filter(v => v && v !== 0);
-                    xData.labels = labels;
+                    xData.labels = validIndices.map(i => labels[i]);
                     xData.datasets[0].data = feeds.map(f => f.field4).filter(v => v && v !== 0);
-                    yData.labels = labels;
+                    yData.labels = validIndices.map(i => labels[i]);
                     yData.datasets[0].data = feeds.map(f => f.field5).filter(v => v && v !== 0);
-                    zData.labels = labels;
+                    zData.labels = validIndices.map(i => labels[i]);
                     zData.datasets[0].data = feeds.map(f => f.field6).filter(v => v && v !== 0);
-                    angleData.labels = labels;
+                    angleData.labels = validIndices.map(i => labels[i]);
                     angleData.datasets[0].data = feeds.map(f => f.field7).filter(v => v && v !== 0);
-                    seismicParticlesData.labels = labels;
+                    seismicParticlesData.labels = validIndices.map(i => labels[i]);
                     seismicParticlesData.datasets[0].data = feeds.map(f => f.field8).filter(v => v && v !== 0);
 
                     // Asegura que las etiquetas coincidan con los datos filtrados
