@@ -6,10 +6,10 @@
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         body { font-family: Georgia, "Times New Roman", serif; margin: 0; background-color: #1E90FF; color: #FFFFFF; position: relative; }
-        .header-container { display: flex; align-items: center; padding: 10px; }
+        .header-container { display: flex; flex-direction: column; align-items: flex-start; padding: 10px; }
         .logo { max-width: 150px; height: auto; margin-right: 20px; }
-        h1 { font-family: Arial, sans-serif; font-weight: bold; font-size: 2em; margin: 0; }
-        .status { margin-left: 20px; }
+        h1 { font-family: Arial, sans-serif; font-weight: bold; font-size: 2em; margin: 0 20px 10px 0; }
+        .status { margin-left: 170px; } /* Alineado debajo del título */
         .status-circle { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .data-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 1200px; margin: 0 auto; }
         .data { font-size: 1.5em; padding: 10px; margin: 5px; background-color: rgba(255, 255, 255, 0.3); border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); flex: 1 1 200px; min-width: 0; }
@@ -19,8 +19,10 @@
 </head>
 <body>
     <div class="header-container">
-        <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo">
-        <h1>Observatorio de Partículas del TOA</h1>
+        <div style="display: flex; align-items: center;">
+            <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo">
+            <h1>Observatorio de Partículas del TOA</h1>
+        </div>
         <div class="status" id="stationStatus">Estado: Cargando...</div>
     </div>
     <div class="data-container">
@@ -80,41 +82,65 @@
         let accelXChart, accelYChart, accelZChart, accelResultChart, seismicMagChart;
 
         function updateCharts() {
-            fetch(url1).then(r => r.ok ? r.json() : Promise.reject('Error canal 1')).then(d => {
-                const f = d.feeds; if (!f?.length) throw 'Sin datos canal 1';
-                const l = f.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => f[i].field1 || f[i].field2 || f[i].field3 || f[i].field4 || f[i].field5 || f[i].field6 || f[i].field7 || f[i].field8);
-                const v = l.map((_, i) => (f[i].field1 || f[i].field2 || f[i].field3 || f[i].field4 || f[i].field5 || f[i].field6 || f[i].field7 || f[i].field8) ? i : -1).filter(i => i !== -1);
-                [realParticlesData, imaginaryParticlesData, molecularPhysicsData, xData, yData, zData, angleData, seismicParticlesData].forEach((d, i) => {
-                    d.labels = v.map(i => l[i]); d.datasets[0].data = f.map(f => f[`field${i + 1}`]).filter(v => v && v !== 0);
-                    d.labels = d.labels.slice(0, d.datasets[0].data.length);
-                });
-                const ld = f[f.length - 1] || {};
-                ['realParticles', 'imaginaryParticles', 'molecularPhysics', 'x', 'y', 'z', 'angle', 'seismicParticles'].forEach((id, i) =>
-                    document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${ld[`field${i + 1}`] !== undefined && ld[`field${i + 1}`] !== null && ld[`field${i + 1}`] !== '' ? ld[`field${i + 1}`] : 'Estación en reposo'}`);
-                updateStatus(Object.values(ld).some(v => v && v !== '0' && v !== '' && v !== null));
-            }).catch(e => console.error('Error canal 1:', e));
+            fetch(url1)
+                .then(r => r.ok ? r.json() : Promise.reject('Error canal 1'))
+                .then(d => {
+                    const feeds = d.feeds; if (!feeds?.length) throw 'Sin datos canal 1';
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
+                    const validIndices = labels.map((_, i) => (feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8) ? i : -1).filter(i => i !== -1);
 
-            fetch(url2).then(r => r.ok ? r.json() : Promise.reject('Error canal 2')).then(d => {
-                const f = d.feeds; if (!f?.length) throw 'Sin datos canal 2';
-                const l = f.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => f[i].field1 || f[i].field2 || f[i].field3 || f[i].field4 || f[i].field5);
-                const v = l.map((_, i) => (f[i].field1 || f[i].field2 || f[i].field3 || f[i].field4 || f[i].field5) ? i : -1).filter(i => i !== -1);
-                [accelXData, accelYData, accelZData, accelResultData, seismicMagData].forEach((d, i) => {
-                    d.labels = v.map(i => l[i]); d.datasets[0].data = f.map(f => f[`field${i + 1}`]).filter(v => v && v !== 0);
-                    d.labels = d.labels.slice(0, d.datasets[0].data.length);
-                });
-                const ld = f[f.length - 1] || {};
-                ['accelX', 'accelY', 'accelZ', 'accelResult', 'seismicMag'].forEach((id, i) =>
-                    document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${ld[`field${i + 1}`] !== undefined && ld[`field${i + 1}`] !== null && ld[`field${i + 1}`] !== '' ? ld[`field${i + 1}`] : 'Estación en reposo'}`);
-                updateStatus(Object.values(ld).some(v => v && v !== '0' && v !== '' && v !== null));
-            }).catch(e => console.error('Error canal 2:', e));
+                    [realParticlesData, imaginaryParticlesData, molecularPhysicsData, xData, yData, zData, angleData, seismicParticlesData].forEach((data, i) => {
+                        data.labels = validIndices.map(i => labels[i]);
+                        data.datasets[0].data = feeds.map(f => f[`field${i + 1}`] || 0).filter(v => v !== 0);
+                        data.labels = data.labels.slice(0, data.datasets[0].data.length);
+                    });
 
-            [realParticlesChart, imaginaryParticlesChart, molecularPhysicsChart, xChart, yChart, zChart, angleChart, seismicParticlesChart,
-             accelXChart, accelYChart, accelZChart, accelResultChart, seismicMagChart].forEach((c, i) => {
-                const d = [realParticlesData, imaginaryParticlesData, molecularPhysicsData, xData, yData, zData, angleData, seismicParticlesData,
-                          accelXData, accelYData, accelZData, accelResultData, seismicMagData][i];
-                if (!c) c = new Chart(document.getElementsByTagName('canvas')[i].getContext('2d'), { type: 'line', data: d });
-                else c.update();
-            });
+                    const latestData1 = feeds[feeds.length - 1] || {};
+                    ['realParticles', 'imaginaryParticles', 'molecularPhysics', 'x', 'y', 'z', 'angle', 'seismicParticles'].forEach((id, i) =>
+                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${latestData1[`field${i + 1}`] !== undefined && latestData1[`field${i + 1}`] !== null && latestData1[`field${i + 1}`] !== '' ? latestData1[`field${i + 1}`] : 'Estación en reposo'}`);
+                    updateStatus(Object.values(latestData1).some(v => v && v !== '0' && v !== '' && v !== null));
+                })
+                .catch(e => console.error('Error canal 1:', e));
+
+            fetch(url2)
+                .then(r => r.ok ? r.json() : Promise.reject('Error canal 2'))
+                .then(d => {
+                    const feeds = d.feeds; if (!feeds?.length) throw 'Sin datos canal 2';
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5);
+                    const validIndices = labels.map((_, i) => (feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5) ? i : -1).filter(i => i !== -1);
+
+                    [accelXData, accelYData, accelZData, accelResultData, seismicMagData].forEach((data, i) => {
+                        data.labels = validIndices.map(i => labels[i]);
+                        data.datasets[0].data = feeds.map(f => f[`field${i + 1}`] || 0).filter(v => v !== 0);
+                        data.labels = data.labels.slice(0, data.datasets[0].data.length);
+                    });
+
+                    const latestData2 = feeds[feeds.length - 1] || {};
+                    ['accelX', 'accelY', 'accelZ', 'accelResult', 'seismicMag'].forEach((id, i) =>
+                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${latestData2[`field${i + 1}`] !== undefined && latestData2[`field${i + 1}`] !== null && latestData2[`field${i + 1}`] !== '' ? latestData2[`field${i + 1}`] : 'Estación en reposo'}`);
+                    updateStatus(Object.values(latestData2).some(v => v && v !== '0' && v !== '' && v !== null));
+                })
+                .catch(e => console.error('Error canal 2:', e));
+
+            if (!realParticlesChart) {
+                realParticlesChart = new Chart(document.getElementById('realParticlesChart').getContext('2d'), { type: 'line', data: realParticlesData });
+                imaginaryParticlesChart = new Chart(document.getElementById('imaginaryParticlesChart').getContext('2d'), { type: 'line', data: imaginaryParticlesData });
+                molecularPhysicsChart = new Chart(document.getElementById('molecularPhysicsChart').getContext('2d'), { type: 'line', data: molecularPhysicsData });
+                xChart = new Chart(document.getElementById('xChart').getContext('2d'), { type: 'line', data: xData });
+                yChart = new Chart(document.getElementById('yChart').getContext('2d'), { type: 'line', data: yData });
+                zChart = new Chart(document.getElementById('zChart').getContext('2d'), { type: 'line', data: zData });
+                angleChart = new Chart(document.getElementById('angleChart').getContext('2d'), { type: 'line', data: angleData });
+                seismicParticlesChart = new Chart(document.getElementById('seismicParticlesChart').getContext('2d'), { type: 'line', data: seismicParticlesData });
+                accelXChart = new Chart(document.getElementById('accelXChart').getContext('2d'), { type: 'line', data: accelXData });
+                accelYChart = new Chart(document.getElementById('accelYChart').getContext('2d'), { type: 'line', data: accelYData });
+                accelZChart = new Chart(document.getElementById('accelZChart').getContext('2d'), { type: 'line', data: accelZData });
+                accelResultChart = new Chart(document.getElementById('accelResultChart').getContext('2d'), { type: 'line', data: accelResultData });
+                seismicMagChart = new Chart(document.getElementById('seismicMagChart').getContext('2d'), { type: 'line', data: seismicMagData });
+            } else {
+                realParticlesChart.update(); imaginaryParticlesChart.update(); molecularPhysicsChart.update();
+                xChart.update(); yChart.update(); zChart.update(); angleChart.update(); seismicParticlesChart.update();
+                accelXChart.update(); accelYChart.update(); accelZChart.update(); accelResultChart.update(); seismicMagChart.update();
+            }
         }
 
         function updateStatus(active) {
