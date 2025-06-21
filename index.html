@@ -96,10 +96,10 @@
                     });
 
                     const latestData1 = feeds[feeds.length - 1] || {};
-                    const dataElements = ['realParticles', 'imaginaryParticles', 'molecularPhysics', 'x', 'y', 'z', 'angle', 'seismicParticles'];
-                    dataElements.forEach((id, i) => {
+                    const labelsEs = ['Partículas Reales', 'Partículas Imaginarias', 'Física Molecular', 'Coordenada x', 'Coordenada y', 'Coordenada z', 'Ángulo', 'Partículas Sísmicas'];
+                    labelsEs.forEach((label, i) => {
                         const value = latestData1[`field${i + 1}`] !== undefined && latestData1[`field${i + 1}`] !== null && latestData1[`field${i + 1}`] !== '' ? latestData1[`field${i + 1}`] : 'En Reposo';
-                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${value}`;
+                        document.getElementById(['realParticles', 'imaginaryParticles', 'molecularPhysics', 'x', 'y', 'z', 'angle', 'seismicParticles'][i]).textContent = `${label}: ${value}`;
                     });
                     updateStatus(latestData1.field1 !== undefined && latestData1.field1 !== null && latestData1.field1 !== '' && latestData1.field1 !== '0');
                 })
@@ -119,10 +119,10 @@
                     });
 
                     const latestData2 = feeds[feeds.length - 1] || {};
-                    const dataElements = ['accelX', 'accelY', 'accelZ', 'accelResult', 'seismicMag'];
-                    dataElements.forEach((id, i) => {
+                    const labelsEs = ['Aceleración en X', 'Aceleración en Y', 'Aceleración en Z', 'Aceleración Resultante (m/s²)', 'Magnitud Sísmica Local Estimada'];
+                    labelsEs.forEach((label, i) => {
                         const value = latestData2[`field${i + 1}`] !== undefined && latestData2[`field${i + 1}`] !== null && latestData2[`field${i + 1}`] !== '' ? latestData2[`field${i + 1}`] : 'En Reposo';
-                        document.getElementById(id).textContent = `${id.replace(/([A-Z])/g, ' $1').trim()}: ${value}`;
+                        document.getElementById(['accelX', 'accelY', 'accelZ', 'accelResult', 'seismicMag'][i]).textContent = `${label}: ${value}`;
                     });
                 })
                 .catch(e => console.error('Error canal 2:', e));
