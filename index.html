@@ -8,11 +8,11 @@
         body { 
             font-family: Georgia, "Times New Roman", serif; 
             margin: 0; 
-            background-image: url('fondo.png'); /* Asegúrate de que el nombre coincida */
-            background-repeat: repeat; /* Repite la imagen para cubrir toda la página */
-            background-size: auto; /* Preserva la calidad original */
-            background-position: center; /* Centra el patrón */
-            color: #FFFFFF; /* Texto blanco para contraste */
+            background-image: url('fondo.png'); 
+            background-repeat: repeat; 
+            background-size: auto; 
+            background-position: center; 
+            color: #FFFFFF; 
             position: relative; 
         }
         .header-container { 
@@ -20,26 +20,26 @@
             flex-direction: column; 
             align-items: flex-start; 
             padding: 10px; 
-            background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente para el título */
+            background-color: rgba(0, 0, 0, 0.7); 
             border-radius: 10px;
         }
         .logo { max-width: 150px; height: auto; margin-right: 20px; }
         h1 { 
-            font-family: "Arial Black", Arial, sans-serif; /* Fuente más profesional */
+            font-family: "Arial Black", Arial, sans-serif; 
             font-weight: bold; 
-            font-size: 2.5em; /* Tamaño más grande */
+            font-size: 2.5em; 
             margin: 0 20px 10px 0; 
-            color: #FFFFFF; /* Texto blanco */
+            color: #FFFFFF; 
         }
         .status { 
             margin-left: 170px; 
-            background-color: rgba(0, 0, 0, 0.7); /* Fondo semi-transparente para el estado */
+            background-color: rgba(0, 0, 0, 0.7); 
             padding: 5px 10px;
             border-radius: 5px;
         }
         .status-circle { width: 15px; height: 15px; border-radius: 50%; display: inline-block; margin-right: 5px; }
         .data-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 1200px; margin: 0 auto; }
-        .data { font-size: 1.5em; padding: 10px; margin: 5px; background-color: rgba(0, 0, 0, 0.5); /* Fondo semi-transparente para legibilidad */ border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); flex: 1 1 200px; min-width: 0; }
+        .data { font-size: 1.5em; padding: 10px; margin: 5px; background-color: rgba(0, 0, 0, 0.5); border-radius: 10px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); flex: 1 1 200px; min-width: 0; }
         canvas { max-width: 100%; margin: 20px auto; border: 3px solid #FFFFFF; border-radius: 10px; background-color: #FFFFFF; width: 1000px; height: 500px; }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -113,13 +113,13 @@
                 .then(r => r.ok ? r.json() : Promise.reject('Error canal 1'))
                 .then(d => {
                     const feeds = d.feeds; if (!feeds?.length) throw 'Sin datos canal 1';
-                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8);
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
                     const validIndices = labels.map((_, i) => (feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8) ? i : -1).filter(i => i !== -1);
 
                     [realParticlesData, imaginaryParticlesData, molecularPhysicsData, xData, yData, zData, angleData, seismicParticlesData].forEach((data, i) => {
                         data.labels = validIndices.map(i => labels[i]);
-                        data.datasets[0].data = feeds.map(f => f[`field${i + 1}`] || 0).filter(v => v !== 0);
-                        data.labels = data.labels.slice(0, data.datasets[0].data.length);
+                        data.datasets[0].data = validIndices.map(i => feeds[i][`field${i + 1}`] || 0).filter(v => v !== null && v !== '');
+                        data.labels = data.labels.slice(0, data.datasets[0].data.length); // Sincroniza etiquetas con datos
                     });
 
                     const latestData1 = feeds[feeds.length - 1] || {};
@@ -136,13 +136,13 @@
                 .then(r => r.ok ? r.json() : Promise.reject('Error canal 2'))
                 .then(d => {
                     const feeds = d.feeds; if (!feeds?.length) throw 'Sin datos canal 2';
-                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString()).filter((_, i) => feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5);
+                    const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
                     const validIndices = labels.map((_, i) => (feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5) ? i : -1).filter(i => i !== -1);
 
                     [accelXData, accelYData, accelZData, accelResultData, seismicMagData].forEach((data, i) => {
                         data.labels = validIndices.map(i => labels[i]);
-                        data.datasets[0].data = feeds.map(f => f[`field${i + 1}`] || 0).filter(v => v !== 0);
-                        data.labels = data.labels.slice(0, data.datasets[0].data.length);
+                        data.datasets[0].data = validIndices.map(i => feeds[i][`field${i + 1}`] || 0).filter(v => v !== null && v !== '');
+                        data.labels = data.labels.slice(0, data.datasets[0].data.length); // Sincroniza etiquetas con datos
                     });
 
                     const latestData2 = feeds[feeds.length - 1] || {};
