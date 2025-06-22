@@ -118,20 +118,23 @@
                         f.field1 || f.field2 || f.field3 || f.field4 || f.field5 || f.field6 || f.field7 || f.field8
                     );
 
+                    // Gráficas sin ceros (excepto y y seismicParticles)
                     realParticlesData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    realParticlesData.datasets[0].data = validFeeds.map(f => f.field1 || 0).filter(v => v !== null && v !== '');
+                    realParticlesData.datasets[0].data = validFeeds.map(f => f.field1 || 0).filter(v => v !== 0 && v !== null && v !== '');
                     imaginaryParticlesData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    imaginaryParticlesData.datasets[0].data = validFeeds.map(f => f.field2 || 0).filter(v => v !== null && v !== '');
+                    imaginaryParticlesData.datasets[0].data = validFeeds.map(f => f.field2 || 0).filter(v => v !== 0 && v !== null && v !== '');
                     molecularPhysicsData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    molecularPhysicsData.datasets[0].data = validFeeds.map(f => f.field3 || 0).filter(v => v !== null && v !== '');
+                    molecularPhysicsData.datasets[0].data = validFeeds.map(f => f.field3 || 0).filter(v => v !== 0 && v !== null && v !== '');
                     xData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    xData.datasets[0].data = validFeeds.map(f => f.field4 || 0).filter(v => v !== null && v !== '');
+                    xData.datasets[0].data = validFeeds.map(f => f.field4 || 0).filter(v => v !== 0 && v !== null && v !== '');
+                    zData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    zData.datasets[0].data = validFeeds.map(f => f.field6 || 0).filter(v => v !== 0 && v !== null && v !== '');
+                    angleData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    angleData.datasets[0].data = validFeeds.map(f => f.field7 || 0).filter(v => v !== 0 && v !== null && v !== '');
+
+                    // Gráficas con ceros permitidos (y y seismicParticles)
                     yData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
                     yData.datasets[0].data = validFeeds.map(f => f.field5 || 0).filter(v => v !== null && v !== '');
-                    zData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    zData.datasets[0].data = validFeeds.map(f => f.field6 || 0).filter(v => v !== null && v !== '');
-                    angleData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    angleData.datasets[0].data = validFeeds.map(f => f.field7 || 0).filter(v => v !== null && v !== '');
                     seismicParticlesData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
                     seismicParticlesData.datasets[0].data = validFeeds.map(f => f.field8 || 0).filter(v => v !== null && v !== '');
 
@@ -154,14 +157,17 @@
                         f.field1 || f.field2 || f.field3 || f.field4 || f.field5
                     );
 
+                    // Gráficas sin ceros (excepto seismicMag)
                     accelXData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    accelXData.datasets[0].data = validFeeds.map(f => f.field1 || 0).filter(v => v !== null && v !== '');
+                    accelXData.datasets[0].data = validFeeds.map(f => f.field1 || 0).filter(v => v !== 0 && v !== null && v !== '');
                     accelYData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    accelYData.datasets[0].data = validFeeds.map(f => f.field2 || 0).filter(v => v !== null && v !== '');
+                    accelYData.datasets[0].data = validFeeds.map(f => f.field2 || 0).filter(v => v !== 0 && v !== null && v !== '');
                     accelZData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    accelZData.datasets[0].data = validFeeds.map(f => f.field3 || 0).filter(v => v !== null && v !== '');
+                    accelZData.datasets[0].data = validFeeds.map(f => f.field3 || 0).filter(v => v !== 0 && v !== null && v !== '');
                     accelResultData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
-                    accelResultData.datasets[0].data = validFeeds.map(f => f.field4 || 0).filter(v => v !== null && v !== '');
+                    accelResultData.datasets[0].data = validFeeds.map(f => f.field4 || 0).filter(v => v !== 0 && v !== null && v !== '');
+
+                    // Gráfica con ceros permitidos (seismicMag)
                     seismicMagData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
                     seismicMagData.datasets[0].data = validFeeds.map(f => f.field5 || 0).filter(v => v !== null && v !== '');
 
