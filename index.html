@@ -114,17 +114,30 @@
                 .then(d => {
                     const feeds = d.feeds; if (!feeds?.length) throw 'Sin datos canal 1';
                     const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
-                    const validIndices = labels.map((_, i) => (feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5 || feeds[i].field6 || feeds[i].field7 || feeds[i].field8) ? i : -1).filter(i => i !== -1);
+                    const validFeeds = feeds.filter(f => 
+                        f.field1 || f.field2 || f.field3 || f.field4 || f.field5 || f.field6 || f.field7 || f.field8
+                    );
 
-                    [realParticlesData, imaginaryParticlesData, molecularPhysicsData, xData, yData, zData, angleData, seismicParticlesData].forEach((data, i) => {
-                        data.labels = validIndices.map(i => labels[i]);
-                        data.datasets[0].data = validIndices.map(i => feeds[i][`field${i + 1}`] || 0).filter(v => v !== null && v !== '');
-                        data.labels = data.labels.slice(0, data.datasets[0].data.length); // Sincroniza etiquetas con datos
-                    });
+                    realParticlesData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    realParticlesData.datasets[0].data = validFeeds.map(f => f.field1 || 0).filter(v => v !== null && v !== '');
+                    imaginaryParticlesData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    imaginaryParticlesData.datasets[0].data = validFeeds.map(f => f.field2 || 0).filter(v => v !== null && v !== '');
+                    molecularPhysicsData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    molecularPhysicsData.datasets[0].data = validFeeds.map(f => f.field3 || 0).filter(v => v !== null && v !== '');
+                    xData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    xData.datasets[0].data = validFeeds.map(f => f.field4 || 0).filter(v => v !== null && v !== '');
+                    yData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    yData.datasets[0].data = validFeeds.map(f => f.field5 || 0).filter(v => v !== null && v !== '');
+                    zData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    zData.datasets[0].data = validFeeds.map(f => f.field6 || 0).filter(v => v !== null && v !== '');
+                    angleData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    angleData.datasets[0].data = validFeeds.map(f => f.field7 || 0).filter(v => v !== null && v !== '');
+                    seismicParticlesData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    seismicParticlesData.datasets[0].data = validFeeds.map(f => f.field8 || 0).filter(v => v !== null && v !== '');
 
                     const latestData1 = feeds[feeds.length - 1] || {};
-                    const labelsEs = ['Partículas Reales', 'Partículas Imaginarias', 'Física Molecular', 'Coordenada x', 'Coordenada y', 'Coordenada z', 'Ángulo', 'Partículas Sísmicas'];
-                    labelsEs.forEach((label, i) => {
+                    const labelsEs1 = ['Partículas Reales', 'Partículas Imaginarias', 'Física Molecular', 'Coordenada x', 'Coordenada y', 'Coordenada z', 'Ángulo', 'Partículas Sísmicas'];
+                    labelsEs1.forEach((label, i) => {
                         const value = latestData1[`field${i + 1}`] !== undefined && latestData1[`field${i + 1}`] !== null && latestData1[`field${i + 1}`] !== '' ? latestData1[`field${i + 1}`] : 'En Reposo';
                         document.getElementById(['realParticles', 'imaginaryParticles', 'molecularPhysics', 'x', 'y', 'z', 'angle', 'seismicParticles'][i]).textContent = `${label}: ${value}`;
                     });
@@ -137,17 +150,24 @@
                 .then(d => {
                     const feeds = d.feeds; if (!feeds?.length) throw 'Sin datos canal 2';
                     const labels = feeds.map(f => new Date(f.created_at).toLocaleString());
-                    const validIndices = labels.map((_, i) => (feeds[i].field1 || feeds[i].field2 || feeds[i].field3 || feeds[i].field4 || feeds[i].field5) ? i : -1).filter(i => i !== -1);
+                    const validFeeds = feeds.filter(f => 
+                        f.field1 || f.field2 || f.field3 || f.field4 || f.field5
+                    );
 
-                    [accelXData, accelYData, accelZData, accelResultData, seismicMagData].forEach((data, i) => {
-                        data.labels = validIndices.map(i => labels[i]);
-                        data.datasets[0].data = validIndices.map(i => feeds[i][`field${i + 1}`] || 0).filter(v => v !== null && v !== '');
-                        data.labels = data.labels.slice(0, data.datasets[0].data.length); // Sincroniza etiquetas con datos
-                    });
+                    accelXData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    accelXData.datasets[0].data = validFeeds.map(f => f.field1 || 0).filter(v => v !== null && v !== '');
+                    accelYData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    accelYData.datasets[0].data = validFeeds.map(f => f.field2 || 0).filter(v => v !== null && v !== '');
+                    accelZData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    accelZData.datasets[0].data = validFeeds.map(f => f.field3 || 0).filter(v => v !== null && v !== '');
+                    accelResultData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    accelResultData.datasets[0].data = validFeeds.map(f => f.field4 || 0).filter(v => v !== null && v !== '');
+                    seismicMagData.labels = validFeeds.map(f => new Date(f.created_at).toLocaleString());
+                    seismicMagData.datasets[0].data = validFeeds.map(f => f.field5 || 0).filter(v => v !== null && v !== '');
 
                     const latestData2 = feeds[feeds.length - 1] || {};
-                    const labelsEs = ['Aceleración en X', 'Aceleración en Y', 'Aceleración en Z', 'Aceleración Resultante (m/s²)', 'Magnitud Sísmica Local Estimada'];
-                    labelsEs.forEach((label, i) => {
+                    const labelsEs2 = ['Aceleración en X', 'Aceleración en Y', 'Aceleración en Z', 'Aceleración Resultante (m/s²)', 'Magnitud Sísmica Local Estimada'];
+                    labelsEs2.forEach((label, i) => {
                         const value = latestData2[`field${i + 1}`] !== undefined && latestData2[`field${i + 1}`] !== null && latestData2[`field${i + 1}`] !== '' ? latestData2[`field${i + 1}`] : 'En Reposo';
                         document.getElementById(['accelX', 'accelY', 'accelZ', 'accelResult', 'seismicMag'][i]).textContent = `${label}: ${value}`;
                     });
