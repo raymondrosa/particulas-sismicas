@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Observatorio de Partículas del TOA – Prof. Rosa</title>
 
 <!-- Chart.js -->
@@ -13,58 +14,58 @@
 body{
     margin:0;
     font-family: Georgia, "Times New Roman", serif;
-    background-image:url('fondo.png');
-    background-repeat:repeat;
+    background:#111;
     color:#fff;
 }
-.header-container{
-    background:rgba(0,0,0,0.75);
+
+.header{
+    background:rgba(0,0,0,0.8);
     padding:15px;
-    border-radius:12px;
 }
-.header-container img{
-    max-width:130px;
-    margin-right:15px;
-}
-h1{
-    font-family:"Arial Black",Arial;
-    font-size:2.3em;
+
+.header h1{
     margin:0;
+    font-family:Arial Black, Arial;
+    font-size:2em;
 }
+
 .status{
-    margin-top:8px;
+    margin-top:6px;
     font-size:1.1em;
 }
+
 .status-circle{
-    width:14px;
-    height:14px;
-    border-radius:50%;
     display:inline-block;
+    width:12px;
+    height:12px;
+    border-radius:50%;
     margin-right:6px;
 }
+
 .data-container{
     display:flex;
     flex-wrap:wrap;
     gap:10px;
     justify-content:center;
-    max-width:1200px;
-    margin:15px auto;
+    margin:15px;
 }
+
 .data{
-    background:rgba(0,0,0,0.55);
+    background:rgba(0,0,0,0.6);
     padding:10px;
-    border-radius:10px;
+    border-radius:8px;
     min-width:220px;
-    font-size:1.2em;
+    font-size:1.1em;
 }
+
 canvas{
     background:#fff;
-    border-radius:12px;
-    border:3px solid #fff;
-    max-width:100%;
-    margin:25px auto;
+    border-radius:10px;
+    margin:20px auto;
     display:block;
+    max-width:95%;
 }
+
 .alert{
     box-shadow: inset 0 0 50px rgba(255,0,0,0.7);
 }
@@ -73,70 +74,65 @@ canvas{
 
 <body>
 
-<div class="header-container">
-    <div style="display:flex;align-items:center;">
-        <img src="logo.jpg">
-        <h1>Observatorio de Partículas del TOA</h1>
-    </div>
-    <div id="stationStatus" class="status">Estado: Cargando…</div>
+<div class="header">
+    <h1>Observatorio de Partículas del TOA</h1>
+    <div id="stationStatus" class="status">Estado: Inicializando…</div>
 </div>
 
 <div class="data-container">
-    <div class="data" id="realParticles"></div>
-    <div class="data" id="imaginaryParticles"></div>
-    <div class="data" id="molecularPhysics"></div>
-    <div class="data" id="x"></div>
-    <div class="data" id="y"></div>
-    <div class="data" id="z"></div>
-    <div class="data" id="angle"></div>
-    <div class="data" id="seismicParticles"></div>
-    <div class="data" id="accelX"></div>
-    <div class="data" id="accelY"></div>
-    <div class="data" id="accelZ"></div>
-    <div class="data" id="accelResult"></div>
-    <div class="data" id="seismicMag"></div>
+    <div class="data" id="realParticles">Partículas Reales:</div>
+    <div class="data" id="imaginaryParticles">Imaginarias:</div>
+    <div class="data" id="molecularPhysics">Física Molecular:</div>
+    <div class="data" id="x">X:</div>
+    <div class="data" id="y">Y:</div>
+    <div class="data" id="z">Z:</div>
+    <div class="data" id="angle">Ángulo:</div>
+    <div class="data" id="seismicParticles">Partículas Sísmicas:</div>
+
+    <div class="data" id="accelX">Accel X:</div>
+    <div class="data" id="accelY">Accel Y:</div>
+    <div class="data" id="accelZ">Accel Z:</div>
+    <div class="data" id="accelResult">Accel Resultante:</div>
+    <div class="data" id="seismicMag">Magnitud Sísmica:</div>
 </div>
 
-<!-- CANVAS -->
-<canvas id="chart1" height="400"></canvas>
-<canvas id="chart2" height="400"></canvas>
-<canvas id="chart3" height="400"></canvas>
-<canvas id="chart4" height="400"></canvas>
+<canvas id="chartParticles" height="350"></canvas>
+<canvas id="chartXYZ" height="350"></canvas>
+<canvas id="chartAccel" height="350"></canvas>
+<canvas id="chartMag" height="350"></canvas>
 
 <script>
 /* ================= CONFIG GLOBAL ================= */
 Chart.defaults.animation = false;
 Chart.defaults.elements.point.radius = 0;
-Chart.defaults.elements.line.borderWidth = 1;
 Chart.defaults.responsive = true;
 
 /* ================= THINGSPEAK ================= */
-const MINUTES = 1440;
+const MINUTES_24H = 1440;
 
-const url1 = "https://api.thingspeak.com/channels/2439912/feeds.json?api_key=BCX6UVTLQZ7VMK4F&minutes=" + MINUTES;
-const url2 = "https://api.thingspeak.com/channels/2972050/feeds.json?api_key=8LMMRSTHHX26Z4MI&minutes=" + MINUTES;
+const URL1 =
+  "https://api.thingspeak.com/channels/2439912/feeds.json?api_key=BCX6UVTLQZ7VMK4F&minutes=" + MINUTES_24H;
+
+const URL2 =
+  "https://api.thingspeak.com/channels/2972050/feeds.json?api_key=8LMMRSTHHX26Z4MI&minutes=" + MINUTES_24H;
 
 /* ================= HELPERS ================= */
-function downsample(data, max=600){
-    if(data.length<=max) return data;
-    const step = Math.ceil(data.length/max);
-    return data.filter((_,i)=>i%step===0);
-}
-
 function series(feeds, field, allowZero=false){
-    return downsample(
-        feeds.map(f=>{
-            const v = Number(f[field]);
-            if(isNaN(v) || (!allowZero && v===0)) return null;
-            return {x:new Date(f.created_at), y:v};
-        }).filter(Boolean)
-    );
+    const data=[];
+    feeds.forEach(f=>{
+        const v = Number(f[field]);
+        if(isNaN(v)) return;
+        if(!allowZero && v===0) return;
+        data.push({x:new Date(f.created_at), y:v});
+    });
+    return data;
 }
 
-function status(active){
+function setStatus(active){
     document.getElementById("stationStatus").innerHTML =
-        `Estado: <span class="status-circle" style="background:${active?'#0f0':'#f00'}"></span>
-        ${active?'Monitoreo Activo':'Reposo'}`;
+        'Estado: <span class="status-circle" style="background:' +
+        (active ? '#0f0' : '#f00') +
+        '"></span>' + (active ? 'Monitoreo Activo' : 'Reposo');
 }
 
 /* ================= CHART OPTIONS ================= */
@@ -148,93 +144,123 @@ const timeOptions = {
     }
 };
 
-/* ================= CHARTS ================= */
-const chart1 = new Chart(chart1,{
-    type:'line',
-    data:{ datasets:[
-        {label:'Partículas Reales', borderColor:'#36A2EB'},
-        {label:'Imaginarias', borderColor:'#FF6384'}
-    ]},
-    options:timeOptions
-});
+/* ================= CHART INIT ================= */
+const chartParticles = new Chart(
+    document.getElementById("chartParticles").getContext("2d"),
+    {
+        type:"line",
+        data:{ datasets:[
+            {label:"Reales", borderColor:"#36A2EB"},
+            {label:"Imaginarias", borderColor:"#FF6384"}
+        ]},
+        options:timeOptions
+    }
+);
 
-const chart2 = new Chart(chart2,{
-    type:'line',
-    data:{ datasets:[
-        {label:'X', borderColor:'#FF9F40'},
-        {label:'Y', borderColor:'#9966FF'},
-        {label:'Z', borderColor:'#FFCD56'}
-    ]},
-    options:timeOptions
-});
+const chartXYZ = new Chart(
+    document.getElementById("chartXYZ").getContext("2d"),
+    {
+        type:"line",
+        data:{ datasets:[
+            {label:"X", borderColor:"#FF9F40"},
+            {label:"Y", borderColor:"#9966FF"},
+            {label:"Z", borderColor:"#FFCD56"}
+        ]},
+        options:timeOptions
+    }
+);
 
-const chart3 = new Chart(chart3,{
-    type:'line',
-    data:{ datasets:[
-        {label:'Aceleración Resultante', borderColor:'#FF33A1'}
-    ]},
-    options:timeOptions
-});
+const chartAccel = new Chart(
+    document.getElementById("chartAccel").getContext("2d"),
+    {
+        type:"line",
+        data:{ datasets:[
+            {label:"Aceleración Resultante", borderColor:"#FF33A1"}
+        ]},
+        options:timeOptions
+    }
+);
 
-const chart4 = new Chart(chart4,{
-    type:'line',
-    data:{ datasets:[
-        {label:'Magnitud Sísmica', borderColor:'#A1FF33'}
-    ]},
-    options:timeOptions
-});
+const chartMag = new Chart(
+    document.getElementById("chartMag").getContext("2d"),
+    {
+        type:"line",
+        data:{ datasets:[
+            {label:"Magnitud Sísmica", borderColor:"#A1FF33"}
+        ]},
+        options:timeOptions
+    }
+);
 
 /* ================= UPDATE LOOP ================= */
 async function update(){
-    const [d1,d2] = await Promise.all([
-        fetch(url1).then(r=>r.json()),
-        fetch(url2).then(r=>r.json())
-    ]);
+    try{
+        const [d1,d2] = await Promise.all([
+            fetch(URL1).then(r=>r.json()),
+            fetch(URL2).then(r=>r.json())
+        ]);
 
-    const f1=d1.feeds||[];
-    const f2=d2.feeds||[];
+        const f1 = d1.feeds || [];
+        const f2 = d2.feeds || [];
 
-    chart1.data.datasets[0].data = series(f1,'field1');
-    chart1.data.datasets[1].data = series(f1,'field2');
+        chartParticles.data.datasets[0].data = series(f1,"field1");
+        chartParticles.data.datasets[1].data = series(f1,"field2");
 
-    chart2.data.datasets[0].data = series(f1,'field4');
-    chart2.data.datasets[1].data = series(f1,'field5');
-    chart2.data.datasets[2].data = series(f1,'field6');
+        chartXYZ.data.datasets[0].data = series(f1,"field4");
+        chartXYZ.data.datasets[1].data = series(f1,"field5");
+        chartXYZ.data.datasets[2].data = series(f1,"field6");
 
-    chart3.data.datasets[0].data = series(f2,'field4');
+        chartAccel.data.datasets[0].data = series(f2,"field4");
 
-    chart4.data.datasets[0].data = series(f2,'field5',true);
+        chartMag.data.datasets[0].data = series(f2,"field5",true);
 
-    chart1.update('none');
-    chart2.update('none');
-    chart3.update('none');
-    chart4.update('none');
+        chartParticles.update("none");
+        chartXYZ.update("none");
+        chartAccel.update("none");
+        chartMag.update("none");
 
-    const last1=f1.at(-1)||{};
-    const last2=f2.at(-1)||{};
+        const last1 = f1[f1.length-1] || {};
+        const last2 = f2[f2.length-1] || {};
 
-    document.getElementById("realParticles").textContent="Partículas Reales: "+(last1.field1||'Reposo');
-    document.getElementById("imaginaryParticles").textContent="Imaginarias: "+(last1.field2||'Reposo');
-    document.getElementById("molecularPhysics").textContent="Física Molecular: "+(last1.field3||'Reposo');
-    document.getElementById("x").textContent="X: "+(last1.field4||'0');
-    document.getElementById("y").textContent="Y: "+(last1.field5||'0');
-    document.getElementById("z").textContent="Z: "+(last1.field6||'0');
-    document.getElementById("angle").textContent="Ángulo: "+(last1.field7||'0');
-    document.getElementById("seismicParticles").textContent="Partículas Sísmicas: "+(last1.field8||'0');
+        document.getElementById("realParticles").textContent =
+            "Partículas Reales: " + (last1.field1 || "0");
+        document.getElementById("imaginaryParticles").textContent =
+            "Imaginarias: " + (last1.field2 || "0");
+        document.getElementById("molecularPhysics").textContent =
+            "Física Molecular: " + (last1.field3 || "0");
+        document.getElementById("x").textContent = "X: " + (last1.field4 || "0");
+        document.getElementById("y").textContent = "Y: " + (last1.field5 || "0");
+        document.getElementById("z").textContent = "Z: " + (last1.field6 || "0");
+        document.getElementById("angle").textContent =
+            "Ángulo: " + (last1.field7 || "0");
+        document.getElementById("seismicParticles").textContent =
+            "Partículas Sísmicas: " + (last1.field8 || "0");
 
-    document.getElementById("accelX").textContent="Accel X: "+(last2.field1||'0');
-    document.getElementById("accelY").textContent="Accel Y: "+(last2.field2||'0');
-    document.getElementById("accelZ").textContent="Accel Z: "+(last2.field3||'0');
-    document.getElementById("accelResult").textContent="Accel Resultante: "+(last2.field4||'0');
-    document.getElementById("seismicMag").textContent="Magnitud Sísmica: "+(last2.field5||'0');
+        document.getElementById("accelX").textContent =
+            "Accel X: " + (last2.field1 || "0");
+        document.getElementById("accelY").textContent =
+            "Accel Y: " + (last2.field2 || "0");
+        document.getElementById("accelZ").textContent =
+            "Accel Z: " + (last2.field3 || "0");
+        document.getElementById("accelResult").textContent =
+            "Accel Resultante: " + (last2.field4 || "0");
+        document.getElementById("seismicMag").textContent =
+            "Magnitud Sísmica: " + (last2.field5 || "0");
 
-    const alert = Number(last2.field4)>0.08 || Number(last2.field5)>2.5;
-    document.body.classList.toggle("alert",alert);
-    status(Number(last1.field1)!==0);
+        const alert =
+            Number(last2.field4) > 0.08 ||
+            Number(last2.field5) > 2.5;
+
+        document.body.classList.toggle("alert", alert);
+        setStatus(Number(last1.field1) !== 0);
+
+    }catch(err){
+        console.error("Error en update():", err);
+    }
 }
 
-setInterval(update,30000);
 update();
+setInterval(update, 30000);
 </script>
 
 </body>
