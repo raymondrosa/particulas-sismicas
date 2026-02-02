@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Observatorio de Partículas del TOA – Prof. Rosa</title>
-
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
-
 <style>
 body{
     margin:0;
@@ -17,23 +14,19 @@ body{
     background:#111;
     color:#fff;
 }
-
 .header{
     background:rgba(0,0,0,0.8);
     padding:15px;
 }
-
 .header h1{
     margin:0;
     font-family:Arial Black, Arial;
     font-size:2em;
 }
-
 .status{
     margin-top:6px;
     font-size:1.1em;
 }
-
 .status-circle{
     display:inline-block;
     width:12px;
@@ -41,7 +34,6 @@ body{
     border-radius:50%;
     margin-right:6px;
 }
-
 .data-container{
     display:flex;
     flex-wrap:wrap;
@@ -49,7 +41,6 @@ body{
     justify-content:center;
     margin:15px;
 }
-
 .data{
     background:rgba(0,0,0,0.6);
     padding:10px;
@@ -57,7 +48,6 @@ body{
     min-width:220px;
     font-size:1.1em;
 }
-
 canvas{
     background:#fff;
     border-radius:10px;
@@ -65,20 +55,16 @@ canvas{
     display:block;
     max-width:95%;
 }
-
 .alert{
     box-shadow: inset 0 0 50px rgba(255,0,0,0.7);
 }
 </style>
 </head>
-
 <body>
-
 <div class="header">
     <h1>Observatorio de Partículas del TOA</h1>
     <div id="stationStatus" class="status">Estado: Inicializando…</div>
 </div>
-
 <div class="data-container">
     <div class="data" id="realParticles">Partículas Reales:</div>
     <div class="data" id="imaginaryParticles">Imaginarias:</div>
@@ -88,7 +74,6 @@ canvas{
     <div class="data" id="z">Z:</div>
     <div class="data" id="angle">Ángulo:</div>
     <div class="data" id="seismicParticles">Partículas Sísmicas:</div>
-
     <div class="data" id="accelX">Accel X:</div>
     <div class="data" id="accelY">Accel Y:</div>
     <div class="data" id="accelZ">Accel Z:</div>
@@ -102,166 +87,191 @@ canvas{
 <canvas id="chartMag" height="350"></canvas>
 
 <script>
-/* ================= CONFIG GLOBAL ================= */
+// ================= CONFIG GLOBAL =================
 Chart.defaults.animation = false;
 Chart.defaults.elements.point.radius = 0;
 Chart.defaults.responsive = true;
 
-/* ================= THINGSPEAK ================= */
-const MINUTES_24H = 1440;
+// ================= THINGSPEAK =================
+const MINUTES_48H = 2880;  // 48 horas = 48 × 60 minutos
 
-const URL1 =
-  "https://api.thingspeak.com/channels/2439912/feeds.json?api_key=BCX6UVTLQZ7VMK4F&minutes=" + MINUTES_24H;
+const URL1 = 
+  "https://api.thingspeak.com/channels/2439912/feeds.json?api_key=BCX6UVTLQZ7VMK4F&minutes=" + MINUTES_48H;
 
-const URL2 =
-  "https://api.thingspeak.com/channels/2972050/feeds.json?api_key=8LMMRSTHHX26Z4MI&minutes=" + MINUTES_24H;
+const URL2 = 
+  "https://api.thingspeak.com/channels/2972050/feeds.json?api_key=8LMMRSTHHX26Z4MI&minutes=" + MINUTES_48H;
 
-/* ================= HELPERS ================= */
-function series(feeds, field, allowZero=false){
-    const data=[];
-    feeds.forEach(f=>{
+// ================= HELPERS =================
+function series(feeds, field, allowZero = false) {
+    const data = [];
+    feeds.forEach(f => {
         const v = Number(f[field]);
-        if(isNaN(v)) return;
-        if(!allowZero && v===0) return;
-        data.push({x:new Date(f.created_at), y:v});
+        if (isNaN(v)) return;
+        if (!allowZero && v === 0) return;
+        data.push({ x: new Date(f.created_at), y: v });
     });
     return data;
 }
 
-function setStatus(active){
+function setStatus(active) {
     document.getElementById("stationStatus").innerHTML =
         'Estado: <span class="status-circle" style="background:' +
         (active ? '#0f0' : '#f00') +
         '"></span>' + (active ? 'Monitoreo Activo' : 'Reposo');
 }
 
-/* ================= CHART OPTIONS ================= */
+// ================= CHART OPTIONS =================
 const timeOptions = {
-    parsing:false,
-    scales:{
-        x:{ type:'time', time:{unit:'hour'} },
-        y:{ beginAtZero:false }
+    parsing: false,
+    scales: {
+        x: {
+            type: 'time',
+            time: {
+                unit: 'day',                    // o prueba 'hour' si prefieres más detalle
+                displayFormats: {
+                    day: 'DD MMM',              // ej: 01 Feb
+                    hour: 'HH:mm'
+                },
+                tooltipFormat: 'DD MMM YYYY HH:mm'
+            },
+            ticks: {
+                maxTicksLimit: 6                // evita saturar el eje X
+            },
+            title: {
+                display: true,
+                text: 'Últimas 48 horas',
+                color: '#ddd',
+                font: { size: 14 }
+            },
+            grid: { color: '#444' }
+        },
+        y: {
+            beginAtZero: false,
+            grid: { color: '#444' }
+        }
+    },
+    plugins: {
+        legend: {
+            display: true,
+            position: 'top',
+            labels: { color: '#eee' }
+        }
     }
 };
 
-/* ================= CHART INIT ================= */
+// ================= CHART INIT =================
 const chartParticles = new Chart(
     document.getElementById("chartParticles").getContext("2d"),
     {
-        type:"line",
-        data:{ datasets:[
-            {label:"Reales", borderColor:"#36A2EB"},
-            {label:"Imaginarias", borderColor:"#FF6384"}
+        type: "line",
+        data: { datasets: [
+            { label: "Reales",      borderColor: "#36A2EB", tension: 0.1 },
+            { label: "Imaginarias", borderColor: "#FF6384", tension: 0.1 }
         ]},
-        options:timeOptions
+        options: timeOptions
     }
 );
 
 const chartXYZ = new Chart(
     document.getElementById("chartXYZ").getContext("2d"),
     {
-        type:"line",
-        data:{ datasets:[
-            {label:"X", borderColor:"#FF9F40"},
-            {label:"Y", borderColor:"#9966FF"},
-            {label:"Z", borderColor:"#FFCD56"}
+        type: "line",
+        data: { datasets: [
+            { label: "X", borderColor: "#FF9F40", tension: 0.1 },
+            { label: "Y", borderColor: "#9966FF", tension: 0.1 },
+            { label: "Z", borderColor: "#FFCD56", tension: 0.1 }
         ]},
-        options:timeOptions
+        options: timeOptions
     }
 );
 
 const chartAccel = new Chart(
     document.getElementById("chartAccel").getContext("2d"),
     {
-        type:"line",
-        data:{ datasets:[
-            {label:"Aceleración Resultante", borderColor:"#FF33A1"}
+        type: "line",
+        data: { datasets: [
+            { label: "Aceleración Resultante", borderColor: "#FF33A1", tension: 0.1 }
         ]},
-        options:timeOptions
+        options: timeOptions
     }
 );
 
 const chartMag = new Chart(
     document.getElementById("chartMag").getContext("2d"),
     {
-        type:"line",
-        data:{ datasets:[
-            {label:"Magnitud Sísmica", borderColor:"#A1FF33"}
+        type: "line",
+        data: { datasets: [
+            { label: "Magnitud Sísmica", borderColor: "#A1FF33", tension: 0.1 }
         ]},
-        options:timeOptions
+        options: timeOptions
     }
 );
 
-/* ================= UPDATE LOOP ================= */
-async function update(){
-    try{
-        const [d1,d2] = await Promise.all([
-            fetch(URL1).then(r=>r.json()),
-            fetch(URL2).then(r=>r.json())
+// ================= UPDATE LOOP =================
+async function update() {
+    try {
+        const [d1, d2] = await Promise.all([
+            fetch(URL1).then(r => r.json()),
+            fetch(URL2).then(r => r.json())
         ]);
 
         const f1 = d1.feeds || [];
         const f2 = d2.feeds || [];
 
-        chartParticles.data.datasets[0].data = series(f1,"field1");
-        chartParticles.data.datasets[1].data = series(f1,"field2");
+        // Actualizar datos de los gráficos
+        chartParticles.data.datasets[0].data = series(f1, "field1");
+        chartParticles.data.datasets[1].data = series(f1, "field2");
 
-        chartXYZ.data.datasets[0].data = series(f1,"field4");
-        chartXYZ.data.datasets[1].data = series(f1,"field5");
-        chartXYZ.data.datasets[2].data = series(f1,"field6");
+        chartXYZ.data.datasets[0].data = series(f1, "field4");
+        chartXYZ.data.datasets[1].data = series(f1, "field5");
+        chartXYZ.data.datasets[2].data = series(f1, "field6");
 
-        chartAccel.data.datasets[0].data = series(f2,"field4");
+        chartAccel.data.datasets[0].data = series(f2, "field4");
+        chartMag.data.datasets[0].data   = series(f2, "field5", true);
 
-        chartMag.data.datasets[0].data = series(f2,"field5",true);
-
+        // Refrescar gráficos sin animación
         chartParticles.update("none");
         chartXYZ.update("none");
         chartAccel.update("none");
         chartMag.update("none");
 
-        const last1 = f1[f1.length-1] || {};
-        const last2 = f2[f2.length-1] || {};
+        // Actualizar valores en pantalla
+        const last1 = f1[f1.length - 1] || {};
+        const last2 = f2[f2.length - 1] || {};
 
-        document.getElementById("realParticles").textContent =
-            "Partículas Reales: " + (last1.field1 || "0");
-        document.getElementById("imaginaryParticles").textContent =
-            "Imaginarias: " + (last1.field2 || "0");
-        document.getElementById("molecularPhysics").textContent =
-            "Física Molecular: " + (last1.field3 || "0");
-        document.getElementById("x").textContent = "X: " + (last1.field4 || "0");
-        document.getElementById("y").textContent = "Y: " + (last1.field5 || "0");
-        document.getElementById("z").textContent = "Z: " + (last1.field6 || "0");
-        document.getElementById("angle").textContent =
-            "Ángulo: " + (last1.field7 || "0");
-        document.getElementById("seismicParticles").textContent =
-            "Partículas Sísmicas: " + (last1.field8 || "0");
+        document.getElementById("realParticles").textContent      = "Partículas Reales: "       + (last1.field1  || "0");
+        document.getElementById("imaginaryParticles").textContent = "Imaginarias: "             + (last1.field2  || "0");
+        document.getElementById("molecularPhysics").textContent   = "Física Molecular: "        + (last1.field3  || "0");
+        document.getElementById("x").textContent                  = "X: "                       + (last1.field4  || "0");
+        document.getElementById("y").textContent                  = "Y: "                       + (last1.field5  || "0");
+        document.getElementById("z").textContent                  = "Z: "                       + (last1.field6  || "0");
+        document.getElementById("angle").textContent              = "Ángulo: "                  + (last1.field7  || "0");
+        document.getElementById("seismicParticles").textContent   = "Partículas Sísmicas: "     + (last1.field8  || "0");
 
-        document.getElementById("accelX").textContent =
-            "Accel X: " + (last2.field1 || "0");
-        document.getElementById("accelY").textContent =
-            "Accel Y: " + (last2.field2 || "0");
-        document.getElementById("accelZ").textContent =
-            "Accel Z: " + (last2.field3 || "0");
-        document.getElementById("accelResult").textContent =
-            "Accel Resultante: " + (last2.field4 || "0");
-        document.getElementById("seismicMag").textContent =
-            "Magnitud Sísmica: " + (last2.field5 || "0");
+        document.getElementById("accelX").textContent     = "Accel X: "             + (last2.field1  || "0");
+        document.getElementById("accelY").textContent     = "Accel Y: "             + (last2.field2  || "0");
+        document.getElementById("accelZ").textContent     = "Accel Z: "             + (last2.field3  || "0");
+        document.getElementById("accelResult").textContent= "Accel Resultante: "    + (last2.field4  || "0");
+        document.getElementById("seismicMag").textContent = "Magnitud Sísmica: "    + (last2.field5  || "0");
 
-        const alert =
+        // Alerta visual
+        const alert = 
             Number(last2.field4) > 0.08 ||
             Number(last2.field5) > 2.5;
 
         document.body.classList.toggle("alert", alert);
+
+        // Estado de la estación
         setStatus(Number(last1.field1) !== 0);
 
-    }catch(err){
+    } catch (err) {
         console.error("Error en update():", err);
     }
 }
 
+// Primera carga + actualización cada 30 segundos
 update();
 setInterval(update, 30000);
 </script>
-
 </body>
 </html>
