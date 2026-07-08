@@ -324,11 +324,11 @@
     </div>
 
     <!-- Modal para gráfica ampliada -->
-    <div class="modal-overlay" id="chartModal" onclick="closeModal(event)">
-        <div class="modal-content" onclick="event.stopPropagation()">
+    <div class="modal-overlay" id="chartModal">
+        <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Gráfica</h2>
-                <button class="modal-close" onclick="closeModal()">&times;</button>
+                <button class="modal-close" id="modalCloseBtn">&times;</button>
             </div>
             <canvas id="modalCanvas"></canvas>
         </div>
@@ -501,10 +501,11 @@
 
                     // Evento click para abrir modal
                     wrapper.addEventListener('click', function(e) {
-                        // Evitar que el click en el canvas dispare el modal dos veces
-                        if (e.target.tagName === 'CANVAS') {
-                            openModal(cfg.id, cfg.label);
+                        // Si el click fue en el botón de cerrar o en el modal, ignorar
+                        if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) {
+                            return;
                         }
+                        openModal(cfg.id, cfg.label);
                     });
 
                     grid.appendChild(wrapper);
@@ -584,8 +585,7 @@
                 document.body.style.overflow = 'hidden';
             }
 
-            function closeModal(event) {
-                if (event && event.target !== event.currentTarget && event.target.className !== 'modal-close') return;
+            function closeModal() {
                 const modal = document.getElementById('chartModal');
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
@@ -597,7 +597,22 @@
                 }
             }
 
-            // Cerrar con tecla ESC
+            // --- Eventos del Modal ---
+
+            // 1. Botón de cerrar (X)
+            document.getElementById('modalCloseBtn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeModal();
+            });
+
+            // 2. Clic en el overlay (fondo) para cerrar
+            document.getElementById('chartModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeModal();
+                }
+            });
+
+            // 3. Tecla ESC
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') {
                     closeModal();
