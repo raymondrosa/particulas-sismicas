@@ -1,4 +1,3 @@
-// Actualizacion 8 de julio de 2026
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
+        /* ============================================================
+           ÚLTIMA ACTUALIZACIÓN: 8 DE JULIO DE 2026
+           Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
+           ============================================================ */
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -20,6 +24,8 @@
             color: #FFFFFF;
             min-height: 100vh;
             padding: 10px;
+            padding-bottom: 60px;
+            position: relative;
         }
 
         .header-container {
@@ -107,6 +113,14 @@
             padding: 10px;
             border: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .chart-wrapper:hover {
+            transform: scale(1.01);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            border-color: rgba(255, 255, 255, 0.5);
         }
 
         .chart-wrapper canvas {
@@ -127,6 +141,111 @@
             background: rgba(0, 0, 0, 0.5);
             border-radius: 6px 6px 0 0;
             margin-bottom: 4px;
+        }
+
+        .chart-wrapper .expand-hint {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.5);
+            padding: 2px 8px;
+            border-radius: 10px;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .chart-wrapper:hover .expand-hint {
+            opacity: 1;
+        }
+
+        /* Modal para gráfica ampliada */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 20px;
+            max-width: 95vw;
+            max-height: 95vh;
+            width: 1200px;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+        }
+
+        .modal-content .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .modal-content .modal-header h2 {
+            font-size: 1.3rem;
+            margin: 0;
+        }
+
+        .modal-content .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 0 12px;
+            transition: transform 0.2s;
+            line-height: 1;
+        }
+
+        .modal-content .modal-close:hover {
+            transform: rotate(90deg);
+            color: #ff6b6b;
+        }
+
+        .modal-content canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 75vh;
+            border-radius: 8px;
+            background: #FFFFFF;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px 10px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 8px;
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .footer strong {
+            color: rgba(255, 255, 255, 0.9);
         }
 
         /* Scroll suave */
@@ -152,6 +271,12 @@
             .data-container {
                 grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             }
+            .modal-content {
+                padding: 12px;
+            }
+            .modal-content .modal-header h2 {
+                font-size: 1rem;
+            }
         }
     </style>
     <!-- Carga ligera de Chart.js -->
@@ -159,6 +284,11 @@
     </script>
 </head>
 <body>
+
+    <!-- ============================================================
+    ÚLTIMA ACTUALIZACIÓN: 8 DE JULIO DE 2026
+    Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
+    ============================================================ -->
 
     <div class="header-container">
         <div class="header-row">
@@ -193,9 +323,30 @@
         <!-- Las 13 gráficas se generarán con JS para evitar código repetitivo -->
     </div>
 
+    <!-- Modal para gráfica ampliada -->
+    <div class="modal-overlay" id="chartModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h2 id="modalTitle">Gráfica</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <canvas id="modalCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio de Partículas del TOA &bull; 2026
+    </div>
+
     <script>
         (function() {
             'use strict';
+
+            // ============================================================
+            // ÚLTIMA ACTUALIZACIÓN: 8 DE JULIO DE 2026
+            // Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
+            // ============================================================
 
             // Configuración de ThingSpeak
             const CHANNEL1 = 2439912;
@@ -321,7 +472,6 @@
 
             // Almacenar instancias de gráficas
             const chartInstances = {};
-            let dataStore = {}; // Para almacenar datos procesados
 
             // Función para crear elementos gráficos en el grid
             function createChartWrappers() {
@@ -330,6 +480,7 @@
                 CHART_CONFIGS.forEach(cfg => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'chart-wrapper';
+                    wrapper.dataset.chartId = cfg.id;
 
                     const label = document.createElement('div');
                     label.className = 'chart-label';
@@ -342,9 +493,116 @@
                     canvas.height = 200;
                     wrapper.appendChild(canvas);
 
+                    // Hint de expansión
+                    const hint = document.createElement('span');
+                    hint.className = 'expand-hint';
+                    hint.textContent = '🔍 Click para ampliar';
+                    wrapper.appendChild(hint);
+
+                    // Evento click para abrir modal
+                    wrapper.addEventListener('click', function(e) {
+                        // Evitar que el click en el canvas dispare el modal dos veces
+                        if (e.target.tagName === 'CANVAS') {
+                            openModal(cfg.id, cfg.label);
+                        }
+                    });
+
                     grid.appendChild(wrapper);
                 });
             }
+
+            // --- Funciones del Modal ---
+            function openModal(chartId, label) {
+                const modal = document.getElementById('chartModal');
+                const modalCanvas = document.getElementById('modalCanvas');
+                const modalTitle = document.getElementById('modalTitle');
+
+                modalTitle.textContent = label;
+
+                // Obtener la gráfica original
+                const originalChart = chartInstances[chartId];
+                if (!originalChart) return;
+
+                // Configurar el canvas del modal con los mismos datos
+                const ctx = modalCanvas.getContext('2d');
+
+                // Destruir gráfica anterior si existe
+                if (modalCanvas._chart) {
+                    modalCanvas._chart.destroy();
+                }
+
+                // Crear nueva gráfica en el modal (más grande)
+                const newChart = new Chart(ctx, {
+                    type: 'line',
+                    data: JSON.parse(JSON.stringify(originalChart.data)),
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: {
+                                    color: '#fff',
+                                    font: { size: 14 }
+                                }
+                            },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false
+                            }
+                        },
+                        scales: {
+                            x: {
+                                ticks: {
+                                    color: '#ccc',
+                                    font: { size: 11 },
+                                    maxTicksLimit: 20,
+                                    maxRotation: 45
+                                },
+                                grid: { color: 'rgba(255,255,255,0.1)' }
+                            },
+                            y: {
+                                ticks: {
+                                    color: '#ccc',
+                                    font: { size: 11 }
+                                },
+                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                beginAtZero: false
+                            }
+                        },
+                        elements: {
+                            point: {
+                                radius: 2,
+                                hoverRadius: 6
+                            }
+                        }
+                    }
+                });
+
+                modalCanvas._chart = newChart;
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal(event) {
+                if (event && event.target !== event.currentTarget && event.target.className !== 'modal-close') return;
+                const modal = document.getElementById('chartModal');
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                // Destruir gráfica del modal para liberar memoria
+                const modalCanvas = document.getElementById('modalCanvas');
+                if (modalCanvas._chart) {
+                    modalCanvas._chart.destroy();
+                    modalCanvas._chart = null;
+                }
+            }
+
+            // Cerrar con tecla ESC
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
 
             // Función para procesar datos de ThingSpeak
             function processFeeds(feeds, field, allowZero) {
@@ -525,7 +783,6 @@
                     })
                     .catch(error => {
                         console.error('Error al cargar datos:', error);
-                        // Mostrar error en estado
                         const status = document.getElementById('stationStatus');
                         status.innerHTML =
                             `<span class="status-circle" style="background-color: #FF0000"></span>Estado: Error de conexión`;
@@ -542,7 +799,7 @@
                 // Actualizar cada 15 segundos
                 setInterval(updateCharts, 15000);
 
-                // También actualizar al volver a la pestaña (para mejorar experiencia)
+                // Actualizar al volver a la pestaña
                 document.addEventListener('visibilitychange', function() {
                     if (!document.hidden) {
                         updateCharts();
