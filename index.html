@@ -622,14 +622,15 @@
                 if (e.key === 'Escape') closeModal();
             });
 
-            // Función para procesar datos de ThingSpeak
+            // Función para procesar datos de ThingSpeak (permite valores cero)
             function processFeeds(feeds, field) {
                 if (!feeds || feeds.length === 0) return { labels: [], data: [] };
                 const labels = [];
                 const data = [];
                 feeds.forEach(feed => {
                     const val = parseFloat(feed[field]);
-                    if (val !== undefined && !isNaN(val) && val !== 0) {
+                    // Incluimos todos los valores numéricos válidos, incluyendo 0
+                    if (val !== undefined && !isNaN(val)) {
                         labels.push(new Date(feed.created_at).toLocaleString());
                         data.push(val);
                     }
