@@ -763,7 +763,6 @@
 
                         // Acumular para la combinada (usamos los mismos datos)
                         if (labels.length > 0 && data.length > 0) {
-                            // Tomar las primeras etiquetas como referencia (todas deberían coincidir en tiempo)
                             if (allLabels.length === 0) {
                                 allLabels.push(...labels);
                             }
@@ -780,7 +779,7 @@
                         }
                     });
 
-                    // --- Gráfica combinada ---
+                    // --- Gráfica combinada CON LEYENDA ---
                     const combinedCanvas = document.getElementById('chart-combined');
                     if (combinedCanvas) {
                         const ctxCombined = combinedCanvas.getContext('2d');
@@ -805,14 +804,15 @@
                                             labels: {
                                                 color: '#fff',
                                                 font: { size: 10 },
-                                                boxWidth: 12
+                                                boxWidth: 14,
+                                                padding: 10
                                             }
                                         },
                                         tooltip: {
                                             mode: 'index',
                                             intersect: false,
                                             callbacks: {
-                                                label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) :
+                                                label: ctx => ctx.parsed.y !== null ? `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}` :
                                                     'N/A'
                                             }
                                         }
