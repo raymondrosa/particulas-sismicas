@@ -6,7 +6,7 @@
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         /* ============================================================
-           OPTIMIZACIÓN: 21 DE JULIO DE 2026
+           OPTIMIZACIÓN: 29 DE JULIO DE 2026
            Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
            ============================================================ */
 
@@ -82,39 +82,39 @@
 
         .data-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
             max-width: 1400px;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
 
         .data {
-            font-size: clamp(0.8rem, 1.2vw, 1.2rem);
-            padding: 12px 10px;
+            font-size: clamp(0.7rem, 1vw, 1rem);
+            padding: 10px 8px;
             background-color: rgba(0, 0, 0, 0.55);
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
             text-align: center;
             word-break: break-word;
-            line-height: 1.4;
+            line-height: 1.3;
         }
 
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 12px;
             max-width: 1400px;
             margin: 0 auto;
         }
 
         .chart-wrapper {
             background: rgba(255, 255, 255, 0.08);
-            border-radius: 12px;
-            padding: 10px;
+            border-radius: 10px;
+            padding: 8px;
             border: 2px solid rgba(255, 255, 255, 0.2);
             position: relative;
             cursor: pointer;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
 
         .chart-wrapper:hover {
@@ -126,8 +126,8 @@
         .chart-wrapper canvas {
             width: 100% !important;
             height: auto !important;
-            max-height: 220px;
-            border-radius: 8px;
+            max-height: 180px;
+            border-radius: 6px;
             background-color: #FFFFFF;
             display: block;
         }
@@ -135,23 +135,23 @@
         .chart-label {
             color: #FFFFFF;
             text-align: center;
-            font-size: 0.85rem;
-            padding: 4px 0;
+            font-size: 0.75rem;
+            padding: 3px 0;
             font-weight: bold;
             background: rgba(0, 0, 0, 0.5);
-            border-radius: 6px 6px 0 0;
-            margin-bottom: 4px;
+            border-radius: 5px 5px 0 0;
+            margin-bottom: 3px;
         }
 
         .chart-wrapper .expand-hint {
             position: absolute;
-            top: 8px;
-            right: 12px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.5);
+            top: 6px;
+            right: 10px;
+            font-size: 0.6rem;
+            color: rgba(255, 255, 255, 0.4);
             background: rgba(0, 0, 0, 0.5);
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 2px 6px;
+            border-radius: 8px;
             pointer-events: none;
             transition: opacity 0.3s;
         }
@@ -172,7 +172,7 @@
             z-index: 9999;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 15px;
             backdrop-filter: blur(5px);
         }
 
@@ -182,11 +182,11 @@
 
         .modal-content {
             background: #1a1a2e;
-            border-radius: 16px;
-            padding: 20px;
+            border-radius: 14px;
+            padding: 15px;
             max-width: 95vw;
             max-height: 95vh;
-            width: 1200px;
+            width: 1100px;
             position: relative;
             border: 2px solid rgba(255, 255, 255, 0.3);
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
@@ -196,12 +196,12 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             color: #fff;
         }
 
         .modal-content .modal-header h2 {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             margin: 0;
         }
 
@@ -209,9 +209,9 @@
             background: none;
             border: none;
             color: #fff;
-            font-size: 2rem;
+            font-size: 1.8rem;
             cursor: pointer;
-            padding: 0 12px;
+            padding: 0 10px;
             transition: transform 0.2s;
             line-height: 1;
         }
@@ -224,18 +224,18 @@
         .modal-content canvas {
             width: 100% !important;
             height: auto !important;
-            max-height: 75vh;
-            border-radius: 8px;
+            max-height: 70vh;
+            border-radius: 6px;
             background: #FFFFFF;
         }
 
         /* Footer */
         .footer {
             text-align: center;
-            padding: 20px 10px;
-            margin-top: 30px;
+            padding: 15px 10px;
+            margin-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.15);
-            font-size: 0.9rem;
+            font-size: 0.8rem;
             color: rgba(255, 255, 255, 0.7);
             background: rgba(0, 0, 0, 0.4);
             border-radius: 8px;
@@ -264,18 +264,37 @@
                 white-space: normal;
                 width: 100%;
                 justify-content: center;
+                font-size: 0.85rem;
             }
             .charts-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
             }
             .data-container {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+                gap: 5px;
+            }
+            .data {
+                font-size: 0.65rem;
+                padding: 6px 4px;
             }
             .modal-content {
-                padding: 12px;
+                padding: 10px;
             }
             .modal-content .modal-header h2 {
-                font-size: 1rem;
+                font-size: 0.9rem;
+            }
+            .chart-wrapper canvas {
+                max-height: 120px;
+            }
+            .chart-label {
+                font-size: 0.6rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -286,23 +305,28 @@
         }
 
         .chart-wrapper.combined canvas {
-            max-height: 280px;
+            max-height: 200px;
+        }
+
+        @media (max-width: 600px) {
+            .chart-wrapper.combined canvas {
+                max-height: 150px;
+            }
         }
     </style>
-    <!-- Carga ligera de Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
-    </script>
+    <!-- Carga ligera de Chart.js con defer para no bloquear renderizado -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
 
     <!-- ============================================================
-    OPTIMIZACIÓN: 21 DE JULIO DE 2026
+    OPTIMIZACIÓN: 29 DE JULIO DE 2026
     Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
     ============================================================ -->
 
     <div class="header-container">
         <div class="header-row">
-            <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy">
+            <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto">
             <h1>Observatorio de Partículas del TOA</h1>
             <div class="status" id="stationStatus">
                 <span class="status-circle" style="background-color: #FFA500;"></span>
@@ -328,7 +352,7 @@
 
     <!-- Gráficas en grid (incluye la combinada al final) -->
     <div class="charts-grid" id="chartsGrid">
-        <!-- Las 11 gráficas individuales + la combinada se generan con JS -->
+        <!-- Las gráficas se generan con JS -->
     </div>
 
     <!-- Modal para gráfica ampliada -->
@@ -352,26 +376,28 @@
             'use strict';
 
             // ============================================================
-            // OPTIMIZACIÓN: 21 DE JULIO DE 2026
+            // OPTIMIZACIÓN: 29 DE JULIO DE 2026
             // Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
             // ============================================================
 
-            // Configuración de ThingSpeak
+            // --- CONFIGURACIÓN ---
             const CHANNEL1 = 2439912;
             const KEY1 = 'BCX6UVTLQZ7VMK4F';
             const CHANNEL2 = 2972050;
             const KEY2 = '8LMMRSTHHX26Z4MI';
 
+            // Reducir el rango de fechas para menos datos (últimos 3 días en lugar de 7)
             const now = new Date();
-            const sevenDaysAgo = new Date(now);
-            sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-            const startStr = sevenDaysAgo.toISOString().replace('T', '%20').slice(0, 19);
+            const threeDaysAgo = new Date(now);
+            threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+            const startStr = threeDaysAgo.toISOString().replace('T', '%20').slice(0, 19);
             const endStr = now.toISOString().replace('T', '%20').slice(0, 19);
 
+            // Limitar resultados a 2000 para reducir carga
             const URL1 =
-                `https://api.thingspeak.com/channels/${CHANNEL1}/feeds.json?api_key=${KEY1}&start=${startStr}&end=${endStr}&results=8000`;
+                `https://api.thingspeak.com/channels/${CHANNEL1}/feeds.json?api_key=${KEY1}&start=${startStr}&end=${endStr}&results=2000`;
             const URL2 =
-                `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&start=${startStr}&end=${endStr}&results=8000`;
+                `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&start=${startStr}&end=${endStr}&results=2000`;
 
             // Definición de gráficas (sin sísmicos)
             const CHART_CONFIGS = [{
@@ -459,8 +485,10 @@
 
             const chartInstances = {};
             let combinedChartInstance = null;
+            let updateTimeout = null;
+            let isUpdating = false;
 
-            // Función para crear elementos gráficos en el grid
+            // --- FUNCIÓN PARA CREAR GRÁFICAS EN EL GRID ---
             function createChartWrappers() {
                 const grid = document.getElementById('chartsGrid');
                 grid.innerHTML = '';
@@ -478,13 +506,13 @@
 
                     const canvas = document.createElement('canvas');
                     canvas.id = `chart-${cfg.id}`;
-                    canvas.width = 400;
-                    canvas.height = 200;
+                    canvas.width = 300;
+                    canvas.height = 150;
                     wrapper.appendChild(canvas);
 
                     const hint = document.createElement('span');
                     hint.className = 'expand-hint';
-                    hint.textContent = '🔍 Click para ampliar';
+                    hint.textContent = '🔍 Click';
                     wrapper.appendChild(hint);
 
                     wrapper.addEventListener('click', function(e) {
@@ -495,36 +523,36 @@
                     grid.appendChild(wrapper);
                 });
 
-                // --- Gráfica combinada (todas en una) ---
+                // Gráfica combinada
                 const combinedWrapper = document.createElement('div');
                 combinedWrapper.className = 'chart-wrapper combined';
                 combinedWrapper.dataset.chartId = 'combined';
 
                 const combinedLabel = document.createElement('div');
                 combinedLabel.className = 'chart-label';
-                combinedLabel.textContent = '📊 Todas las variables (escala común)';
+                combinedLabel.textContent = '📊 Todas las variables';
                 combinedWrapper.appendChild(combinedLabel);
 
                 const combinedCanvas = document.createElement('canvas');
                 combinedCanvas.id = 'chart-combined';
-                combinedCanvas.width = 800;
-                combinedCanvas.height = 280;
+                combinedCanvas.width = 600;
+                combinedCanvas.height = 200;
                 combinedWrapper.appendChild(combinedCanvas);
 
                 const hintCombined = document.createElement('span');
                 hintCombined.className = 'expand-hint';
-                hintCombined.textContent = '🔍 Click para ampliar';
+                hintCombined.textContent = '🔍 Click';
                 combinedWrapper.appendChild(hintCombined);
 
                 combinedWrapper.addEventListener('click', function(e) {
                     if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
-                    openModal('combined', '📊 Todas las variables (escala común)');
+                    openModal('combined', '📊 Todas las variables');
                 });
 
                 grid.appendChild(combinedWrapper);
             }
 
-            // --- Funciones del Modal ---
+            // --- FUNCIONES DEL MODAL ---
             function openModal(chartId, label) {
                 const modal = document.getElementById('chartModal');
                 const modalCanvas = document.getElementById('modalCanvas');
@@ -546,56 +574,61 @@
                     modalCanvas._chart.destroy();
                 }
 
-                const newChart = new Chart(ctx, {
-                    type: 'line',
-                    data: JSON.parse(JSON.stringify(originalChart.data)),
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: true,
-                        plugins: {
-                            legend: {
-                                display: true,
-                                labels: {
-                                    color: '#fff',
-                                    font: { size: 14 }
+                try {
+                    const newChart = new Chart(ctx, {
+                        type: 'line',
+                        data: JSON.parse(JSON.stringify(originalChart.data)),
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            animation: { duration: 200 },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: {
+                                        color: '#fff',
+                                        font: { size: 12 }
+                                    }
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false
                                 }
                             },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false
-                            }
-                        },
-                        scales: {
-                            x: {
-                                ticks: {
-                                    color: '#ccc',
-                                    font: { size: 11 },
-                                    maxTicksLimit: 20,
-                                    maxRotation: 45
+                            scales: {
+                                x: {
+                                    ticks: {
+                                        color: '#ccc',
+                                        font: { size: 9 },
+                                        maxTicksLimit: 15,
+                                        maxRotation: 45
+                                    },
+                                    grid: { color: 'rgba(255,255,255,0.1)' }
                                 },
-                                grid: { color: 'rgba(255,255,255,0.1)' }
+                                y: {
+                                    ticks: {
+                                        color: '#ccc',
+                                        font: { size: 9 }
+                                    },
+                                    grid: { color: 'rgba(255,255,255,0.1)' },
+                                    beginAtZero: false
+                                }
                             },
-                            y: {
-                                ticks: {
-                                    color: '#ccc',
-                                    font: { size: 11 }
-                                },
-                                grid: { color: 'rgba(255,255,255,0.1)' },
-                                beginAtZero: false
-                            }
-                        },
-                        elements: {
-                            point: {
-                                radius: 2,
-                                hoverRadius: 6
+                            elements: {
+                                point: {
+                                    radius: 2,
+                                    hoverRadius: 5
+                                }
                             }
                         }
-                    }
-                });
+                    });
 
-                modalCanvas._chart = newChart;
-                modal.classList.add('active');
-                document.body.style.overflow = 'hidden';
+                    modalCanvas._chart = newChart;
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } catch (e) {
+                    console.warn('Error al crear gráfica en modal:', e);
+                }
             }
 
             function closeModal() {
@@ -609,6 +642,7 @@
                 }
             }
 
+            // Eventos del modal
             document.getElementById('modalCloseBtn').addEventListener('click', function(e) {
                 e.stopPropagation();
                 closeModal();
@@ -622,23 +656,39 @@
                 if (e.key === 'Escape') closeModal();
             });
 
-            // Función para procesar datos de ThingSpeak (permite valores cero)
-            function processFeeds(feeds, field) {
+            // --- PROCESAR DATOS DE THINGSPEAK (con muestreo para reducir puntos) ---
+            function processFeeds(feeds, field, maxPoints = 300) {
                 if (!feeds || feeds.length === 0) return { labels: [], data: [] };
-                const labels = [];
-                const data = [];
-                feeds.forEach(feed => {
+
+                const result = { labels: [], data: [] };
+                const step = Math.max(1, Math.floor(feeds.length / maxPoints));
+
+                for (let i = 0; i < feeds.length; i += step) {
+                    const feed = feeds[i];
                     const val = parseFloat(feed[field]);
-                    // Incluimos todos los valores numéricos válidos, incluyendo 0
                     if (val !== undefined && !isNaN(val)) {
-                        labels.push(new Date(feed.created_at).toLocaleString());
-                        data.push(val);
+                        result.labels.push(new Date(feed.created_at).toLocaleString());
+                        result.data.push(val);
                     }
-                });
-                return { labels, data };
+                }
+
+                // Asegurar que el último punto siempre esté incluido
+                if (feeds.length > 0) {
+                    const lastFeed = feeds[feeds.length - 1];
+                    const lastVal = parseFloat(lastFeed[field]);
+                    if (lastVal !== undefined && !isNaN(lastVal)) {
+                        const lastLabel = new Date(lastFeed.created_at).toLocaleString();
+                        if (result.labels.length === 0 || result.labels[result.labels.length - 1] !== lastLabel) {
+                            result.labels.push(lastLabel);
+                            result.data.push(lastVal);
+                        }
+                    }
+                }
+
+                return result;
             }
 
-            // Actualizar datos en vivo (sin sísmicos)
+            // --- ACTUALIZAR DATOS EN VIVO ---
             function updateLiveData(latestFeed1, latestFeed2) {
                 const map1 = {
                     realParticles: 'field1',
@@ -683,11 +733,23 @@
                     `<span class="status-circle" style="background-color: ${isActive ? '#00FF00' : '#FF0000'}"></span>Estado: ${isActive ? 'En Monitoreo Activo' : 'En Reposo'}`;
             }
 
-            // Actualizar gráficas (individuales + combinada)
+            // --- ACTUALIZAR GRÁFICAS ---
             function updateCharts() {
+                // Evitar actualizaciones concurrentes
+                if (isUpdating) return;
+                isUpdating = true;
+
+                // Limpiar timeout pendiente
+                if (updateTimeout) {
+                    clearTimeout(updateTimeout);
+                    updateTimeout = null;
+                }
+
                 Promise.all([
-                    fetch(URL1).then(r => r.ok ? r.json() : Promise.reject('Error canal 1')),
-                    fetch(URL2).then(r => r.ok ? r.json() : Promise.reject('Error canal 2'))
+                    fetch(URL1, { signal: AbortSignal.timeout(15000) })
+                    .then(r => r.ok ? r.json() : Promise.reject('Error canal 1')),
+                    fetch(URL2, { signal: AbortSignal.timeout(15000) })
+                    .then(r => r.ok ? r.json() : Promise.reject('Error canal 2'))
                 ]).then(([data1, data2]) => {
                     const feeds1 = data1.feeds || [];
                     const feeds2 = data2.feeds || [];
@@ -698,7 +760,7 @@
 
                     // Datos para la gráfica combinada
                     const combinedDatasets = [];
-                    const allLabels = [];
+                    let allLabels = [];
 
                     // Procesar cada gráfica individual
                     CHART_CONFIGS.forEach(cfg => {
@@ -709,78 +771,91 @@
                         const ctx = canvas.getContext('2d');
 
                         if (chartInstances[cfg.id]) {
+                            // Actualizar datos existentes
                             chartInstances[cfg.id].data.labels = labels;
                             chartInstances[cfg.id].data.datasets[0].data = data;
                             chartInstances[cfg.id].update('none');
                         } else {
-                            chartInstances[cfg.id] = new Chart(ctx, {
-                                type: 'line',
-                                data: {
-                                    labels: labels,
-                                    datasets: [{
-                                        label: cfg.label,
-                                        data: data,
-                                        borderColor: cfg.color,
-                                        backgroundColor: cfg.color + '33',
-                                        borderWidth: 1.5,
-                                        pointRadius: 0.8,
-                                        pointHoverRadius: 3,
-                                        fill: true,
-                                        tension: 0.2
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: true,
-                                    animation: { duration: 300 },
-                                    plugins: {
-                                        legend: { display: false },
-                                        tooltip: {
-                                            mode: 'index',
-                                            intersect: false,
-                                            callbacks: {
-                                                label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) :
-                                                    'N/A'
+                            // Crear nueva gráfica
+                            try {
+                                chartInstances[cfg.id] = new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [{
+                                            label: cfg.label,
+                                            data: data,
+                                            borderColor: cfg.color,
+                                            backgroundColor: cfg.color + '33',
+                                            borderWidth: 1.5,
+                                            pointRadius: 0.5,
+                                            pointHoverRadius: 3,
+                                            fill: true,
+                                            tension: 0.2
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: true,
+                                        animation: { duration: 200 },
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: {
+                                                mode: 'index',
+                                                intersect: false,
+                                                callbacks: {
+                                                    label: ctx => ctx.parsed.y !== null ? ctx.parsed.y
+                                                        .toFixed(4) : 'N/A'
+                                                }
                                             }
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            display: true,
-                                            ticks: { maxTicksLimit: 10, font: { size: 8 }, maxRotation: 30 },
-                                            grid: { display: false }
                                         },
-                                        y: {
-                                            display: true,
-                                            ticks: { font: { size: 8 }, callback: value => value.toFixed(2) },
-                                            grid: { color: 'rgba(0,0,0,0.08)' },
-                                            beginAtZero: false
-                                        }
-                                    },
-                                    elements: { line: { borderJoinStyle: 'round' } }
-                                }
-                            });
+                                        scales: {
+                                            x: {
+                                                display: true,
+                                                ticks: {
+                                                    maxTicksLimit: 8,
+                                                    font: { size: 7 },
+                                                    maxRotation: 30
+                                                },
+                                                grid: { display: false }
+                                            },
+                                            y: {
+                                                display: true,
+                                                ticks: {
+                                                    font: { size: 7 },
+                                                    callback: value => value.toFixed(2)
+                                                },
+                                                grid: { color: 'rgba(0,0,0,0.08)' },
+                                                beginAtZero: false
+                                            }
+                                        },
+                                        elements: { line: { borderJoinStyle: 'round' } }
+                                    }
+                                });
+                            } catch (e) {
+                                console.warn(`Error al crear gráfica ${cfg.id}:`, e);
+                            }
                         }
 
-                        // Acumular para la combinada (usamos los mismos datos)
+                        // Acumular para la combinada (solo si hay datos)
                         if (labels.length > 0 && data.length > 0) {
                             if (allLabels.length === 0) {
-                                allLabels.push(...labels);
+                                allLabels = labels.slice();
                             }
                             combinedDatasets.push({
                                 label: cfg.label,
                                 data: data,
                                 borderColor: cfg.color,
                                 backgroundColor: cfg.color + '33',
-                                borderWidth: 1.5,
-                                pointRadius: 0.5,
+                                borderWidth: 1.2,
+                                pointRadius: 0.3,
                                 fill: false,
                                 tension: 0.2
                             });
                         }
                     });
 
-                    // --- Gráfica combinada CON LEYENDA ---
+                    // --- Actualizar gráfica combinada ---
                     const combinedCanvas = document.getElementById('chart-combined');
                     if (combinedCanvas) {
                         const ctxCombined = combinedCanvas.getContext('2d');
@@ -789,80 +864,123 @@
                             combinedChartInstance.data.datasets = combinedDatasets;
                             combinedChartInstance.update('none');
                         } else {
-                            combinedChartInstance = new Chart(ctxCombined, {
-                                type: 'line',
-                                data: {
-                                    labels: allLabels,
-                                    datasets: combinedDatasets
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: true,
-                                    animation: { duration: 300 },
-                                    plugins: {
-                                        legend: {
-                                            display: true,
-                                            labels: {
-                                                color: '#fff',
-                                                font: { size: 10 },
-                                                boxWidth: 14,
-                                                padding: 10
+                            try {
+                                combinedChartInstance = new Chart(ctxCombined, {
+                                    type: 'line',
+                                    data: {
+                                        labels: allLabels,
+                                        datasets: combinedDatasets
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: true,
+                                        animation: { duration: 200 },
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                labels: {
+                                                    color: '#fff',
+                                                    font: { size: 8 },
+                                                    boxWidth: 12,
+                                                    padding: 8
+                                                }
+                                            },
+                                            tooltip: {
+                                                mode: 'index',
+                                                intersect: false,
+                                                callbacks: {
+                                                    label: ctx => ctx.parsed.y !== null ?
+                                                        `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}` :
+                                                        'N/A'
+                                                }
                                             }
                                         },
-                                        tooltip: {
-                                            mode: 'index',
-                                            intersect: false,
-                                            callbacks: {
-                                                label: ctx => ctx.parsed.y !== null ? `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}` :
-                                                    'N/A'
+                                        scales: {
+                                            x: {
+                                                ticks: {
+                                                    color: '#ccc',
+                                                    font: { size: 7 },
+                                                    maxTicksLimit: 12,
+                                                    maxRotation: 30
+                                                },
+                                                grid: { color: 'rgba(255,255,255,0.1)' }
+                                            },
+                                            y: {
+                                                ticks: {
+                                                    color: '#ccc',
+                                                    font: { size: 7 },
+                                                    callback: value => value.toFixed(2)
+                                                },
+                                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                                beginAtZero: false
                                             }
-                                        }
-                                    },
-                                    scales: {
-                                        x: {
-                                            ticks: {
-                                                color: '#ccc',
-                                                font: { size: 8 },
-                                                maxTicksLimit: 15,
-                                                maxRotation: 30
-                                            },
-                                            grid: { color: 'rgba(255,255,255,0.1)' }
                                         },
-                                        y: {
-                                            ticks: {
-                                                color: '#ccc',
-                                                font: { size: 8 },
-                                                callback: value => value.toFixed(2)
-                                            },
-                                            grid: { color: 'rgba(255,255,255,0.1)' },
-                                            beginAtZero: false
+                                        elements: {
+                                            point: { radius: 0.3, hoverRadius: 3 },
+                                            line: { borderJoinStyle: 'round' }
                                         }
-                                    },
-                                    elements: {
-                                        point: { radius: 0.5, hoverRadius: 4 },
-                                        line: { borderJoinStyle: 'round' }
                                     }
-                                }
-                            });
+                                });
+                            } catch (e) {
+                                console.warn('Error al crear gráfica combinada:', e);
+                            }
                         }
                     }
+
+                    isUpdating = false;
                 }).catch(error => {
-                    console.error('Error al cargar datos:', error);
+                    console.warn('Error al cargar datos:', error);
                     document.getElementById('stationStatus').innerHTML =
                         `<span class="status-circle" style="background-color: #FF0000"></span>Estado: Error de conexión`;
+                    isUpdating = false;
+
+                    // Reintentar después de 30 segundos
+                    if (updateTimeout) {
+                        clearTimeout(updateTimeout);
+                    }
+                    updateTimeout = setTimeout(updateCharts, 30000);
                 });
             }
 
-            // Inicialización
+            // --- INICIALIZACIÓN ---
             function init() {
                 createChartWrappers();
-                updateCharts();
-                setInterval(updateCharts, 15000);
+                // Esperar a que Chart.js esté cargado
+                if (typeof Chart !== 'undefined') {
+                    updateCharts();
+                } else {
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Verificar si Chart ya está disponible
+                        if (typeof Chart !== 'undefined') {
+                            updateCharts();
+                        } else {
+                            // Esperar a que Chart.js se cargue
+                            const checkChart = setInterval(() => {
+                                if (typeof Chart !== 'undefined') {
+                                    clearInterval(checkChart);
+                                    updateCharts();
+                                }
+                            }, 200);
+                        }
+                    });
+                }
+
+                // Actualizar cada 30 segundos (más espaciado)
+                setInterval(updateCharts, 30000);
+
+                // Actualizar al volver a la pestaña
                 document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden) updateCharts();
+                    if (!document.hidden) {
+                        if (updateTimeout) {
+                            clearTimeout(updateTimeout);
+                            updateTimeout = null;
+                        }
+                        updateCharts();
+                    }
                 });
             }
 
+            // Iniciar cuando el DOM esté listo
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', init);
             } else {
