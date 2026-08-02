@@ -2,40 +2,66 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         /* ============================================================
-           OPTIMIZACIÓN: 29 DE JULIO DE 2026
+           OPTIMIZACIÓN PREMIUM - 29 DE JULIO DE 2026
            Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
            ============================================================ */
 
+        /* Reset optimizado */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
+        /* Variables CSS para temas y rendimiento */
+        :root {
+            --bg-overlay: rgba(0, 0, 0, 0.75);
+            --bg-card: rgba(0, 0, 0, 0.55);
+            --border-glow: rgba(255, 255, 255, 0.2);
+            --text-primary: #FFFFFF;
+            --text-secondary: rgba(255, 255, 255, 0.85);
+            --radius: 10px;
+            --transition-fast: 0.15s ease;
+            --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         body {
-            font-family: Georgia, "Times New Roman", serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background-image: url('fondo.png');
             background-repeat: repeat;
             background-size: auto;
-            color: #FFFFFF;
+            color: var(--text-primary);
             min-height: 100vh;
-            padding: 10px;
-            padding-bottom: 60px;
+            padding: 8px;
+            padding-bottom: 50px;
             position: relative;
+            background-color: #0a0a12;
+            /* Fallback */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
+        /* ===== HEADER ===== */
         .header-container {
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            padding: 15px;
-            background-color: rgba(0, 0, 0, 0.75);
-            border-radius: 12px;
-            margin-bottom: 15px;
+            padding: 12px 16px;
+            background-color: var(--bg-overlay);
+            border-radius: var(--radius);
+            margin-bottom: 12px;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .header-row {
@@ -43,124 +69,144 @@
             align-items: center;
             flex-wrap: wrap;
             width: 100%;
-            gap: 15px;
+            gap: 12px;
         }
 
         .logo {
-            max-width: 130px;
+            max-width: 110px;
             height: auto;
-            border-radius: 8px;
+            border-radius: 6px;
+            flex-shrink: 0;
+            image-rendering: auto;
         }
 
         h1 {
-            font-family: "Arial Black", Arial, sans-serif;
-            font-weight: bold;
-            font-size: clamp(1.2rem, 4vw, 2.5rem);
-            color: #FFFFFF;
+            font-family: 'Arial Black', system-ui, Arial, sans-serif;
+            font-weight: 900;
+            font-size: clamp(1rem, 3.5vw, 2.2rem);
+            color: var(--text-primary);
             flex: 1;
-            min-width: 200px;
+            min-width: 160px;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         .status {
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 1rem;
+            background-color: rgba(0, 0, 0, 0.75);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: clamp(0.7rem, 1.2vw, 0.95rem);
             display: flex;
             align-items: center;
             gap: 8px;
             white-space: nowrap;
-        }
-
-        .status-circle {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            display: inline-block;
+            border: 1px solid rgba(255, 255, 255, 0.1);
             flex-shrink: 0;
         }
 
+        .status-circle {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+            transition: background-color 0.3s ease;
+        }
+
+        /* ===== DATOS EN VIVO ===== */
         .data-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 8px;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 6px;
             max-width: 1400px;
-            margin: 0 auto 15px;
+            margin: 0 auto 12px;
         }
 
         .data {
-            font-size: clamp(0.7rem, 1vw, 1rem);
-            padding: 10px 8px;
-            background-color: rgba(0, 0, 0, 0.55);
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+            font-size: clamp(0.6rem, 0.9vw, 0.9rem);
+            padding: 8px 6px;
+            background-color: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
             text-align: center;
             word-break: break-word;
             line-height: 1.3;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: background-color 0.2s;
         }
 
+        .data:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        /* ===== GRÁFICAS ===== */
         .charts-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px;
             max-width: 1400px;
             margin: 0 auto;
         }
 
         .chart-wrapper {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
-            padding: 8px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: var(--radius);
+            padding: 6px;
+            border: 1.5px solid var(--border-glow);
             position: relative;
             cursor: pointer;
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+            touch-action: manipulation;
+        }
+
+        .chart-wrapper:active {
+            transform: scale(0.98);
         }
 
         .chart-wrapper:hover {
             transform: scale(1.01);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
             border-color: rgba(255, 255, 255, 0.5);
         }
 
         .chart-wrapper canvas {
             width: 100% !important;
             height: auto !important;
-            max-height: 180px;
-            border-radius: 6px;
+            max-height: 160px;
+            border-radius: 4px;
             background-color: #FFFFFF;
             display: block;
+            image-rendering: auto;
         }
 
         .chart-label {
-            color: #FFFFFF;
+            color: var(--text-primary);
             text-align: center;
-            font-size: 0.75rem;
-            padding: 3px 0;
-            font-weight: bold;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 5px 5px 0 0;
-            margin-bottom: 3px;
+            font-size: clamp(0.6rem, 0.8vw, 0.7rem);
+            padding: 3px 0 2px;
+            font-weight: 700;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 4px 4px 0 0;
+            margin-bottom: 2px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            font-size: 0.65rem;
         }
 
         .chart-wrapper .expand-hint {
             position: absolute;
-            top: 6px;
-            right: 10px;
-            font-size: 0.6rem;
-            color: rgba(255, 255, 255, 0.4);
-            background: rgba(0, 0, 0, 0.5);
-            padding: 2px 6px;
-            border-radius: 8px;
+            top: 4px;
+            right: 8px;
+            font-size: 0.55rem;
+            color: rgba(255, 255, 255, 0.35);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 1px 6px;
+            border-radius: 10px;
             pointer-events: none;
-            transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
         }
 
-        .chart-wrapper:hover .expand-hint {
-            opacity: 1;
-        }
-
-        /* Modal para gráfica ampliada */
+        /* ===== MODAL ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -168,12 +214,13 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.92);
+            background: rgba(0, 0, 0, 0.94);
             z-index: 9999;
             justify-content: center;
             align-items: center;
-            padding: 15px;
-            backdrop-filter: blur(5px);
+            padding: 12px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
         }
 
         .modal-overlay.active {
@@ -183,26 +230,39 @@
         .modal-content {
             background: #1a1a2e;
             border-radius: 14px;
-            padding: 15px;
+            padding: 12px;
             max-width: 95vw;
             max-height: 95vh;
-            width: 1100px;
+            width: 1000px;
             position: relative;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+            animation: modalIn 0.2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
 
         .modal-content .modal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             color: #fff;
         }
 
         .modal-content .modal-header h2 {
-            font-size: 1.1rem;
+            font-size: clamp(0.9rem, 1.8vw, 1.2rem);
             margin: 0;
+            font-weight: 700;
         }
 
         .modal-content .modal-close {
@@ -214,9 +274,11 @@
             padding: 0 10px;
             transition: transform 0.2s;
             line-height: 1;
+            touch-action: manipulation;
         }
 
-        .modal-content .modal-close:hover {
+        .modal-content .modal-close:hover,
+        .modal-content .modal-close:active {
             transform: rotate(90deg);
             color: #ff6b6b;
         }
@@ -229,138 +291,238 @@
             background: #FFFFFF;
         }
 
-        /* Footer */
+        /* ===== FOOTER ===== */
         .footer {
             text-align: center;
-            padding: 15px 10px;
-            margin-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.15);
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.7);
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 8px;
+            padding: 12px 10px;
+            margin-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: clamp(0.6rem, 0.7vw, 0.75rem);
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius);
             max-width: 1400px;
             margin-left: auto;
             margin-right: auto;
+            backdrop-filter: blur(2px);
         }
 
         .footer strong {
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.85);
         }
 
-        /* Scroll suave */
-        html {
-            scroll-behavior: smooth;
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .header-row {
-                flex-direction: column;
-                align-items: center;
-                text-align: center;
-            }
-            .status {
-                white-space: normal;
-                width: 100%;
-                justify-content: center;
-                font-size: 0.85rem;
-            }
-            .charts-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
-            }
-            .data-container {
-                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-                gap: 5px;
-            }
-            .data {
-                font-size: 0.65rem;
-                padding: 6px 4px;
-            }
-            .modal-content {
-                padding: 10px;
-            }
-            .modal-content .modal-header h2 {
-                font-size: 0.9rem;
-            }
-            .chart-wrapper canvas {
-                max-height: 120px;
-            }
-            .chart-label {
-                font-size: 0.6rem;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* Estilo especial para la gráfica combinada */
+        /* ===== GRÁFICA COMBINADA ===== */
         .chart-wrapper.combined {
             grid-column: 1 / -1;
             border-color: #FFD700;
         }
 
         .chart-wrapper.combined canvas {
-            max-height: 200px;
+            max-height: 180px;
         }
 
-        @media (max-width: 600px) {
+        /* ===== RESPONSIVE AVANZADO ===== */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+                padding-bottom: 40px;
+            }
+
+            .header-row {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 8px;
+            }
+
+            .logo {
+                max-width: 85px;
+            }
+
+            h1 {
+                font-size: clamp(0.9rem, 4vw, 1.4rem);
+                min-width: auto;
+            }
+
+            .status {
+                white-space: normal;
+                width: 100%;
+                justify-content: center;
+                font-size: 0.75rem;
+                padding: 5px 12px;
+            }
+
+            .data-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 4px;
+            }
+
+            .data {
+                font-size: 0.55rem;
+                padding: 5px 3px;
+                border-radius: 6px;
+            }
+
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .chart-wrapper canvas {
+                max-height: 100px;
+            }
+
+            .chart-label {
+                font-size: 0.5rem;
+                padding: 2px 0;
+            }
+
+            .chart-wrapper .expand-hint {
+                font-size: 0.45rem;
+                top: 3px;
+                right: 5px;
+                padding: 1px 4px;
+            }
+
             .chart-wrapper.combined canvas {
-                max-height: 150px;
+                max-height: 120px;
+            }
+
+            .modal-content {
+                padding: 8px;
+            }
+
+            .modal-content .modal-header h2 {
+                font-size: 0.8rem;
             }
         }
+
+        @media (max-width: 480px) {
+            .data-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 3px;
+            }
+
+            .data {
+                font-size: 0.5rem;
+                padding: 4px 2px;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 5px;
+            }
+
+            .chart-wrapper canvas {
+                max-height: 80px;
+            }
+
+            .chart-label {
+                font-size: 0.45rem;
+            }
+
+            .chart-wrapper.combined canvas {
+                max-height: 100px;
+            }
+
+            .footer {
+                font-size: 0.5rem;
+                padding: 8px 6px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .data-container {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+
+            .chart-wrapper.combined {
+                grid-column: 1 / -1;
+            }
+
+            .chart-wrapper canvas {
+                max-height: 180px;
+            }
+        }
+
+        /* Soporte para preferencia de movimiento reducido */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Modo oscuro para canvas en gráficas */
+        .chart-wrapper canvas {
+            background-color: #fafafa;
+        }
+
+        /* Mejora de accesibilidad táctil */
+        .chart-wrapper,
+        .modal-close,
+        .data {
+            touch-action: manipulation;
+        }
     </style>
-    <!-- Carga ligera de Chart.js con defer para no bloquear renderizado -->
+    <!-- Chart.js optimizado con CDN y defer -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
 
     <!-- ============================================================
-    OPTIMIZACIÓN: 29 DE JULIO DE 2026
+    OPTIMIZACIÓN PREMIUM - 29 DE JULIO DE 2026
     Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
     ============================================================ -->
 
     <div class="header-container">
         <div class="header-row">
-            <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto">
+            <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy" width="110" height="auto" decoding="async">
             <h1>Observatorio de Partículas del TOA</h1>
             <div class="status" id="stationStatus">
                 <span class="status-circle" style="background-color: #FFA500;"></span>
-                Estado: Cargando...
+                <span id="statusText">Cargando...</span>
             </div>
         </div>
     </div>
 
-    <!-- Datos en tiempo real (sin sísmicos) -->
+    <!-- Datos en tiempo real -->
     <div class="data-container" id="dataContainer">
         <div class="data" id="realParticles">Partículas Reales: ⏳</div>
-        <div class="data" id="imaginaryParticles">Partículas Imaginarias: ⏳</div>
+        <div class="data" id="imaginaryParticles">Partículas Imag.: ⏳</div>
         <div class="data" id="molecularPhysics">Física Molecular: ⏳</div>
-        <div class="data" id="x">Coordenada x: ⏳</div>
-        <div class="data" id="y">Coordenada y: ⏳</div>
-        <div class="data" id="z">Coordenada z: ⏳</div>
+        <div class="data" id="x">Coord. x: ⏳</div>
+        <div class="data" id="y">Coord. y: ⏳</div>
+        <div class="data" id="z">Coord. z: ⏳</div>
         <div class="data" id="angle">Ángulo: ⏳</div>
-        <div class="data" id="accelX">Aceleración en X: ⏳</div>
-        <div class="data" id="accelY">Aceleración en Y: ⏳</div>
-        <div class="data" id="accelZ">Aceleración en Z: ⏳</div>
-        <div class="data" id="accelResult">Aceleración Resultante: ⏳</div>
+        <div class="data" id="accelX">Acel. X: ⏳</div>
+        <div class="data" id="accelY">Acel. Y: ⏳</div>
+        <div class="data" id="accelZ">Acel. Z: ⏳</div>
+        <div class="data" id="accelResult">Acel. Result.: ⏳</div>
     </div>
 
-    <!-- Gráficas en grid (incluye la combinada al final) -->
-    <div class="charts-grid" id="chartsGrid">
-        <!-- Las gráficas se generan con JS -->
-    </div>
+    <!-- Gráficas -->
+    <div class="charts-grid" id="chartsGrid"></div>
 
-    <!-- Modal para gráfica ampliada -->
+    <!-- Modal -->
     <div class="modal-overlay" id="chartModal">
         <div class="modal-content">
             <div class="modal-header">
                 <h2 id="modalTitle">Gráfica</h2>
-                <button class="modal-close" id="modalCloseBtn">&times;</button>
+                <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">&times;</button>
             </div>
             <canvas id="modalCanvas"></canvas>
         </div>
@@ -376,30 +538,31 @@
             'use strict';
 
             // ============================================================
-            // OPTIMIZACIÓN: 29 DE JULIO DE 2026
-            // Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
+            // OPTIMIZACIÓN PREMIUM - 29 DE JULIO DE 2026
             // ============================================================
 
-            // --- CONFIGURACIÓN ---
+            // --- CONFIGURACIÓN IoT ---
             const CHANNEL1 = 2439912;
             const KEY1 = 'BCX6UVTLQZ7VMK4F';
             const CHANNEL2 = 2972050;
             const KEY2 = '8LMMRSTHHX26Z4MI';
 
-            // Reducir el rango de fechas para menos datos (últimos 3 días en lugar de 7)
+            // MÁXIMA CAPTURA DE DATOS: 8000 registros (límite máximo de ThingSpeak)
+            // Usamos un rango de 7 días para capturar el máximo histórico posible
             const now = new Date();
-            const threeDaysAgo = new Date(now);
-            threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
-            const startStr = threeDaysAgo.toISOString().replace('T', '%20').slice(0, 19);
+            const startDate = new Date(now);
+            startDate.setDate(startDate.getDate() - 7);
+
+            const startStr = startDate.toISOString().replace('T', '%20').slice(0, 19);
             const endStr = now.toISOString().replace('T', '%20').slice(0, 19);
 
-            // Limitar resultados a 2000 para reducir carga
+            // Solicitar el máximo de registros (8000) y usar el campo 'results' con el máximo permitido
             const URL1 =
-                `https://api.thingspeak.com/channels/${CHANNEL1}/feeds.json?api_key=${KEY1}&start=${startStr}&end=${endStr}&results=2000`;
+                `https://api.thingspeak.com/channels/${CHANNEL1}/feeds.json?api_key=${KEY1}&start=${startStr}&end=${endStr}&results=8000`;
             const URL2 =
-                `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&start=${startStr}&end=${endStr}&results=2000`;
+                `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&start=${startStr}&end=${endStr}&results=8000`;
 
-            // Definición de gráficas (sin sísmicos)
+            // --- CONFIGURACIÓN DE GRÁFICAS ---
             const CHART_CONFIGS = [{
                 id: 'realParticles',
                 label: 'Partículas Reales',
@@ -408,7 +571,7 @@
                 channel: 1
             }, {
                 id: 'imaginaryParticles',
-                label: 'Partículas Imaginarias',
+                label: 'Partículas Imag.',
                 field: 'field2',
                 color: '#FF6384',
                 channel: 1
@@ -420,19 +583,19 @@
                 channel: 1
             }, {
                 id: 'xCoord',
-                label: 'Coordenada x',
+                label: 'Coord. x',
                 field: 'field4',
                 color: '#FF9F40',
                 channel: 1
             }, {
                 id: 'yCoord',
-                label: 'Coordenada y',
+                label: 'Coord. y',
                 field: 'field5',
                 color: '#9966FF',
                 channel: 1
             }, {
                 id: 'zCoord',
-                label: 'Coordenada z',
+                label: 'Coord. z',
                 field: 'field6',
                 color: '#FFCD56',
                 channel: 1
@@ -444,31 +607,30 @@
                 channel: 1
             }, {
                 id: 'accelX',
-                label: 'Aceleración en X',
+                label: 'Acel. X',
                 field: 'field1',
                 color: '#FF5733',
                 channel: 2
             }, {
                 id: 'accelY',
-                label: 'Aceleración en Y',
+                label: 'Acel. Y',
                 field: 'field2',
                 color: '#33FF57',
                 channel: 2
             }, {
                 id: 'accelZ',
-                label: 'Aceleración en Z',
+                label: 'Acel. Z',
                 field: 'field3',
                 color: '#5733FF',
                 channel: 2
             }, {
                 id: 'accelResult',
-                label: 'Aceleración Resultante (m/s²)',
+                label: 'Acel. Result.',
                 field: 'field4',
                 color: '#FF33A1',
                 channel: 2
             }];
 
-            // Mapeo de IDs a elementos del DOM para datos en vivo
             const DATA_ELEMENTS = {
                 realParticles: 'realParticles',
                 imaginaryParticles: 'imaginaryParticles',
@@ -485,15 +647,60 @@
 
             const chartInstances = {};
             let combinedChartInstance = null;
-            let updateTimeout = null;
             let isUpdating = false;
+            let updateTimeoutId = null;
+            let retryTimeoutId = null;
 
-            // --- FUNCIÓN PARA CREAR GRÁFICAS EN EL GRID ---
+            // --- DECODIFICADOR DE DATOS CON MUESTREO INTELIGENTE ---
+            function processFeeds(feeds, field, maxPoints = 500) {
+                if (!feeds || feeds.length === 0) return { labels: [], data: [] };
+
+                const result = { labels: [], data: [] };
+                const total = feeds.length;
+
+                // Si hay pocos datos, mostrar todos
+                if (total <= maxPoints) {
+                    for (let i = 0; i < total; i++) {
+                        const feed = feeds[i];
+                        const val = parseFloat(feed[field]);
+                        if (val !== undefined && !isNaN(val)) {
+                            result.labels.push(new Date(feed.created_at).toLocaleString());
+                            result.data.push(val);
+                        }
+                    }
+                    return result;
+                }
+
+                // Muestreo adaptativo: mantener picos y tendencias
+                const step = Math.floor(total / maxPoints);
+                for (let i = 0; i < total; i += step) {
+                    const feed = feeds[i];
+                    const val = parseFloat(feed[field]);
+                    if (val !== undefined && !isNaN(val)) {
+                        result.labels.push(new Date(feed.created_at).toLocaleString());
+                        result.data.push(val);
+                    }
+                }
+
+                // Siempre incluir el último dato
+                const last = feeds[total - 1];
+                const lastVal = parseFloat(last[field]);
+                if (lastVal !== undefined && !isNaN(lastVal)) {
+                    const lastLabel = new Date(last.created_at).toLocaleString();
+                    if (result.labels.length === 0 || result.labels[result.labels.length - 1] !== lastLabel) {
+                        result.labels.push(lastLabel);
+                        result.data.push(lastVal);
+                    }
+                }
+
+                return result;
+            }
+
+            // --- CREAR ELEMENTOS DE GRÁFICAS EN EL GRID ---
             function createChartWrappers() {
                 const grid = document.getElementById('chartsGrid');
                 grid.innerHTML = '';
 
-                // Gráficas individuales
                 CHART_CONFIGS.forEach(cfg => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'chart-wrapper';
@@ -508,17 +715,18 @@
                     canvas.id = `chart-${cfg.id}`;
                     canvas.width = 300;
                     canvas.height = 150;
+                    canvas.setAttribute('loading', 'lazy');
                     wrapper.appendChild(canvas);
 
                     const hint = document.createElement('span');
                     hint.className = 'expand-hint';
-                    hint.textContent = '🔍 Click';
+                    hint.textContent = '🔍';
                     wrapper.appendChild(hint);
 
                     wrapper.addEventListener('click', function(e) {
                         if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
                         openModal(cfg.id, cfg.label);
-                    });
+                    }, { passive: true });
 
                     grid.appendChild(wrapper);
                 });
@@ -537,22 +745,23 @@
                 combinedCanvas.id = 'chart-combined';
                 combinedCanvas.width = 600;
                 combinedCanvas.height = 200;
+                combinedCanvas.setAttribute('loading', 'lazy');
                 combinedWrapper.appendChild(combinedCanvas);
 
                 const hintCombined = document.createElement('span');
                 hintCombined.className = 'expand-hint';
-                hintCombined.textContent = '🔍 Click';
+                hintCombined.textContent = '🔍';
                 combinedWrapper.appendChild(hintCombined);
 
                 combinedWrapper.addEventListener('click', function(e) {
                     if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
                     openModal('combined', '📊 Todas las variables');
-                });
+                }, { passive: true });
 
                 grid.appendChild(combinedWrapper);
             }
 
-            // --- FUNCIONES DEL MODAL ---
+            // --- MODAL ---
             function openModal(chartId, label) {
                 const modal = document.getElementById('chartModal');
                 const modalCanvas = document.getElementById('modalCanvas');
@@ -560,18 +769,13 @@
 
                 modalTitle.textContent = label;
 
-                let originalChart = null;
-                if (chartId === 'combined') {
-                    originalChart = combinedChartInstance;
-                } else {
-                    originalChart = chartInstances[chartId];
-                }
-
+                const originalChart = chartId === 'combined' ? combinedChartInstance : chartInstances[chartId];
                 if (!originalChart) return;
 
                 const ctx = modalCanvas.getContext('2d');
                 if (modalCanvas._chart) {
                     modalCanvas._chart.destroy();
+                    modalCanvas._chart = null;
                 }
 
                 try {
@@ -587,12 +791,18 @@
                                     display: true,
                                     labels: {
                                         color: '#fff',
-                                        font: { size: 12 }
+                                        font: { size: 11 },
+                                        boxWidth: 14,
+                                        padding: 10
                                     }
                                 },
                                 tooltip: {
                                     mode: 'index',
-                                    intersect: false
+                                    intersect: false,
+                                    callbacks: {
+                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) :
+                                            'N/A'
+                                    }
                                 }
                             },
                             scales: {
@@ -600,24 +810,24 @@
                                     ticks: {
                                         color: '#ccc',
                                         font: { size: 9 },
-                                        maxTicksLimit: 15,
+                                        maxTicksLimit: 20,
                                         maxRotation: 45
                                     },
-                                    grid: { color: 'rgba(255,255,255,0.1)' }
+                                    grid: { color: 'rgba(255,255,255,0.08)' }
                                 },
                                 y: {
                                     ticks: {
                                         color: '#ccc',
                                         font: { size: 9 }
                                     },
-                                    grid: { color: 'rgba(255,255,255,0.1)' },
+                                    grid: { color: 'rgba(255,255,255,0.08)' },
                                     beginAtZero: false
                                 }
                             },
                             elements: {
                                 point: {
                                     radius: 2,
-                                    hoverRadius: 5
+                                    hoverRadius: 6
                                 }
                             }
                         }
@@ -627,7 +837,7 @@
                     modal.classList.add('active');
                     document.body.style.overflow = 'hidden';
                 } catch (e) {
-                    console.warn('Error al crear gráfica en modal:', e);
+                    console.warn('Error en modal:', e);
                 }
             }
 
@@ -656,38 +866,6 @@
                 if (e.key === 'Escape') closeModal();
             });
 
-            // --- PROCESAR DATOS DE THINGSPEAK (con muestreo para reducir puntos) ---
-            function processFeeds(feeds, field, maxPoints = 300) {
-                if (!feeds || feeds.length === 0) return { labels: [], data: [] };
-
-                const result = { labels: [], data: [] };
-                const step = Math.max(1, Math.floor(feeds.length / maxPoints));
-
-                for (let i = 0; i < feeds.length; i += step) {
-                    const feed = feeds[i];
-                    const val = parseFloat(feed[field]);
-                    if (val !== undefined && !isNaN(val)) {
-                        result.labels.push(new Date(feed.created_at).toLocaleString());
-                        result.data.push(val);
-                    }
-                }
-
-                // Asegurar que el último punto siempre esté incluido
-                if (feeds.length > 0) {
-                    const lastFeed = feeds[feeds.length - 1];
-                    const lastVal = parseFloat(lastFeed[field]);
-                    if (lastVal !== undefined && !isNaN(lastVal)) {
-                        const lastLabel = new Date(lastFeed.created_at).toLocaleString();
-                        if (result.labels.length === 0 || result.labels[result.labels.length - 1] !== lastLabel) {
-                            result.labels.push(lastLabel);
-                            result.data.push(lastVal);
-                        }
-                    }
-                }
-
-                return result;
-            }
-
             // --- ACTUALIZAR DATOS EN VIVO ---
             function updateLiveData(latestFeed1, latestFeed2) {
                 const map1 = {
@@ -710,8 +888,8 @@
                     const field = map1[key];
                     const el = document.getElementById(DATA_ELEMENTS[key]);
                     if (el) {
-                        const val = latestFeed1 && latestFeed1[field] !== undefined && latestFeed1[field] !== null &&
-                            latestFeed1[field] !== '' ? latestFeed1[field] : 'En Reposo';
+                        const val = latestFeed1 && latestFeed1[field] !== undefined && latestFeed1[field] !==
+                            null && latestFeed1[field] !== '' ? latestFeed1[field] : 'En Reposo';
                         el.textContent = `${el.textContent.split(':')[0]}: ${val}`;
                     }
                 });
@@ -720,37 +898,51 @@
                     const field = map2[key];
                     const el = document.getElementById(DATA_ELEMENTS[key]);
                     if (el) {
-                        const val = latestFeed2 && latestFeed2[field] !== undefined && latestFeed2[field] !== null &&
-                            latestFeed2[field] !== '' ? latestFeed2[field] : 'En Reposo';
+                        const val = latestFeed2 && latestFeed2[field] !== undefined && latestFeed2[field] !==
+                            null && latestFeed2[field] !== '' ? latestFeed2[field] : 'En Reposo';
                         el.textContent = `${el.textContent.split(':')[0]}: ${val}`;
                     }
                 });
 
-                const status = document.getElementById('stationStatus');
+                const statusCircle = document.querySelector('.status-circle');
+                const statusText = document.getElementById('statusText');
                 const isActive = latestFeed1 && latestFeed1.field1 !== undefined && latestFeed1.field1 !== null &&
                     latestFeed1.field1 !== '' && latestFeed1.field1 !== '0';
-                status.innerHTML =
-                    `<span class="status-circle" style="background-color: ${isActive ? '#00FF00' : '#FF0000'}"></span>Estado: ${isActive ? 'En Monitoreo Activo' : 'En Reposo'}`;
+
+                if (statusCircle) {
+                    statusCircle.style.backgroundColor = isActive ? '#00E676' : '#FF1744';
+                }
+                if (statusText) {
+                    statusText.textContent = isActive ? 'En Monitoreo Activo' : 'En Reposo';
+                }
             }
 
-            // --- ACTUALIZAR GRÁFICAS ---
+            // --- ACTUALIZAR GRÁFICAS CON MÁXIMA CAPTURA ---
             function updateCharts() {
-                // Evitar actualizaciones concurrentes
                 if (isUpdating) return;
                 isUpdating = true;
 
-                // Limpiar timeout pendiente
-                if (updateTimeout) {
-                    clearTimeout(updateTimeout);
-                    updateTimeout = null;
+                if (updateTimeoutId) {
+                    clearTimeout(updateTimeoutId);
+                    updateTimeoutId = null;
+                }
+                if (retryTimeoutId) {
+                    clearTimeout(retryTimeoutId);
+                    retryTimeoutId = null;
                 }
 
+                // Timeout para evitar colgar la UI
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 25000);
+
                 Promise.all([
-                    fetch(URL1, { signal: AbortSignal.timeout(15000) })
-                    .then(r => r.ok ? r.json() : Promise.reject('Error canal 1')),
-                    fetch(URL2, { signal: AbortSignal.timeout(15000) })
-                    .then(r => r.ok ? r.json() : Promise.reject('Error canal 2'))
+                    fetch(URL1, { signal: controller.signal }).then(r => r.ok ? r.json() : Promise.reject(
+                        'Error canal 1')),
+                    fetch(URL2, { signal: controller.signal }).then(r => r.ok ? r.json() : Promise.reject(
+                        'Error canal 2'))
                 ]).then(([data1, data2]) => {
+                    clearTimeout(timeoutId);
+
                     const feeds1 = data1.feeds || [];
                     const feeds2 = data2.feeds || [];
                     const latestFeed1 = feeds1.length ? feeds1[feeds1.length - 1] : null;
@@ -758,11 +950,10 @@
 
                     updateLiveData(latestFeed1, latestFeed2);
 
-                    // Datos para la gráfica combinada
                     const combinedDatasets = [];
                     let allLabels = [];
 
-                    // Procesar cada gráfica individual
+                    // Procesar cada gráfica
                     CHART_CONFIGS.forEach(cfg => {
                         const feeds = cfg.channel === 2 ? feeds2 : feeds1;
                         const { labels, data } = processFeeds(feeds, cfg.field);
@@ -771,12 +962,10 @@
                         const ctx = canvas.getContext('2d');
 
                         if (chartInstances[cfg.id]) {
-                            // Actualizar datos existentes
                             chartInstances[cfg.id].data.labels = labels;
                             chartInstances[cfg.id].data.datasets[0].data = data;
                             chartInstances[cfg.id].update('none');
                         } else {
-                            // Crear nueva gráfica
                             try {
                                 chartInstances[cfg.id] = new Chart(ctx, {
                                     type: 'line',
@@ -797,15 +986,15 @@
                                     options: {
                                         responsive: true,
                                         maintainAspectRatio: true,
-                                        animation: { duration: 200 },
+                                        animation: { duration: 150 },
                                         plugins: {
                                             legend: { display: false },
                                             tooltip: {
                                                 mode: 'index',
                                                 intersect: false,
                                                 callbacks: {
-                                                    label: ctx => ctx.parsed.y !== null ? ctx.parsed.y
-                                                        .toFixed(4) : 'N/A'
+                                                    label: ctx => ctx.parsed.y !== null ? ctx
+                                                        .parsed.y.toFixed(4) : 'N/A'
                                                 }
                                             }
                                         },
@@ -813,19 +1002,19 @@
                                             x: {
                                                 display: true,
                                                 ticks: {
-                                                    maxTicksLimit: 8,
-                                                    font: { size: 7 },
-                                                    maxRotation: 30
+                                                    maxTicksLimit: 6,
+                                                    font: { size: 6 },
+                                                    maxRotation: 25
                                                 },
                                                 grid: { display: false }
                                             },
                                             y: {
                                                 display: true,
                                                 ticks: {
-                                                    font: { size: 7 },
+                                                    font: { size: 6 },
                                                     callback: value => value.toFixed(2)
                                                 },
-                                                grid: { color: 'rgba(0,0,0,0.08)' },
+                                                grid: { color: 'rgba(0,0,0,0.06)' },
                                                 beginAtZero: false
                                             }
                                         },
@@ -833,11 +1022,11 @@
                                     }
                                 });
                             } catch (e) {
-                                console.warn(`Error al crear gráfica ${cfg.id}:`, e);
+                                console.warn('Error gráfica:', cfg.id, e);
                             }
                         }
 
-                        // Acumular para la combinada (solo si hay datos)
+                        // Acumular para combinada
                         if (labels.length > 0 && data.length > 0) {
                             if (allLabels.length === 0) {
                                 allLabels = labels.slice();
@@ -846,7 +1035,7 @@
                                 label: cfg.label,
                                 data: data,
                                 borderColor: cfg.color,
-                                backgroundColor: cfg.color + '33',
+                                backgroundColor: cfg.color + '22',
                                 borderWidth: 1.2,
                                 pointRadius: 0.3,
                                 fill: false,
@@ -855,7 +1044,7 @@
                         }
                     });
 
-                    // --- Actualizar gráfica combinada ---
+                    // Gráfica combinada
                     const combinedCanvas = document.getElementById('chart-combined');
                     if (combinedCanvas) {
                         const ctxCombined = combinedCanvas.getContext('2d');
@@ -874,15 +1063,15 @@
                                     options: {
                                         responsive: true,
                                         maintainAspectRatio: true,
-                                        animation: { duration: 200 },
+                                        animation: { duration: 150 },
                                         plugins: {
                                             legend: {
                                                 display: true,
                                                 labels: {
                                                     color: '#fff',
-                                                    font: { size: 8 },
-                                                    boxWidth: 12,
-                                                    padding: 8
+                                                    font: { size: 7 },
+                                                    boxWidth: 10,
+                                                    padding: 6
                                                 }
                                             },
                                             tooltip: {
@@ -899,19 +1088,19 @@
                                             x: {
                                                 ticks: {
                                                     color: '#ccc',
-                                                    font: { size: 7 },
-                                                    maxTicksLimit: 12,
-                                                    maxRotation: 30
+                                                    font: { size: 6 },
+                                                    maxTicksLimit: 10,
+                                                    maxRotation: 25
                                                 },
-                                                grid: { color: 'rgba(255,255,255,0.1)' }
+                                                grid: { color: 'rgba(255,255,255,0.06)' }
                                             },
                                             y: {
                                                 ticks: {
                                                     color: '#ccc',
-                                                    font: { size: 7 },
+                                                    font: { size: 6 },
                                                     callback: value => value.toFixed(2)
                                                 },
-                                                grid: { color: 'rgba(255,255,255,0.1)' },
+                                                grid: { color: 'rgba(255,255,255,0.06)' },
                                                 beginAtZero: false
                                             }
                                         },
@@ -922,70 +1111,79 @@
                                     }
                                 });
                             } catch (e) {
-                                console.warn('Error al crear gráfica combinada:', e);
+                                console.warn('Error gráfica combinada:', e);
                             }
                         }
                     }
 
                     isUpdating = false;
                 }).catch(error => {
-                    console.warn('Error al cargar datos:', error);
-                    document.getElementById('stationStatus').innerHTML =
-                        `<span class="status-circle" style="background-color: #FF0000"></span>Estado: Error de conexión`;
+                    clearTimeout(timeoutId);
+                    console.warn('Error en actualización:', error);
+
+                    const statusText = document.getElementById('statusText');
+                    if (statusText) statusText.textContent = 'Error de conexión';
+                    const statusCircle = document.querySelector('.status-circle');
+                    if (statusCircle) statusCircle.style.backgroundColor = '#FF1744';
+
                     isUpdating = false;
 
-                    // Reintentar después de 30 segundos
-                    if (updateTimeout) {
-                        clearTimeout(updateTimeout);
-                    }
-                    updateTimeout = setTimeout(updateCharts, 30000);
+                    // Reintentar después de 15 segundos
+                    if (retryTimeoutId) clearTimeout(retryTimeoutId);
+                    retryTimeoutId = setTimeout(updateCharts, 15000);
                 });
             }
 
             // --- INICIALIZACIÓN ---
             function init() {
                 createChartWrappers();
-                // Esperar a que Chart.js esté cargado
-                if (typeof Chart !== 'undefined') {
-                    updateCharts();
+
+                const checkChart = () => {
+                    if (typeof Chart !== 'undefined') {
+                        updateCharts();
+                        return true;
+                    }
+                    return false;
+                };
+
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    if (!checkChart()) {
+                        const interval = setInterval(() => {
+                            if (checkChart()) clearInterval(interval);
+                        }, 200);
+                    }
                 } else {
-                    document.addEventListener('DOMContentLoaded', function() {
-                        // Verificar si Chart ya está disponible
-                        if (typeof Chart !== 'undefined') {
-                            updateCharts();
-                        } else {
-                            // Esperar a que Chart.js se cargue
-                            const checkChart = setInterval(() => {
-                                if (typeof Chart !== 'undefined') {
-                                    clearInterval(checkChart);
-                                    updateCharts();
-                                }
+                    document.addEventListener('DOMContentLoaded', () => {
+                        if (!checkChart()) {
+                            const interval = setInterval(() => {
+                                if (checkChart()) clearInterval(interval);
                             }, 200);
                         }
                     });
                 }
 
-                // Actualizar cada 30 segundos (más espaciado)
-                setInterval(updateCharts, 30000);
+                // Actualizar cada 20 segundos para datos más frescos
+                setInterval(updateCharts, 20000);
 
                 // Actualizar al volver a la pestaña
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
-                        if (updateTimeout) {
-                            clearTimeout(updateTimeout);
-                            updateTimeout = null;
+                        if (updateTimeoutId) {
+                            clearTimeout(updateTimeoutId);
+                            updateTimeoutId = null;
                         }
                         updateCharts();
                     }
-                });
+                }, { passive: true });
             }
 
-            // Iniciar cuando el DOM esté listo
+            // Iniciar
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', init);
             } else {
                 init();
             }
+
         })();
     </script>
 
