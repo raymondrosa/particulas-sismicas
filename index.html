@@ -6,7 +6,7 @@
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         /* ============================================================
-           OPTIMIZACIÓN PREMIUM - 5 DE AGOSTO DE 2026, Rev8 - CORREGIDO
+           OPTIMIZACIÓN PREMIUM - 5 DE AGOSTO DE 2026, Rev9
            Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
            + GRÁFICA DE SISMOS USGS (M>=6.0) - 5 DE AGOSTO DE 2026
            ============================================================ */
@@ -220,6 +220,19 @@
 
         .chart-wrapper.loading::after {
             content: '⏳ Cargando gráfica...';
+        }
+
+        .chart-wrapper.no-data {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .chart-wrapper.no-data::after {
+            content: '📊 Sin datos disponibles';
         }
 
         /* ===== MODAL ===== */
@@ -634,12 +647,12 @@
         <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio de Partículas del TOA &bull; 2026
     </div>
 
-    <!-- ===== SCRIPTS - CARGADOS SIN DEFER PARA GARANTIZAR DISPONIBILIDAD ===== -->
+    <!-- ===== SCRIPTS ===== -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
     </script>
     <script>
         // ============================================================
-        // CONFIGURACIÓN OPTIMIZADA - 5 DE AGOSTO DE 2026 - CORREGIDO
+        // CONFIGURACIÓN - 5 DE AGOSTO DE 2026 - CORREGIDO
         // ============================================================
 
         (function() {
@@ -647,7 +660,7 @@
 
             // Verificar que Chart.js esté cargado
             if (typeof Chart === 'undefined') {
-                console.error('Chart.js no está disponible. Las gráficas no se mostrarán.');
+                console.error('Chart.js no está disponible.');
                 document.querySelectorAll('.chart-wrapper').forEach(el => {
                     el.classList.add('loading');
                 });
@@ -700,7 +713,7 @@
                         return { min: state.sensorMinTime, max: state.sensorMaxTime };
                     }
                     const now = Date.now();
-                    return { min: now - 7 * 24 * 60 * 60 * 1000, max: now };
+                    return { min: now - 30 * 24 * 60 * 60 * 1000, max: now }; // 30 días para sismos
                 },
                 getDateRange: () => {
                     const now = new Date();
@@ -709,6 +722,15 @@
                     return {
                         start: start.toISOString().replace('T', '%20').slice(0, 19),
                         end: now.toISOString().replace('T', '%20').slice(0, 19)
+                    };
+                },
+                getSeismicDateRange: () => {
+                    const now = new Date();
+                    const start = new Date(now);
+                    start.setDate(start.getDate() - 30); // 30 días atrás
+                    return {
+                        start: start.toISOString().slice(0, 10),
+                        end: now.toISOString().slice(0, 10)
                     };
                 }
             };
@@ -808,18 +830,19 @@
             }
 
             function processEarthquakes(features) {
-                if (!features) return [];
+                if (!features || !features.length) return [];
                 return features
                     .slice()
                     .reverse()
                     .filter(f => {
                         const mag = f.properties?.mag;
-                        return mag !== null && mag !== undefined && !isNaN(mag);
+                        return mag !== null && mag !== undefined && !isNaN(mag) && mag >= 6;
                     })
                     .map(f => ({
                         x: f.properties.time,
                         y: f.properties.mag,
-                        place: f.properties.place || 'Ubicación desconocida'
+                        place: f.properties.place || 'Ubicación desconocida',
+                        time: f.properties.time
                     }));
             }
 
@@ -931,11 +954,10 @@
             }
 
             function createModalOptions(isSeismic, range) {
-                return {
+                const baseOptions = {
                     responsive: true,
                     maintainAspectRatio: true,
                     animation: { duration: 200 },
-                    parsing: isSeismic ? false : undefined,
                     plugins: {
                         legend: {
                             display: !isSeismic,
@@ -950,8 +972,12 @@
                             mode: isSeismic ? 'nearest' : 'index',
                             intersect: isSeismic,
                             callbacks: isSeismic ? {
-                                title: ctx => ctx[0] ? new Date(ctx[0].parsed.x).toLocaleString() : '',
-                                label: ctx => {
+                                title: function(ctx) {
+                                    if (!ctx || !ctx.length) return '';
+                                    const date = new Date(ctx[0].parsed.x);
+                                    return date.toLocaleString();
+                                },
+                                label: function(ctx) {
                                     const place = ctx.raw?.place || '';
                                     return `M${ctx.parsed.y.toFixed(1)} - ${place}`;
                                 }
@@ -961,31 +987,6 @@
                         }
                     },
                     scales: {
-                        x: isSeismic ? {
-                            type: 'time',
-                            min: range.min,
-                            max: range.max,
-                            time: {
-                                unit: 'day',
-                                displayFormats: { day: 'MMM d' },
-                                tooltipFormat: 'PPpp'
-                            },
-                            ticks: {
-                                color: '#ccc',
-                                font: { size: 11 },
-                                maxTicksLimit: 14,
-                                maxRotation: 45
-                            },
-                            grid: { color: 'rgba(255,255,255,0.08)' }
-                        } : {
-                            ticks: {
-                                color: '#ccc',
-                                font: { size: 11 },
-                                maxTicksLimit: 20,
-                                maxRotation: 45
-                            },
-                            grid: { color: 'rgba(255,255,255,0.08)' }
-                        },
                         y: {
                             beginAtZero: isSeismic,
                             suggestedMax: isSeismic ? 9 : undefined,
@@ -1003,6 +1004,38 @@
                         }
                     }
                 };
+
+                if (isSeismic) {
+                    baseOptions.scales.x = {
+                        type: 'time',
+                        min: range.min,
+                        max: range.max,
+                        time: {
+                            unit: 'day',
+                            displayFormats: { day: 'MMM d' },
+                            tooltipFormat: 'PPpp'
+                        },
+                        ticks: {
+                            color: '#ccc',
+                            font: { size: 11 },
+                            maxTicksLimit: 14,
+                            maxRotation: 45
+                        },
+                        grid: { color: 'rgba(255,255,255,0.08)' }
+                    };
+                } else {
+                    baseOptions.scales.x = {
+                        ticks: {
+                            color: '#ccc',
+                            font: { size: 11 },
+                            maxTicksLimit: 20,
+                            maxRotation: 45
+                        },
+                        grid: { color: 'rgba(255,255,255,0.08)' }
+                    };
+                }
+
+                return baseOptions;
             }
 
             function closeModal() {
@@ -1192,7 +1225,6 @@
                         const canvas = document.getElementById(`chart-${cfg.id}`);
                         if (!canvas) return;
 
-                        // Quitar clase de carga si existe
                         const wrapper = canvas.closest('.chart-wrapper');
                         if (wrapper) wrapper.classList.remove('loading');
 
@@ -1213,7 +1245,6 @@
                     });
 
                     updateCombinedChart(allLabels, combinedDatasets);
-                    syncEarthquakeChartBounds();
 
                 } catch (error) {
                     if (error.name !== 'AbortError') {
@@ -1315,7 +1346,7 @@
             }
 
             // ============================================================
-            // GRÁFICA DE SISMOS
+            // GRÁFICA DE SISMOS - CORREGIDA
             // ============================================================
 
             async function updateEarthquakeChart() {
@@ -1323,52 +1354,90 @@
                 state.isUpdatingSeismic = true;
 
                 try {
-                    const range = utils.getTimeRange();
-                    const url = buildSeismicUrl(range);
+                    const range = utils.getSeismicDateRange();
+                    const url =
+                        `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${range.start}&endtime=${range.end}&minmagnitude=6&orderby=time`;
+
+                    console.log('Consultando USGS:', url);
 
                     const response = await fetch(url);
-                    if (!response.ok) throw new Error('Error USGS');
+                    if (!response.ok) throw new Error(`Error USGS: ${response.status}`);
 
                     const geojson = await response.json();
                     const features = geojson.features || [];
+
+                    console.log(`Encontrados ${features.length} sismos M≥6 en el período`);
+
                     const points = processEarthquakes(features);
 
                     const countEl = document.getElementById('earthquakeCount');
                     if (countEl) countEl.textContent = `🌍 Sismos M≥6: ${points.length}`;
 
                     const canvas = document.getElementById('chart-earthquakes');
-                    if (!canvas) return;
+                    if (!canvas) {
+                        console.warn('Canvas de sismos no encontrado');
+                        return;
+                    }
 
-                    // Quitar clase de carga si existe
                     const wrapper = canvas.closest('.chart-wrapper');
-                    if (wrapper) wrapper.classList.remove('loading');
+                    if (wrapper) wrapper.classList.remove('loading', 'no-data');
+
+                    if (points.length === 0) {
+                        console.warn('No hay sismos M≥6 en el período seleccionado');
+                        if (wrapper) wrapper.classList.add('no-data');
+                        // Mostrar mensaje en la gráfica
+                        const ctx = canvas.getContext('2d');
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                        ctx.fillStyle = '#999';
+                        ctx.font = '16px Arial';
+                        ctx.textAlign = 'center';
+                        ctx.fillText('No hay sismos M≥6 en este período', canvas.width / 2, canvas.height / 2);
+                        return;
+                    }
 
                     updateSeismicChart(canvas, points, range);
 
                 } catch (error) {
-                    console.warn('Error al actualizar sismos USGS:', error);
+                    console.error('Error al actualizar sismos USGS:', error);
                     const countEl = document.getElementById('earthquakeCount');
                     if (countEl) countEl.textContent = '🌍 Sismos M≥6: ⚠️';
+
+                    const canvas = document.getElementById('chart-earthquakes');
+                    if (canvas) {
+                        const wrapper = canvas.closest('.chart-wrapper');
+                        if (wrapper) wrapper.classList.add('no-data');
+                    }
+
                     setTimeout(updateEarthquakeChart, 60000);
                 } finally {
                     state.isUpdatingSeismic = false;
                 }
             }
 
-            function buildSeismicUrl(range) {
-                const start = new Date(range.min).toISOString().slice(0, 10);
-                const end = new Date(range.max).toISOString().slice(0, 10);
-                return `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start}&endtime=${end}&minmagnitude=6&orderby=time`;
-            }
-
             function updateSeismicChart(canvas, points, range) {
                 const ctx = canvas.getContext('2d');
+
+                // Si no hay puntos, mostrar mensaje
+                if (!points || points.length === 0) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#999';
+                    ctx.font = '16px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('No hay sismos M≥6 en este período', canvas.width / 2, canvas.height / 2);
+                    return;
+                }
 
                 const pointColor = (context) => {
                     const m = context.raw?.y;
                     if (m === null) return '#FF8C00';
                     return m >= 8 ? '#8B0000' : m >= 7 ? '#FF0000' : '#FF8C00';
                 };
+
+                // Obtener el rango de tiempo real de los puntos
+                const times = points.map(p => p.x);
+                const minTime = Math.min(...times);
+                const maxTime = Math.max(...times);
+                const padding = (maxTime - minTime) * 0.05 || 24 * 60 * 60 * 1000; // 5% de padding o 1 día
 
                 const chartData = {
                     datasets: [{
@@ -1378,26 +1447,31 @@
                         backgroundColor: 'rgba(255, 68, 68, 0.15)',
                         pointBackgroundColor: pointColor,
                         pointBorderColor: '#fff',
-                        pointRadius: 4,
-                        pointHoverRadius: 7,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
                         borderWidth: 2,
                         fill: true,
                         tension: 0,
-                        spanGaps: true
+                        spanGaps: false,
+                        showLine: false
                     }]
                 };
 
                 const chartOptions = {
                     responsive: true,
                     maintainAspectRatio: true,
-                    animation: { duration: 150 },
+                    animation: { duration: 300 },
                     parsing: false,
                     plugins: {
                         legend: { display: false },
                         tooltip: {
                             callbacks: {
-                                title: ctx => ctx[0] ? new Date(ctx[0].parsed.x).toLocaleString() : '',
-                                label: ctx => {
+                                title: function(ctx) {
+                                    if (!ctx || !ctx.length) return '';
+                                    const date = new Date(ctx[0].parsed.x);
+                                    return date.toLocaleString();
+                                },
+                                label: function(ctx) {
                                     const place = ctx.raw?.place || '';
                                     return `M${ctx.parsed.y.toFixed(1)} - ${place}`;
                                 }
@@ -1407,26 +1481,30 @@
                     scales: {
                         x: {
                             type: 'time',
-                            min: range.min,
-                            max: range.max,
+                            min: minTime - padding,
+                            max: maxTime + padding,
                             time: {
                                 unit: 'day',
                                 displayFormats: { day: 'MMM d' },
                                 tooltipFormat: 'PPpp'
                             },
                             ticks: {
-                                maxTicksLimit: 8,
-                                font: { size: 8 },
-                                maxRotation: 30
+                                maxTicksLimit: 10,
+                                font: { size: 10 },
+                                maxRotation: 30,
+                                color: '#666'
                             },
-                            grid: { display: false }
+                            grid: { color: 'rgba(0,0,0,0.06)' }
                         },
                         y: {
                             beginAtZero: true,
                             suggestedMax: 9,
                             ticks: {
-                                font: { size: 8 },
-                                callback: value => value.toFixed(1)
+                                font: { size: 10 },
+                                callback: function(value) {
+                                    return 'M' + value.toFixed(1);
+                                },
+                                color: '#666'
                             },
                             grid: { color: 'rgba(0,0,0,0.06)' }
                         }
@@ -1445,20 +1523,10 @@
                             data: chartData,
                             options: chartOptions
                         });
+                        console.log('Gráfica de sismos creada correctamente');
                     } catch (e) {
-                        console.warn('Error gráfica de sismos:', e);
+                        console.error('Error gráfica de sismos:', e);
                     }
-                }
-            }
-
-            function syncEarthquakeChartBounds() {
-                const chart = state.chartInstances['earthquakes'];
-                if (!chart) return;
-                const range = utils.getTimeRange();
-                if (chart.options.scales?.x) {
-                    chart.options.scales.x.min = range.min;
-                    chart.options.scales.x.max = range.max;
-                    chart.update('none');
                 }
             }
 
@@ -1516,7 +1584,7 @@
             }
 
             // ============================================================
-            // INICIO - CON VERIFICACIÓN DE CHART.JS
+            // INICIO
             // ============================================================
 
             if (typeof Chart !== 'undefined') {
@@ -1539,7 +1607,6 @@
                     }
                 }, 200);
 
-                // Timeout para no esperar indefinidamente
                 setTimeout(() => {
                     clearInterval(checkChart);
                     if (!state.isInitialized) {
