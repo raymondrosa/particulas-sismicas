@@ -211,6 +211,21 @@
             font-weight: 600;
         }
 
+        /* Estilo especial para la gráfica de sismos */
+        .chart-wrapper.seismic-chart {
+            border-color: #FF6B35;
+            grid-column: 1 / -1;
+        }
+
+        .chart-wrapper.seismic-chart canvas {
+            max-height: 150px;
+        }
+
+        .chart-wrapper.seismic-chart .chart-label {
+            background: rgba(255, 107, 53, 0.3);
+            color: #FFD700;
+        }
+
         .modal-overlay {
             display: none;
             position: fixed;
@@ -361,12 +376,6 @@
             color: rgba(255, 255, 255, 0.6);
         }
 
-        .seismic-card .detail {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 4px;
-        }
-
         .seismic-empty {
             color: rgba(255, 255, 255, 0.5);
             text-align: center;
@@ -480,6 +489,9 @@
             .chart-wrapper.combined canvas {
                 max-height: 140px;
             }
+            .chart-wrapper.seismic-chart canvas {
+                max-height: 120px;
+            }
             .modal-content {
                 padding: 12px;
             }
@@ -542,6 +554,9 @@
             .chart-wrapper.combined canvas {
                 max-height: 110px;
             }
+            .chart-wrapper.seismic-chart canvas {
+                max-height: 100px;
+            }
             .status {
                 font-size: 0.75rem;
                 padding: 4px 10px;
@@ -585,8 +600,14 @@
             .chart-wrapper.combined {
                 grid-column: 1 / -1;
             }
+            .chart-wrapper.seismic-chart {
+                grid-column: 1 / -1;
+            }
             .chart-wrapper canvas {
                 max-height: 200px;
+            }
+            .chart-wrapper.seismic-chart canvas {
+                max-height: 180px;
             }
         }
 
@@ -742,9 +763,11 @@
 
             const chartInstances = {};
             let combinedChartInstance = null;
+            let seismicChartInstance = null;
             let isUpdating = false;
             let updateTimeoutId = null;
             let retryTimeoutId = null;
+            let seismicData = [];
 
             // ============================================================
             // DECODIFICADOR DE DATOS
@@ -839,6 +862,111 @@
                     openModal('combined', '📊 Todas las variables');
                 }, { passive: true });
                 grid.appendChild(combinedWrapper);
+
+                // ============================================================
+                // NUEVA GRÁFICA DE SISMOS AL FINAL
+                // ============================================================
+                const seismicWrapper = document.createElement('div');
+                seismicWrapper.className = 'chart-wrapper seismic-chart';
+                seismicWrapper.dataset.chartId = 'seismic';
+                const seismicLabel = document.createElement('div');
+                seismicLabel.className = 'chart-label';
+                seismicLabel.textContent = '🌋 Magnitud de Sismos > 6M';
+                seismicWrapper.appendChild(seismicLabel);
+                const seismicCanvas = document.createElement('canvas');
+                seismicCanvas.id = 'chart-seismic';
+                seismicCanvas.width = 600;
+                seismicCanvas.height = 180;
+                seismicCanvas.setAttribute('loading', 'lazy');
+                seismicWrapper.appendChild(seismicCanvas);
+                const hintSeismic = document.createElement('span');
+                hintSeismic.className = 'expand-hint';
+                hintSeismic.textContent = '🔍 Ampliar';
+                seismicWrapper.appendChild(hintSeismic);
+                seismicWrapper.addEventListener('click', function(e) {
+                    if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
+                    openModal('seismic', '🌋 Magnitud de Sismos > 6M');
+                }, { passive: true });
+                grid.appendChild(seismicWrapper);
+            }
+
+            // ============================================================
+            // ACTUALIZAR GRÁFICA DE SISMOS
+            // ============================================================
+            function updateSeismicChart() {
+                const canvas = document.getElementById('chart-seismic');
+                if (!canvas) return;
+
+                const ctx = canvas.getContext('2d');
+
+                // Preparar datos de sismos
+                const labels = [];
+                const data = [];
+
+                if (seismicData.length > 0) {
+                    // Ordenar por tiempo
+                    const sorted = [...seismicData].sort((a, b) => a.time - b.time);
+                    sorted.forEach(quake => {
+                        labels.push(new Date(quake.time).toLocaleString());
+                        data.push(quake.mag);
+                    });
+                }
+
+                if (seismicChartInstance) {
+                    seismicChartInstance.data.labels = labels;
+                    seismicChartInstance.data.datasets[0].data = data;
+                    seismicChartInstance.update('none');
+                } else {
+                    try {
+                        seismicChartInstance = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Magnitud',
+                                    data: data,
+                                    backgroundColor: 'rgba(255, 107, 53, 0.7)',
+                                    borderColor: '#FF6B35',
+                                    borderWidth: 2,
+                                    borderRadius: 4,
+                                    barPercentage: 0.6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                animation: { duration: 150 },
+                                plugins: {
+                                    legend: {
+                                        display: true,
+                                        labels: { color: '#fff', font: { size: 10 }, boxWidth: 14, padding: 8 }
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: ctx => `Magnitud: ${ctx.parsed.y.toFixed(1)} M`
+                                        }
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        ticks: { color: '#ccc', font: { size: 8 }, maxTicksLimit: 12,
+                                            maxRotation: 30 },
+                                        grid: { color: 'rgba(255,255,255,0.06)' }
+                                    },
+                                    y: {
+                                        ticks: { color: '#ccc', font: { size: 8 }, callback: value => value
+                                                .toFixed(1) },
+                                        grid: { color: 'rgba(255,255,255,0.06)' },
+                                        beginAtZero: true,
+                                        min: 5.5
+                                    }
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        console.warn('Error en gráfica sísmica:', e);
+                    }
+                }
             }
 
             // ============================================================
@@ -849,7 +977,16 @@
                 const modalCanvas = document.getElementById('modalCanvas');
                 const modalTitle = document.getElementById('modalTitle');
                 modalTitle.textContent = label;
-                const originalChart = chartId === 'combined' ? combinedChartInstance : chartInstances[chartId];
+
+                let originalChart = null;
+                if (chartId === 'combined') {
+                    originalChart = combinedChartInstance;
+                } else if (chartId === 'seismic') {
+                    originalChart = seismicChartInstance;
+                } else {
+                    originalChart = chartInstances[chartId];
+                }
+
                 if (!originalChart) return;
                 const ctx = modalCanvas.getContext('2d');
                 if (modalCanvas._chart) {
@@ -858,39 +995,9 @@
                 }
                 try {
                     const newChart = new Chart(ctx, {
-                        type: 'line',
+                        type: originalChart.config.type || 'line',
                         data: JSON.parse(JSON.stringify(originalChart.data)),
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            animation: { duration: 200 },
-                            plugins: {
-                                legend: {
-                                    display: true,
-                                    labels: { color: '#fff', font: { size: 13 }, boxWidth: 16, padding: 12 }
-                                },
-                                tooltip: {
-                                    mode: 'index',
-                                    intersect: false,
-                                    callbacks: {
-                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) : 'N/A'
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: {
-                                    ticks: { color: '#ccc', font: { size: 11 }, maxTicksLimit: 20,
-                                        maxRotation: 45 },
-                                    grid: { color: 'rgba(255,255,255,0.08)' }
-                                },
-                                y: {
-                                    ticks: { color: '#ccc', font: { size: 11 } },
-                                    grid: { color: 'rgba(255,255,255,0.08)' },
-                                    beginAtZero: false
-                                }
-                            },
-                            elements: { point: { radius: 2, hoverRadius: 6 } }
-                        }
+                        options: JSON.parse(JSON.stringify(originalChart.options))
                     });
                     modalCanvas._chart = newChart;
                     modal.classList.add('active');
@@ -1141,6 +1248,10 @@
                             }
                         }
                     }
+
+                    // Actualizar gráfica sísmica
+                    updateSeismicChart();
+
                     isUpdating = false;
                 }).catch(error => {
                     clearTimeout(timeoutId);
@@ -1172,8 +1283,17 @@
                         const countEl = document.getElementById('quakeCount');
                         countEl.textContent = features.length;
 
+                        // Guardar datos para la gráfica
+                        seismicData = features.map(f => ({
+                            time: f.properties.time,
+                            mag: f.properties.mag || 0,
+                            place: f.properties.place || 'Ubicación desconocida'
+                        }));
+
                         if (features.length === 0) {
                             container.innerHTML = '<div class="seismic-empty">🌍 No se registraron eventos > 6M en el período.</div>';
+                            // Actualizar gráfica vacía
+                            updateSeismicChart();
                             return;
                         }
 
@@ -1183,18 +1303,19 @@
                             const mag = props.mag ? props.mag.toFixed(1) : 'N/A';
                             const place = props.place || 'Ubicación desconocida';
                             const time = new Date(props.time).toLocaleString();
-                            const url = props.url || '#';
                             html += `
                                 <div class="seismic-card">
                                     <div class="mag">⚡ ${mag} M</div>
                                     <div class="place">📍 ${place}</div>
                                     <div class="time">🕐 ${time}</div>
-                                    <div class="detail">${props.detail ? '🔗 <a href="'+props.detail+'" target="_blank" style="color:#FFD700;">Ver detalle</a>' : ''}</div>
                                 </div>
                             `;
                         });
                         html += '</div>';
                         container.innerHTML = html;
+
+                        // Actualizar gráfica con los nuevos datos
+                        updateSeismicChart();
                     })
                     .catch(error => {
                         console.warn('Error al obtener datos sísmicos:', error);
