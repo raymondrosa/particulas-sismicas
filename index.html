@@ -6,7 +6,7 @@
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         /* ============================================================
-           OPTIMIZACIÓN PREMIUM - 5 DE AGOSTO DE 2026, Rev7
+           OPTIMIZACIÓN PREMIUM - 5 DE AGOSTO DE 2026, Rev8 - CORREGIDO
            Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
            + GRÁFICA DE SISMOS USGS (M>=6.0) - 5 DE AGOSTO DE 2026
            ============================================================ */
@@ -52,7 +52,6 @@
             line-height: 1.5;
         }
 
-        /* ===== HEADER ===== */
         .header-container {
             display: flex;
             flex-direction: column;
@@ -117,7 +116,6 @@
             transition: background-color 0.3s ease;
         }
 
-        /* ===== DATOS EN VIVO ===== */
         .data-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -144,7 +142,6 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
 
-        /* ===== GRÁFICAS ===== */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -162,6 +159,7 @@
             cursor: pointer;
             transition: transform var(--transition-fast), box-shadow var(--transition-fast);
             touch-action: manipulation;
+            min-height: 200px;
         }
 
         .chart-wrapper:active {
@@ -209,6 +207,19 @@
             pointer-events: none;
             backdrop-filter: blur(2px);
             font-weight: 600;
+        }
+
+        .chart-wrapper.loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        .chart-wrapper.loading::after {
+            content: '⏳ Cargando gráfica...';
         }
 
         /* ===== MODAL ===== */
@@ -296,7 +307,6 @@
             background: #FFFFFF;
         }
 
-        /* ===== FOOTER ===== */
         .footer {
             text-align: center;
             padding: 14px 12px;
@@ -316,7 +326,6 @@
             color: rgba(255, 255, 255, 0.85);
         }
 
-        /* ===== GRÁFICA COMBINADA ===== */
         .chart-wrapper.combined {
             grid-column: 1 / -1;
             border-color: #FFD700;
@@ -326,7 +335,6 @@
             max-height: 200px;
         }
 
-        /* ===== GRÁFICA DE SISMOS (USGS, M >= 6.0) ===== */
         .chart-wrapper.seismic {
             grid-column: 1 / -1;
             border-color: #FF4444;
@@ -336,7 +344,6 @@
             max-height: 200px;
         }
 
-        /* ===== RESPONSIVE AVANZADO ===== */
         @media (max-width: 1024px) {
             .charts-grid {
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -466,6 +473,7 @@
 
             .chart-wrapper {
                 padding: 4px;
+                min-height: 140px;
             }
 
             .chart-wrapper canvas {
@@ -547,7 +555,6 @@
             }
         }
 
-        /* Soporte para preferencia de movimiento reducido */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -627,14 +634,27 @@
         <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio de Partículas del TOA &bull; 2026
     </div>
 
-    <!-- ===== SCRIPTS OPTIMIZADOS ===== -->
+    <!-- ===== SCRIPTS - CARGADOS SIN DEFER PARA GARANTIZAR DISPONIBILIDAD ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
     <script>
+        // ============================================================
+        // CONFIGURACIÓN OPTIMIZADA - 5 DE AGOSTO DE 2026 - CORREGIDO
+        // ============================================================
+
         (function() {
             'use strict';
 
-            // ============================================================
-            // CONFIGURACIÓN OPTIMIZADA - 5 DE AGOSTO DE 2026
-            // ============================================================
+            // Verificar que Chart.js esté cargado
+            if (typeof Chart === 'undefined') {
+                console.error('Chart.js no está disponible. Las gráficas no se mostrarán.');
+                document.querySelectorAll('.chart-wrapper').forEach(el => {
+                    el.classList.add('loading');
+                });
+                return;
+            }
+
+            console.log('Chart.js cargado correctamente. Versión:', Chart.version);
 
             const CONFIG = {
                 channels: {
@@ -642,8 +662,8 @@
                     acceleration: { id: 2972050, key: '8LMMRSTHHX26Z4MI' }
                 },
                 maxResults: 8000,
-                updateInterval: 20000, // 20 segundos
-                seismicInterval: 300000, // 5 minutos
+                updateInterval: 20000,
+                seismicInterval: 300000,
                 retryDelay: 15000,
                 maxPoints: 500
             };
@@ -659,7 +679,8 @@
                 sensorMaxTime: null,
                 isUpdating: false,
                 isUpdatingSeismic: false,
-                abortController: null
+                abortController: null,
+                isInitialized: false
             };
 
             // ============================================================
@@ -667,7 +688,13 @@
             // ============================================================
 
             const utils = {
-                formatDate: (date) => new Date(date).toLocaleString(),
+                formatDate: (date) => {
+                    try {
+                        return new Date(date).toLocaleString();
+                    } catch {
+                        return date;
+                    }
+                },
                 getTimeRange: () => {
                     if (state.sensorMinTime !== null && state.sensorMaxTime !== null) {
                         return { min: state.sensorMinTime, max: state.sensorMaxTime };
@@ -741,7 +768,7 @@
             // ============================================================
 
             function processFeeds(feeds, field, maxPoints = CONFIG.maxPoints) {
-                if (!feeds?.length) return { labels: [], data: [] };
+                if (!feeds || !feeds.length) return { labels: [], data: [] };
 
                 const result = { labels: [], data: [] };
                 const total = feeds.length;
@@ -767,12 +794,11 @@
                     }
                 }
 
-                // Asegurar el último punto
                 const last = feeds[total - 1];
                 const lastVal = parseFloat(last[field]);
                 if (!isNaN(lastVal)) {
                     const lastLabel = utils.formatDate(last.created_at);
-                    if (result.labels[result.labels.length - 1] !== lastLabel) {
+                    if (result.labels.length === 0 || result.labels[result.labels.length - 1] !== lastLabel) {
                         result.labels.push(lastLabel);
                         result.data.push(lastVal);
                     }
@@ -782,7 +808,8 @@
             }
 
             function processEarthquakes(features) {
-                return (features || [])
+                if (!features) return [];
+                return features
                     .slice()
                     .reverse()
                     .filter(f => {
@@ -802,6 +829,7 @@
 
             function createChartWrappers() {
                 const grid = document.getElementById('chartsGrid');
+                if (!grid) return;
                 grid.innerHTML = '';
 
                 // Gráficas individuales
@@ -869,12 +897,16 @@
                 const modalCanvas = document.getElementById('modalCanvas');
                 const modalTitle = document.getElementById('modalTitle');
 
+                if (!modal || !modalCanvas || !modalTitle) return;
+
                 modalTitle.textContent = label;
 
                 const originalChart = chartId === 'combined' ? state.combinedChart : state.chartInstances[chartId];
-                if (!originalChart) return;
+                if (!originalChart) {
+                    console.warn('Gráfica no disponible para modal:', chartId);
+                    return;
+                }
 
-                // Destruir gráfica anterior en el modal
                 if (modalCanvas._chart) {
                     modalCanvas._chart.destroy();
                     modalCanvas._chart = null;
@@ -975,10 +1007,11 @@
 
             function closeModal() {
                 const modal = document.getElementById('chartModal');
+                if (!modal) return;
                 modal.classList.remove('active');
                 document.body.style.overflow = '';
                 const modalCanvas = document.getElementById('modalCanvas');
-                if (modalCanvas._chart) {
+                if (modalCanvas && modalCanvas._chart) {
                     modalCanvas._chart.destroy();
                     modalCanvas._chart = null;
                 }
@@ -995,18 +1028,20 @@
                 Object.keys(fieldMap1).forEach(key => {
                     const el = document.getElementById(DATA_MAPPING[key]);
                     if (el) {
-                        const val = feed1?.[fieldMap1[key]] ?? 'En Reposo';
+                        const val = feed1?.[fieldMap1[key]];
+                        const displayVal = (val !== undefined && val !== null && val !== '') ? val : 'En Reposo';
                         const label = el.textContent.split(':')[0];
-                        el.textContent = `${label}: ${val}`;
+                        el.textContent = `${label}: ${displayVal}`;
                     }
                 });
 
                 Object.keys(fieldMap2).forEach(key => {
                     const el = document.getElementById(DATA_MAPPING[key]);
                     if (el) {
-                        const val = feed2?.[fieldMap2[key]] ?? 'En Reposo';
+                        const val = feed2?.[fieldMap2[key]];
+                        const displayVal = (val !== undefined && val !== null && val !== '') ? val : 'En Reposo';
                         const label = el.textContent.split(':')[0];
-                        el.textContent = `${label}: ${val}`;
+                        el.textContent = `${label}: ${displayVal}`;
                     }
                 });
 
@@ -1026,7 +1061,7 @@
             // CONSTRUCCIÓN DE GRÁFICAS
             // ============================================================
 
-            function buildChartOptions(cfg, isSeismic = false) {
+            function buildChartOptions(cfg) {
                 return {
                     responsive: true,
                     maintainAspectRatio: true,
@@ -1125,7 +1160,6 @@
                 state.isUpdating = true;
 
                 try {
-                    // Cancelar petición anterior si existe
                     if (state.abortController) {
                         state.abortController.abort();
                     }
@@ -1135,8 +1169,10 @@
                     const [url1, url2] = buildUrls(range);
 
                     const [data1, data2] = await Promise.all([
-                        fetch(url1, { signal: state.abortController.signal }).then(r => r.ok ? r.json() : Promise.reject('Error canal 1')),
-                        fetch(url2, { signal: state.abortController.signal }).then(r => r.ok ? r.json() : Promise.reject('Error canal 2'))
+                        fetch(url1, { signal: state.abortController.signal }).then(r => r.ok ? r.json() : Promise.reject(
+                            'Error canal 1')),
+                        fetch(url2, { signal: state.abortController.signal }).then(r => r.ok ? r.json() : Promise.reject(
+                            'Error canal 2'))
                     ]);
 
                     const feeds1 = data1.feeds || [];
@@ -1144,13 +1180,9 @@
                     const latestFeed1 = feeds1.length ? feeds1[feeds1.length - 1] : null;
                     const latestFeed2 = feeds2.length ? feeds2[feeds2.length - 1] : null;
 
-                    // Actualizar rango temporal
                     updateTimeRange([...feeds1, ...feeds2]);
-
-                    // Actualizar datos en vivo
                     updateLiveData(latestFeed1, latestFeed2);
 
-                    // Procesar gráficas individuales y combinada
                     const combinedDatasets = [];
                     let allLabels = [];
 
@@ -1159,6 +1191,10 @@
                         const { labels, data } = processFeeds(feeds, cfg.field);
                         const canvas = document.getElementById(`chart-${cfg.id}`);
                         if (!canvas) return;
+
+                        // Quitar clase de carga si existe
+                        const wrapper = canvas.closest('.chart-wrapper');
+                        if (wrapper) wrapper.classList.remove('loading');
 
                         updateIndividualChart(cfg.id, cfg, labels, data);
                         if (labels.length && data.length) {
@@ -1176,15 +1212,14 @@
                         }
                     });
 
-                    // Actualizar gráfica combinada
                     updateCombinedChart(allLabels, combinedDatasets);
-
-                    // Sincronizar gráfica de sismos
                     syncEarthquakeChartBounds();
 
                 } catch (error) {
-                    console.warn('Error en actualización:', error);
-                    handleUpdateError();
+                    if (error.name !== 'AbortError') {
+                        console.warn('Error en actualización:', error);
+                        handleUpdateError();
+                    }
                 } finally {
                     state.isUpdating = false;
                 }
@@ -1298,13 +1333,15 @@
                     const features = geojson.features || [];
                     const points = processEarthquakes(features);
 
-                    // Actualizar contador
                     const countEl = document.getElementById('earthquakeCount');
                     if (countEl) countEl.textContent = `🌍 Sismos M≥6: ${points.length}`;
 
-                    // Actualizar gráfica
                     const canvas = document.getElementById('chart-earthquakes');
                     if (!canvas) return;
+
+                    // Quitar clase de carga si existe
+                    const wrapper = canvas.closest('.chart-wrapper');
+                    if (wrapper) wrapper.classList.remove('loading');
 
                     updateSeismicChart(canvas, points, range);
 
@@ -1418,33 +1455,29 @@
                 const chart = state.chartInstances['earthquakes'];
                 if (!chart) return;
                 const range = utils.getTimeRange();
-                chart.options.scales.x.min = range.min;
-                chart.options.scales.x.max = range.max;
-                chart.update('none');
+                if (chart.options.scales?.x) {
+                    chart.options.scales.x.min = range.min;
+                    chart.options.scales.x.max = range.max;
+                    chart.update('none');
+                }
             }
 
             // ============================================================
             // INICIALIZACIÓN
             // ============================================================
 
-            function init() {
-                // Verificar que Chart.js esté disponible
-                if (typeof Chart === 'undefined') {
-                    const interval = setInterval(() => {
-                        if (typeof Chart !== 'undefined') {
-                            clearInterval(interval);
-                            initializeApp();
-                        }
-                    }, 200);
-                } else {
-                    initializeApp();
-                }
-            }
-
             function initializeApp() {
+                if (state.isInitialized) return;
+
+                console.log('Inicializando Observatorio de Partículas del TOA...');
+
                 createChartWrappers();
-                updateCharts();
-                updateEarthquakeChart();
+
+                // Pequeño retraso para asegurar que los canvas estén en el DOM
+                setTimeout(() => {
+                    updateCharts();
+                    updateEarthquakeChart();
+                }, 100);
 
                 // Actualizaciones periódicas
                 setInterval(updateCharts, CONFIG.updateInterval);
@@ -1459,27 +1492,63 @@
                 }, { passive: true });
 
                 // Eventos del modal
-                document.getElementById('modalCloseBtn').addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    closeModal();
-                });
+                const closeBtn = document.getElementById('modalCloseBtn');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        closeModal();
+                    });
+                }
 
-                document.getElementById('chartModal').addEventListener('click', (e) => {
-                    if (e.target === e.currentTarget) closeModal();
-                });
+                const modal = document.getElementById('chartModal');
+                if (modal) {
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === e.currentTarget) closeModal();
+                    });
+                }
 
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') closeModal();
                 });
 
+                state.isInitialized = true;
                 console.log('Observatorio de Partículas del TOA - Inicializado correctamente');
             }
 
-            // Iniciar la aplicación
-            if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', init);
+            // ============================================================
+            // INICIO - CON VERIFICACIÓN DE CHART.JS
+            // ============================================================
+
+            if (typeof Chart !== 'undefined') {
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initializeApp);
+                } else {
+                    initializeApp();
+                }
             } else {
-                init();
+                console.error('Chart.js no está disponible. Esperando...');
+                const checkChart = setInterval(() => {
+                    if (typeof Chart !== 'undefined') {
+                        clearInterval(checkChart);
+                        console.log('Chart.js ahora está disponible.');
+                        if (document.readyState === 'loading') {
+                            document.addEventListener('DOMContentLoaded', initializeApp);
+                        } else {
+                            initializeApp();
+                        }
+                    }
+                }, 200);
+
+                // Timeout para no esperar indefinidamente
+                setTimeout(() => {
+                    clearInterval(checkChart);
+                    if (!state.isInitialized) {
+                        console.error('Timeout: Chart.js no se cargó correctamente.');
+                        document.querySelectorAll('.chart-wrapper').forEach(el => {
+                            el.classList.add('loading');
+                        });
+                    }
+                }, 10000);
             }
 
         })();
