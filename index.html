@@ -6,7 +6,7 @@
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         /* ============================================================
-           OPTIMIZACIÓN PREMIUM - 5 DE AGOSTO DE 2026, Rev6
+           OPTIMIZACIÓN PREMIUM - 5 DE AGOSTO DE 2026, Rev7
            Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
            + GRÁFICA DE SISMOS USGS (M>=6.0) - 5 DE AGOSTO DE 2026
            ============================================================ */
@@ -26,12 +26,7 @@
             --radius: 10px;
             --transition-fast: 0.15s ease;
             --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
-            /* TAMAÑOS DE FUENTE MEJORADOS */
             --font-size-base: 16px;
-            --font-size-small: 0.85rem;
-            --font-size-medium: 1rem;
-            --font-size-large: 1.2rem;
-            --font-size-xl: 1.4rem;
         }
 
         html {
@@ -573,7 +568,6 @@
             touch-action: manipulation;
         }
 
-        /* Mejoras de legibilidad adicionales */
         .data .label {
             font-weight: 300;
             opacity: 0.8;
@@ -583,18 +577,10 @@
             font-weight: 700;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js" defer></script>
 </head>
 <body>
 
-    <!-- ============================================================
-    OPTIMIZACIÓN PREMIUM - 29 DE JULIO DE 2026
-    Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
-    + GRÁFICA DE SISMOS USGS (M>=6.0) - 5 DE AGOSTO DE 2026
-    ============================================================ -->
-
+    <!-- ===== HEADER ===== -->
     <div class="header-container">
         <div class="header-row">
             <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto" decoding="async">
@@ -641,112 +627,84 @@
         <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio de Partículas del TOA &bull; 2026
     </div>
 
+    <!-- ===== SCRIPTS OPTIMIZADOS ===== -->
     <script>
         (function() {
             'use strict';
 
             // ============================================================
-            // OPTIMIZACIÓN PREMIUM - 29 DE JULIO DE 2026
-            // + GRÁFICA DE SISMOS USGS (M>=6.0) - 5 DE AGOSTO DE 2026
+            // CONFIGURACIÓN OPTIMIZADA - 5 DE AGOSTO DE 2026
             // ============================================================
 
-            // --- CONFIGURACIÓN IoT ---
-            const CHANNEL1 = 2439912;
-            const KEY1 = 'BCX6UVTLQZ7VMK4F';
-            const CHANNEL2 = 2972050;
-            const KEY2 = '8LMMRSTHHX26Z4MI';
+            const CONFIG = {
+                channels: {
+                    particle: { id: 2439912, key: 'BCX6UVTLQZ7VMK4F' },
+                    acceleration: { id: 2972050, key: '8LMMRSTHHX26Z4MI' }
+                },
+                maxResults: 8000,
+                updateInterval: 20000, // 20 segundos
+                seismicInterval: 300000, // 5 minutos
+                retryDelay: 15000,
+                maxPoints: 500
+            };
 
-            // MÁXIMA CAPTURA DE DATOS: 8000 registros
-            const now = new Date();
-            const startDate = new Date(now);
-            startDate.setDate(startDate.getDate() - 7);
+            // ============================================================
+            // ESTADO DE LA APLICACIÓN
+            // ============================================================
 
-            const startStr = startDate.toISOString().replace('T', '%20').slice(0, 19);
-            const endStr = now.toISOString().replace('T', '%20').slice(0, 19);
+            const state = {
+                chartInstances: {},
+                combinedChart: null,
+                sensorMinTime: null,
+                sensorMaxTime: null,
+                isUpdating: false,
+                isUpdatingSeismic: false,
+                abortController: null
+            };
 
-            const URL1 =
-                `https://api.thingspeak.com/channels/${CHANNEL1}/feeds.json?api_key=${KEY1}&start=${startStr}&end=${endStr}&results=8000`;
-            const URL2 =
-                `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&start=${startStr}&end=${endStr}&results=8000`;
+            // ============================================================
+            // UTILIDADES
+            // ============================================================
 
-            // --- CONFIGURACIÓN SISMOS USGS (M >= 6.0), mismo periodo que la recopilación de datos ---
-            // Nota: por defecto es GLOBAL. Para limitar a la región del Caribe/Puerto Rico,
-            // añade estos parámetros a la URL: &minlatitude=14&maxlatitude=24&minlongitude=-72&maxlongitude=-60
-            const USGS_START = startDate.toISOString().slice(0, 10);
-            const USGS_END = now.toISOString().slice(0, 10);
-            const USGS_URL =
-                `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${USGS_START}&endtime=${USGS_END}&minmagnitude=6&orderby=time`;
+            const utils = {
+                formatDate: (date) => new Date(date).toLocaleString(),
+                getTimeRange: () => {
+                    if (state.sensorMinTime !== null && state.sensorMaxTime !== null) {
+                        return { min: state.sensorMinTime, max: state.sensorMaxTime };
+                    }
+                    const now = Date.now();
+                    return { min: now - 7 * 24 * 60 * 60 * 1000, max: now };
+                },
+                getDateRange: () => {
+                    const now = new Date();
+                    const start = new Date(now);
+                    start.setDate(start.getDate() - 7);
+                    return {
+                        start: start.toISOString().replace('T', '%20').slice(0, 19),
+                        end: now.toISOString().replace('T', '%20').slice(0, 19)
+                    };
+                }
+            };
 
-            // --- CONFIGURACIÓN DE GRÁFICAS ---
-            const CHART_CONFIGS = [{
-                id: 'realParticles',
-                label: 'Partículas Reales',
-                field: 'field1',
-                color: '#36A2EB',
-                channel: 1
-            }, {
-                id: 'imaginaryParticles',
-                label: 'Partículas Imag.',
-                field: 'field2',
-                color: '#FF6384',
-                channel: 1
-            }, {
-                id: 'molecularPhysics',
-                label: 'Física Molecular',
-                field: 'field3',
-                color: '#4BC0C0',
-                channel: 1
-            }, {
-                id: 'xCoord',
-                label: 'Coord. x',
-                field: 'field4',
-                color: '#FF9F40',
-                channel: 1
-            }, {
-                id: 'yCoord',
-                label: 'Coord. y',
-                field: 'field5',
-                color: '#9966FF',
-                channel: 1
-            }, {
-                id: 'zCoord',
-                label: 'Coord. z',
-                field: 'field6',
-                color: '#FFCD56',
-                channel: 1
-            }, {
-                id: 'angle',
-                label: 'Ángulo',
-                field: 'field7',
-                color: '#C9CBCF',
-                channel: 1
-            }, {
-                id: 'accelX',
-                label: 'Acel. X',
-                field: 'field1',
-                color: '#FF5733',
-                channel: 2
-            }, {
-                id: 'accelY',
-                label: 'Acel. Y',
-                field: 'field2',
-                color: '#33FF57',
-                channel: 2
-            }, {
-                id: 'accelZ',
-                label: 'Acel. Z',
-                field: 'field3',
-                color: '#5733FF',
-                channel: 2
-            }, {
-                id: 'accelResult',
-                label: 'Acel. Result.',
-                field: 'field4',
-                color: '#FF33A1',
-                channel: 2
-            }];
+            // ============================================================
+            // CONFIGURACIÓN DE GRÁFICAS
+            // ============================================================
 
-            const DATA_ELEMENTS = {
+            const CHART_CONFIGS = [
+                { id: 'realParticles', label: 'Partículas Reales', field: 'field1', color: '#36A2EB', channel: 1 },
+                { id: 'imaginaryParticles', label: 'Partículas Imag.', field: 'field2', color: '#FF6384', channel: 1 },
+                { id: 'molecularPhysics', label: 'Física Molecular', field: 'field3', color: '#4BC0C0', channel: 1 },
+                { id: 'xCoord', label: 'Coord. x', field: 'field4', color: '#FF9F40', channel: 1 },
+                { id: 'yCoord', label: 'Coord. y', field: 'field5', color: '#9966FF', channel: 1 },
+                { id: 'zCoord', label: 'Coord. z', field: 'field6', color: '#FFCD56', channel: 1 },
+                { id: 'angle', label: 'Ángulo', field: 'field7', color: '#C9CBCF', channel: 1 },
+                { id: 'accelX', label: 'Acel. X', field: 'field1', color: '#FF5733', channel: 2 },
+                { id: 'accelY', label: 'Acel. Y', field: 'field2', color: '#33FF57', channel: 2 },
+                { id: 'accelZ', label: 'Acel. Z', field: 'field3', color: '#5733FF', channel: 2 },
+                { id: 'accelResult', label: 'Acel. Result.', field: 'field4', color: '#FF33A1', channel: 2 }
+            ];
+
+            const DATA_MAPPING = {
                 realParticles: 'realParticles',
                 imaginaryParticles: 'imaginaryParticles',
                 molecularPhysics: 'molecularPhysics',
@@ -760,51 +718,39 @@
                 accelResult: 'accelResult'
             };
 
-            const chartInstances = {};
-            let combinedChartInstance = null;
-            let isUpdating = false;
-            let isUpdatingSeismic = false;
-            let updateTimeoutId = null;
-            let retryTimeoutId = null;
-            let seismicRetryTimeoutId = null;
-
-            // Rango real de fechas cubierto por las muestras del sensor (se calcula tras cada
-            // actualización de updateCharts). La gráfica de sismos usa este rango — no el rango
-            // solicitado a la API — para que las fechas coincidan exactamente con los datos.
-            let sensorMinTime = null;
-            let sensorMaxTime = null;
-
-            function getTimeRange() {
-                if (sensorMinTime !== null && sensorMaxTime !== null) {
-                    return { min: sensorMinTime, max: sensorMaxTime };
+            const CHANNEL_FIELDS = {
+                1: {
+                    realParticles: 'field1',
+                    imaginaryParticles: 'field2',
+                    molecularPhysics: 'field3',
+                    xCoord: 'field4',
+                    yCoord: 'field5',
+                    zCoord: 'field6',
+                    angle: 'field7'
+                },
+                2: {
+                    accelX: 'field1',
+                    accelY: 'field2',
+                    accelZ: 'field3',
+                    accelResult: 'field4'
                 }
-                return { min: startDate.getTime(), max: now.getTime() };
-            }
+            };
 
-            // Ajusta el eje de tiempo de la gráfica de sismos al rango real de las muestras,
-            // sin volver a pedir datos a USGS.
-            function syncEarthquakeChartBounds() {
-                const chart = chartInstances['earthquakes'];
-                if (!chart) return;
-                const range = getTimeRange();
-                chart.options.scales.x.min = range.min;
-                chart.options.scales.x.max = range.max;
-                chart.update('none');
-            }
+            // ============================================================
+            // PROCESAMIENTO DE DATOS
+            // ============================================================
 
-            // --- DECODIFICADOR DE DATOS CON MUESTREO INTELIGENTE ---
-            function processFeeds(feeds, field, maxPoints = 500) {
-                if (!feeds || feeds.length === 0) return { labels: [], data: [] };
+            function processFeeds(feeds, field, maxPoints = CONFIG.maxPoints) {
+                if (!feeds?.length) return { labels: [], data: [] };
 
                 const result = { labels: [], data: [] };
                 const total = feeds.length;
 
                 if (total <= maxPoints) {
-                    for (let i = 0; i < total; i++) {
-                        const feed = feeds[i];
+                    for (const feed of feeds) {
                         const val = parseFloat(feed[field]);
-                        if (val !== undefined && !isNaN(val)) {
-                            result.labels.push(new Date(feed.created_at).toLocaleString());
+                        if (!isNaN(val)) {
+                            result.labels.push(utils.formatDate(feed.created_at));
                             result.data.push(val);
                         }
                     }
@@ -815,17 +761,18 @@
                 for (let i = 0; i < total; i += step) {
                     const feed = feeds[i];
                     const val = parseFloat(feed[field]);
-                    if (val !== undefined && !isNaN(val)) {
-                        result.labels.push(new Date(feed.created_at).toLocaleString());
+                    if (!isNaN(val)) {
+                        result.labels.push(utils.formatDate(feed.created_at));
                         result.data.push(val);
                     }
                 }
 
+                // Asegurar el último punto
                 const last = feeds[total - 1];
                 const lastVal = parseFloat(last[field]);
-                if (lastVal !== undefined && !isNaN(lastVal)) {
-                    const lastLabel = new Date(last.created_at).toLocaleString();
-                    if (result.labels.length === 0 || result.labels[result.labels.length - 1] !== lastLabel) {
+                if (!isNaN(lastVal)) {
+                    const lastLabel = utils.formatDate(last.created_at);
+                    if (result.labels[result.labels.length - 1] !== lastLabel) {
                         result.labels.push(lastLabel);
                         result.data.push(lastVal);
                     }
@@ -834,124 +781,89 @@
                 return result;
             }
 
-            // --- DECODIFICADOR DE SISMOS USGS ---
-            // Devuelve puntos {x: timestamp, y: magnitud, place: lugar} para graficarlos
-            // en un eje de tiempo real, alineado a la misma ventana de fechas que las muestras.
             function processEarthquakes(features) {
-                const points = [];
-
-                // USGS devuelve del más reciente al más antiguo; se invierte para orden cronológico
-                const ordered = (features || []).slice().reverse();
-
-                ordered.forEach(f => {
-                    const props = f.properties || {};
-                    const mag = props.mag;
-                    if (mag === null || mag === undefined || isNaN(mag)) return;
-                    points.push({
-                        x: props.time,
-                        y: mag,
-                        place: props.place || 'Ubicación desconocida'
-                    });
-                });
-
-                return points;
+                return (features || [])
+                    .slice()
+                    .reverse()
+                    .filter(f => {
+                        const mag = f.properties?.mag;
+                        return mag !== null && mag !== undefined && !isNaN(mag);
+                    })
+                    .map(f => ({
+                        x: f.properties.time,
+                        y: f.properties.mag,
+                        place: f.properties.place || 'Ubicación desconocida'
+                    }));
             }
 
-            // --- CREAR ELEMENTOS DE GRÁFICAS EN EL GRID ---
+            // ============================================================
+            // CREACIÓN DE ELEMENTOS DOM
+            // ============================================================
+
             function createChartWrappers() {
                 const grid = document.getElementById('chartsGrid');
                 grid.innerHTML = '';
 
+                // Gráficas individuales
                 CHART_CONFIGS.forEach(cfg => {
-                    const wrapper = document.createElement('div');
-                    wrapper.className = 'chart-wrapper';
-                    wrapper.dataset.chartId = cfg.id;
-
-                    const label = document.createElement('div');
-                    label.className = 'chart-label';
-                    label.textContent = cfg.label;
-                    wrapper.appendChild(label);
-
-                    const canvas = document.createElement('canvas');
-                    canvas.id = `chart-${cfg.id}`;
-                    canvas.width = 300;
-                    canvas.height = 150;
-                    canvas.setAttribute('loading', 'lazy');
+                    const wrapper = createWrapperElement(cfg.id, cfg.label);
+                    const canvas = createCanvasElement(`chart-${cfg.id}`);
                     wrapper.appendChild(canvas);
-
-                    const hint = document.createElement('span');
-                    hint.className = 'expand-hint';
-                    hint.textContent = '🔍 Ampliar';
-                    wrapper.appendChild(hint);
-
-                    wrapper.addEventListener('click', function(e) {
-                        if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
-                        openModal(cfg.id, cfg.label);
-                    }, { passive: true });
-
+                    wrapper.appendChild(createExpandHint());
+                    wrapper.addEventListener('click', () => openModal(cfg.id, cfg.label), { passive: true });
                     grid.appendChild(wrapper);
                 });
 
                 // Gráfica combinada
-                const combinedWrapper = document.createElement('div');
-                combinedWrapper.className = 'chart-wrapper combined';
-                combinedWrapper.dataset.chartId = 'combined';
-
-                const combinedLabel = document.createElement('div');
-                combinedLabel.className = 'chart-label';
-                combinedLabel.textContent = '📊 Todas las variables';
-                combinedWrapper.appendChild(combinedLabel);
-
-                const combinedCanvas = document.createElement('canvas');
-                combinedCanvas.id = 'chart-combined';
-                combinedCanvas.width = 600;
-                combinedCanvas.height = 200;
-                combinedCanvas.setAttribute('loading', 'lazy');
+                const combinedWrapper = createWrapperElement('combined', '📊 Todas las variables', 'combined');
+                const combinedCanvas = createCanvasElement('chart-combined', 600, 200);
                 combinedWrapper.appendChild(combinedCanvas);
-
-                const hintCombined = document.createElement('span');
-                hintCombined.className = 'expand-hint';
-                hintCombined.textContent = '🔍 Ampliar';
-                combinedWrapper.appendChild(hintCombined);
-
-                combinedWrapper.addEventListener('click', function(e) {
-                    if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
-                    openModal('combined', '📊 Todas las variables');
-                }, { passive: true });
-
+                combinedWrapper.appendChild(createExpandHint());
+                combinedWrapper.addEventListener('click', () => openModal('combined', '📊 Todas las variables'), { passive: true });
                 grid.appendChild(combinedWrapper);
 
-                // Gráfica de sismos M>=6.0 (USGS) — colocada al final, según lo solicitado
-                const seismicWrapper = document.createElement('div');
-                seismicWrapper.className = 'chart-wrapper seismic';
-                seismicWrapper.dataset.chartId = 'earthquakes';
-
-                const seismicLabel = document.createElement('div');
-                seismicLabel.className = 'chart-label';
-                seismicLabel.textContent = '🌍 Sismos M≥6.0 (USGS)';
-                seismicWrapper.appendChild(seismicLabel);
-
-                const seismicCanvas = document.createElement('canvas');
-                seismicCanvas.id = 'chart-earthquakes';
-                seismicCanvas.width = 600;
-                seismicCanvas.height = 200;
-                seismicCanvas.setAttribute('loading', 'lazy');
+                // Gráfica de sismos
+                const seismicWrapper = createWrapperElement('earthquakes', '🌍 Sismos M≥6.0 (USGS)', 'seismic');
+                const seismicCanvas = createCanvasElement('chart-earthquakes', 600, 200);
                 seismicWrapper.appendChild(seismicCanvas);
-
-                const hintSeismic = document.createElement('span');
-                hintSeismic.className = 'expand-hint';
-                hintSeismic.textContent = '🔍 Ampliar';
-                seismicWrapper.appendChild(hintSeismic);
-
-                seismicWrapper.addEventListener('click', function(e) {
-                    if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
-                    openModal('earthquakes', '🌍 Sismos M≥6.0 (USGS)');
-                }, { passive: true });
-
+                seismicWrapper.appendChild(createExpandHint());
+                seismicWrapper.addEventListener('click', () => openModal('earthquakes', '🌍 Sismos M≥6.0 (USGS)'), { passive: true });
                 grid.appendChild(seismicWrapper);
             }
 
-            // --- MODAL ---
+            function createWrapperElement(id, label, className = '') {
+                const wrapper = document.createElement('div');
+                wrapper.className = `chart-wrapper${className ? ` ${className}` : ''}`;
+                wrapper.dataset.chartId = id;
+
+                const labelEl = document.createElement('div');
+                labelEl.className = 'chart-label';
+                labelEl.textContent = label;
+                wrapper.appendChild(labelEl);
+
+                return wrapper;
+            }
+
+            function createCanvasElement(id, width = 300, height = 150) {
+                const canvas = document.createElement('canvas');
+                canvas.id = id;
+                canvas.width = width;
+                canvas.height = height;
+                canvas.setAttribute('loading', 'lazy');
+                return canvas;
+            }
+
+            function createExpandHint() {
+                const hint = document.createElement('span');
+                hint.className = 'expand-hint';
+                hint.textContent = '🔍 Ampliar';
+                return hint;
+            }
+
+            // ============================================================
+            // MODAL
+            // ============================================================
+
             function openModal(chartId, label) {
                 const modal = document.getElementById('chartModal');
                 const modalCanvas = document.getElementById('modalCanvas');
@@ -959,10 +871,10 @@
 
                 modalTitle.textContent = label;
 
-                const originalChart = chartId === 'combined' ? combinedChartInstance : chartInstances[chartId];
+                const originalChart = chartId === 'combined' ? state.combinedChart : state.chartInstances[chartId];
                 if (!originalChart) return;
 
-                const ctx = modalCanvas.getContext('2d');
+                // Destruir gráfica anterior en el modal
                 if (modalCanvas._chart) {
                     modalCanvas._chart.destroy();
                     modalCanvas._chart = null;
@@ -970,88 +882,12 @@
 
                 try {
                     const isSeismic = chartId === 'earthquakes';
-                    const seismicRange = getTimeRange();
+                    const range = utils.getTimeRange();
 
-                    const xScale = isSeismic ? {
-                        type: 'time',
-                        min: seismicRange.min,
-                        max: seismicRange.max,
-                        time: {
-                            unit: 'day',
-                            displayFormats: { day: 'MMM d' },
-                            tooltipFormat: 'PPpp'
-                        },
-                        ticks: {
-                            color: '#ccc',
-                            font: { size: 11 },
-                            maxTicksLimit: 14,
-                            maxRotation: 45
-                        },
-                        grid: { color: 'rgba(255,255,255,0.08)' }
-                    } : {
-                        ticks: {
-                            color: '#ccc',
-                            font: { size: 11 },
-                            maxTicksLimit: 20,
-                            maxRotation: 45
-                        },
-                        grid: { color: 'rgba(255,255,255,0.08)' }
-                    };
-
-                    const newChart = new Chart(ctx, {
+                    const newChart = new Chart(modalCanvas, {
                         type: 'line',
                         data: JSON.parse(JSON.stringify(originalChart.data)),
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: true,
-                            animation: { duration: 200 },
-                            parsing: isSeismic ? false : undefined,
-                            plugins: {
-                                legend: {
-                                    display: !isSeismic,
-                                    labels: {
-                                        color: '#fff',
-                                        font: { size: 13 },
-                                        boxWidth: 16,
-                                        padding: 12
-                                    }
-                                },
-                                tooltip: {
-                                    mode: isSeismic ? 'nearest' : 'index',
-                                    intersect: isSeismic,
-                                    callbacks: isSeismic ? {
-                                        title: ctx => ctx[0] ? new Date(ctx[0].parsed.x)
-                                            .toLocaleString() : '',
-                                        label: ctx => {
-                                            const place = ctx.raw && ctx.raw.place ? ctx.raw.place :
-                                                '';
-                                            return `M${ctx.parsed.y.toFixed(1)} - ${place}`;
-                                        }
-                                    } : {
-                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) :
-                                            'N/A'
-                                    }
-                                }
-                            },
-                            scales: {
-                                x: xScale,
-                                y: {
-                                    beginAtZero: isSeismic,
-                                    suggestedMax: isSeismic ? 9 : undefined,
-                                    ticks: {
-                                        color: '#ccc',
-                                        font: { size: 11 }
-                                    },
-                                    grid: { color: 'rgba(255,255,255,0.08)' }
-                                }
-                            },
-                            elements: {
-                                point: {
-                                    radius: isSeismic ? 4 : 2,
-                                    hoverRadius: isSeismic ? 8 : 6
-                                }
-                            }
-                        }
+                        options: createModalOptions(isSeismic, range)
                     });
 
                     modalCanvas._chart = newChart;
@@ -1060,6 +896,81 @@
                 } catch (e) {
                     console.warn('Error en modal:', e);
                 }
+            }
+
+            function createModalOptions(isSeismic, range) {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    animation: { duration: 200 },
+                    parsing: isSeismic ? false : undefined,
+                    plugins: {
+                        legend: {
+                            display: !isSeismic,
+                            labels: {
+                                color: '#fff',
+                                font: { size: 13 },
+                                boxWidth: 16,
+                                padding: 12
+                            }
+                        },
+                        tooltip: {
+                            mode: isSeismic ? 'nearest' : 'index',
+                            intersect: isSeismic,
+                            callbacks: isSeismic ? {
+                                title: ctx => ctx[0] ? new Date(ctx[0].parsed.x).toLocaleString() : '',
+                                label: ctx => {
+                                    const place = ctx.raw?.place || '';
+                                    return `M${ctx.parsed.y.toFixed(1)} - ${place}`;
+                                }
+                            } : {
+                                label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) : 'N/A'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: isSeismic ? {
+                            type: 'time',
+                            min: range.min,
+                            max: range.max,
+                            time: {
+                                unit: 'day',
+                                displayFormats: { day: 'MMM d' },
+                                tooltipFormat: 'PPpp'
+                            },
+                            ticks: {
+                                color: '#ccc',
+                                font: { size: 11 },
+                                maxTicksLimit: 14,
+                                maxRotation: 45
+                            },
+                            grid: { color: 'rgba(255,255,255,0.08)' }
+                        } : {
+                            ticks: {
+                                color: '#ccc',
+                                font: { size: 11 },
+                                maxTicksLimit: 20,
+                                maxRotation: 45
+                            },
+                            grid: { color: 'rgba(255,255,255,0.08)' }
+                        },
+                        y: {
+                            beginAtZero: isSeismic,
+                            suggestedMax: isSeismic ? 9 : undefined,
+                            ticks: {
+                                color: '#ccc',
+                                font: { size: 11 }
+                            },
+                            grid: { color: 'rgba(255,255,255,0.08)' }
+                        }
+                    },
+                    elements: {
+                        point: {
+                            radius: isSeismic ? 4 : 2,
+                            hoverRadius: isSeismic ? 8 : 6
+                        }
+                    }
+                };
             }
 
             function closeModal() {
@@ -1073,55 +984,27 @@
                 }
             }
 
-            // Eventos del modal
-            document.getElementById('modalCloseBtn').addEventListener('click', function(e) {
-                e.stopPropagation();
-                closeModal();
-            });
+            // ============================================================
+            // ACTUALIZACIÓN DE DATOS EN VIVO
+            // ============================================================
 
-            document.getElementById('chartModal').addEventListener('click', function(e) {
-                if (e.target === this) closeModal();
-            });
+            function updateLiveData(feed1, feed2) {
+                const fieldMap1 = CHANNEL_FIELDS[1];
+                const fieldMap2 = CHANNEL_FIELDS[2];
 
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') closeModal();
-            });
-
-            // --- ACTUALIZAR DATOS EN VIVO ---
-            function updateLiveData(latestFeed1, latestFeed2) {
-                const map1 = {
-                    realParticles: 'field1',
-                    imaginaryParticles: 'field2',
-                    molecularPhysics: 'field3',
-                    xCoord: 'field4',
-                    yCoord: 'field5',
-                    zCoord: 'field6',
-                    angle: 'field7'
-                };
-                const map2 = {
-                    accelX: 'field1',
-                    accelY: 'field2',
-                    accelZ: 'field3',
-                    accelResult: 'field4'
-                };
-
-                Object.keys(map1).forEach(key => {
-                    const field = map1[key];
-                    const el = document.getElementById(DATA_ELEMENTS[key]);
+                Object.keys(fieldMap1).forEach(key => {
+                    const el = document.getElementById(DATA_MAPPING[key]);
                     if (el) {
-                        const val = latestFeed1 && latestFeed1[field] !== undefined && latestFeed1[field] !==
-                            null && latestFeed1[field] !== '' ? latestFeed1[field] : 'En Reposo';
+                        const val = feed1?.[fieldMap1[key]] ?? 'En Reposo';
                         const label = el.textContent.split(':')[0];
                         el.textContent = `${label}: ${val}`;
                     }
                 });
 
-                Object.keys(map2).forEach(key => {
-                    const field = map2[key];
-                    const el = document.getElementById(DATA_ELEMENTS[key]);
+                Object.keys(fieldMap2).forEach(key => {
+                    const el = document.getElementById(DATA_MAPPING[key]);
                     if (el) {
-                        const val = latestFeed2 && latestFeed2[field] !== undefined && latestFeed2[field] !==
-                            null && latestFeed2[field] !== '' ? latestFeed2[field] : 'En Reposo';
+                        const val = feed2?.[fieldMap2[key]] ?? 'En Reposo';
                         const label = el.textContent.split(':')[0];
                         el.textContent = `${label}: ${val}`;
                     }
@@ -1129,8 +1012,7 @@
 
                 const statusCircle = document.querySelector('.status-circle');
                 const statusText = document.getElementById('statusText');
-                const isActive = latestFeed1 && latestFeed1.field1 !== undefined && latestFeed1.field1 !== null &&
-                    latestFeed1.field1 !== '' && latestFeed1.field1 !== '0';
+                const isActive = feed1?.field1 && feed1.field1 !== '0' && feed1.field1 !== '';
 
                 if (statusCircle) {
                     statusCircle.style.backgroundColor = isActive ? '#00E676' : '#FF1744';
@@ -1140,59 +1022,135 @@
                 }
             }
 
-            // --- ACTUALIZAR GRÁFICAS CON MÁXIMA CAPTURA ---
-            function updateCharts() {
-                if (isUpdating) return;
-                isUpdating = true;
+            // ============================================================
+            // CONSTRUCCIÓN DE GRÁFICAS
+            // ============================================================
 
-                if (updateTimeoutId) {
-                    clearTimeout(updateTimeoutId);
-                    updateTimeoutId = null;
-                }
-                if (retryTimeoutId) {
-                    clearTimeout(retryTimeoutId);
-                    retryTimeoutId = null;
-                }
+            function buildChartOptions(cfg, isSeismic = false) {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    animation: { duration: 150 },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) : 'N/A'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            ticks: {
+                                maxTicksLimit: 8,
+                                font: { size: 8 },
+                                maxRotation: 30
+                            },
+                            grid: { display: false }
+                        },
+                        y: {
+                            display: true,
+                            ticks: {
+                                font: { size: 8 },
+                                callback: value => value.toFixed(2)
+                            },
+                            grid: { color: 'rgba(0,0,0,0.06)' },
+                            beginAtZero: false
+                        }
+                    },
+                    elements: { line: { borderJoinStyle: 'round' } }
+                };
+            }
 
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 25000);
+            function buildCombinedOptions() {
+                return {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    animation: { duration: 150 },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: '#fff',
+                                font: { size: 9 },
+                                boxWidth: 12,
+                                padding: 8
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: ctx => ctx.parsed.y !== null ?
+                                    `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}` : 'N/A'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#ccc',
+                                font: { size: 8 },
+                                maxTicksLimit: 12,
+                                maxRotation: 30
+                            },
+                            grid: { color: 'rgba(255,255,255,0.06)' }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#ccc',
+                                font: { size: 8 },
+                                callback: value => value.toFixed(2)
+                            },
+                            grid: { color: 'rgba(255,255,255,0.06)' },
+                            beginAtZero: false
+                        }
+                    },
+                    elements: {
+                        point: { radius: 0.5, hoverRadius: 4 },
+                        line: { borderJoinStyle: 'round' }
+                    }
+                };
+            }
 
-                Promise.all([
-                    fetch(URL1, { signal: controller.signal }).then(r => r.ok ? r.json() : Promise.reject(
-                        'Error canal 1')),
-                    fetch(URL2, { signal: controller.signal }).then(r => r.ok ? r.json() : Promise.reject(
-                        'Error canal 2'))
-                ]).then(([data1, data2]) => {
-                    clearTimeout(timeoutId);
+            // ============================================================
+            // ACTUALIZACIÓN PRINCIPAL
+            // ============================================================
+
+            async function updateCharts() {
+                if (state.isUpdating) return;
+                state.isUpdating = true;
+
+                try {
+                    // Cancelar petición anterior si existe
+                    if (state.abortController) {
+                        state.abortController.abort();
+                    }
+                    state.abortController = new AbortController();
+
+                    const range = utils.getDateRange();
+                    const [url1, url2] = buildUrls(range);
+
+                    const [data1, data2] = await Promise.all([
+                        fetch(url1, { signal: state.abortController.signal }).then(r => r.ok ? r.json() : Promise.reject('Error canal 1')),
+                        fetch(url2, { signal: state.abortController.signal }).then(r => r.ok ? r.json() : Promise.reject('Error canal 2'))
+                    ]);
 
                     const feeds1 = data1.feeds || [];
                     const feeds2 = data2.feeds || [];
                     const latestFeed1 = feeds1.length ? feeds1[feeds1.length - 1] : null;
                     const latestFeed2 = feeds2.length ? feeds2[feeds2.length - 1] : null;
 
-                    // Rango real de fechas de las muestras recibidas (puede ser más angosto que
-                    // el rango solicitado, p. ej. si el sensor estuvo apagado parte del tiempo).
-                    let minT = Infinity;
-                    let maxT = -Infinity;
-                    feeds1.forEach(f => {
-                        if (!f.created_at) return;
-                        const t = new Date(f.created_at).getTime();
-                        if (t < minT) minT = t;
-                        if (t > maxT) maxT = t;
-                    });
-                    feeds2.forEach(f => {
-                        if (!f.created_at) return;
-                        const t = new Date(f.created_at).getTime();
-                        if (t < minT) minT = t;
-                        if (t > maxT) maxT = t;
-                    });
-                    if (minT !== Infinity && maxT !== -Infinity) {
-                        sensorMinTime = minT;
-                        sensorMaxTime = maxT;
-                    }
+                    // Actualizar rango temporal
+                    updateTimeRange([...feeds1, ...feeds2]);
 
+                    // Actualizar datos en vivo
                     updateLiveData(latestFeed1, latestFeed2);
 
+                    // Procesar gráficas individuales y combinada
                     const combinedDatasets = [];
                     let allLabels = [];
 
@@ -1201,77 +1159,10 @@
                         const { labels, data } = processFeeds(feeds, cfg.field);
                         const canvas = document.getElementById(`chart-${cfg.id}`);
                         if (!canvas) return;
-                        const ctx = canvas.getContext('2d');
 
-                        if (chartInstances[cfg.id]) {
-                            chartInstances[cfg.id].data.labels = labels;
-                            chartInstances[cfg.id].data.datasets[0].data = data;
-                            chartInstances[cfg.id].update('none');
-                        } else {
-                            try {
-                                chartInstances[cfg.id] = new Chart(ctx, {
-                                    type: 'line',
-                                    data: {
-                                        labels: labels,
-                                        datasets: [{
-                                            label: cfg.label,
-                                            data: data,
-                                            borderColor: cfg.color,
-                                            backgroundColor: cfg.color + '33',
-                                            borderWidth: 2,
-                                            pointRadius: 1,
-                                            pointHoverRadius: 4,
-                                            fill: true,
-                                            tension: 0.2
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: true,
-                                        animation: { duration: 150 },
-                                        plugins: {
-                                            legend: { display: false },
-                                            tooltip: {
-                                                mode: 'index',
-                                                intersect: false,
-                                                callbacks: {
-                                                    label: ctx => ctx.parsed.y !== null ? ctx
-                                                        .parsed.y.toFixed(4) : 'N/A'
-                                                }
-                                            }
-                                        },
-                                        scales: {
-                                            x: {
-                                                display: true,
-                                                ticks: {
-                                                    maxTicksLimit: 8,
-                                                    font: { size: 8 },
-                                                    maxRotation: 30
-                                                },
-                                                grid: { display: false }
-                                            },
-                                            y: {
-                                                display: true,
-                                                ticks: {
-                                                    font: { size: 8 },
-                                                    callback: value => value.toFixed(2)
-                                                },
-                                                grid: { color: 'rgba(0,0,0,0.06)' },
-                                                beginAtZero: false
-                                            }
-                                        },
-                                        elements: { line: { borderJoinStyle: 'round' } }
-                                    }
-                                });
-                            } catch (e) {
-                                console.warn('Error gráfica:', cfg.id, e);
-                            }
-                        }
-
-                        if (labels.length > 0 && data.length > 0) {
-                            if (allLabels.length === 0) {
-                                allLabels = labels.slice();
-                            }
+                        updateIndividualChart(cfg.id, cfg, labels, data);
+                        if (labels.length && data.length) {
+                            if (!allLabels.length) allLabels = labels.slice();
                             combinedDatasets.push({
                                 label: cfg.label,
                                 data: data,
@@ -1285,279 +1176,306 @@
                         }
                     });
 
-                    // Gráfica combinada
-                    const combinedCanvas = document.getElementById('chart-combined');
-                    if (combinedCanvas) {
-                        const ctxCombined = combinedCanvas.getContext('2d');
-                        if (combinedChartInstance) {
-                            combinedChartInstance.data.labels = allLabels;
-                            combinedChartInstance.data.datasets = combinedDatasets;
-                            combinedChartInstance.update('none');
-                        } else {
-                            try {
-                                combinedChartInstance = new Chart(ctxCombined, {
-                                    type: 'line',
-                                    data: {
-                                        labels: allLabels,
-                                        datasets: combinedDatasets
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: true,
-                                        animation: { duration: 150 },
-                                        plugins: {
-                                            legend: {
-                                                display: true,
-                                                labels: {
-                                                    color: '#fff',
-                                                    font: { size: 9 },
-                                                    boxWidth: 12,
-                                                    padding: 8
-                                                }
-                                            },
-                                            tooltip: {
-                                                mode: 'index',
-                                                intersect: false,
-                                                callbacks: {
-                                                    label: ctx => ctx.parsed.y !== null ?
-                                                        `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}` :
-                                                        'N/A'
-                                                }
-                                            }
-                                        },
-                                        scales: {
-                                            x: {
-                                                ticks: {
-                                                    color: '#ccc',
-                                                    font: { size: 8 },
-                                                    maxTicksLimit: 12,
-                                                    maxRotation: 30
-                                                },
-                                                grid: { color: 'rgba(255,255,255,0.06)' }
-                                            },
-                                            y: {
-                                                ticks: {
-                                                    color: '#ccc',
-                                                    font: { size: 8 },
-                                                    callback: value => value.toFixed(2)
-                                                },
-                                                grid: { color: 'rgba(255,255,255,0.06)' },
-                                                beginAtZero: false
-                                            }
-                                        },
-                                        elements: {
-                                            point: { radius: 0.5, hoverRadius: 4 },
-                                            line: { borderJoinStyle: 'round' }
-                                        }
-                                    }
-                                });
-                            } catch (e) {
-                                console.warn('Error gráfica combinada:', e);
-                            }
-                        }
-                    }
+                    // Actualizar gráfica combinada
+                    updateCombinedChart(allLabels, combinedDatasets);
 
-                    // Alinear el eje de tiempo de la gráfica de sismos con las fechas
-                    // reales de las muestras que se acaban de recibir.
+                    // Sincronizar gráfica de sismos
                     syncEarthquakeChartBounds();
 
-                    isUpdating = false;
-                }).catch(error => {
-                    clearTimeout(timeoutId);
+                } catch (error) {
                     console.warn('Error en actualización:', error);
-
-                    const statusText = document.getElementById('statusText');
-                    if (statusText) statusText.textContent = '⚠️ Error de conexión';
-                    const statusCircle = document.querySelector('.status-circle');
-                    if (statusCircle) statusCircle.style.backgroundColor = '#FF1744';
-
-                    isUpdating = false;
-
-                    if (retryTimeoutId) clearTimeout(retryTimeoutId);
-                    retryTimeoutId = setTimeout(updateCharts, 15000);
-                });
-            }
-
-            // --- ACTUALIZAR GRÁFICA DE SISMOS (USGS, M >= 6.0) ---
-            function updateEarthquakeChart() {
-                if (isUpdatingSeismic) return;
-                isUpdatingSeismic = true;
-
-                if (seismicRetryTimeoutId) {
-                    clearTimeout(seismicRetryTimeoutId);
-                    seismicRetryTimeoutId = null;
+                    handleUpdateError();
+                } finally {
+                    state.isUpdating = false;
                 }
-
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 20000);
-
-                fetch(USGS_URL, { signal: controller.signal })
-                    .then(r => r.ok ? r.json() : Promise.reject('Error USGS'))
-                    .then(geojson => {
-                        clearTimeout(timeoutId);
-
-                        const features = geojson.features || [];
-                        const points = processEarthquakes(features);
-
-                        const countEl = document.getElementById('earthquakeCount');
-                        if (countEl) countEl.textContent = `🌍 Sismos M≥6: ${points.length}`;
-
-                        const canvas = document.getElementById('chart-earthquakes');
-                        if (!canvas) {
-                            isUpdatingSeismic = false;
-                            return;
-                        }
-                        const ctx = canvas.getContext('2d');
-
-                        // Color por rango de magnitud (función scriptable de Chart.js)
-                        const pointColor = context => {
-                            const m = context.raw ? context.raw.y : null;
-                            if (m === null) return '#FF8C00';
-                            return m >= 8 ? '#8B0000' : m >= 7 ? '#FF0000' : '#FF8C00';
-                        };
-
-                        if (chartInstances['earthquakes']) {
-                            const range = getTimeRange();
-                            chartInstances['earthquakes'].data.datasets[0].data = points;
-                            chartInstances['earthquakes'].options.scales.x.min = range.min;
-                            chartInstances['earthquakes'].options.scales.x.max = range.max;
-                            chartInstances['earthquakes'].update('none');
-                        } else {
-                            try {
-                                const initialRange = getTimeRange();
-                                const chart = new Chart(ctx, {
-                                    type: 'line',
-                                    data: {
-                                        datasets: [{
-                                            label: 'Magnitud',
-                                            data: points,
-                                            borderColor: '#FF4444',
-                                            backgroundColor: 'rgba(255, 68, 68, 0.15)',
-                                            pointBackgroundColor: pointColor,
-                                            pointBorderColor: '#fff',
-                                            pointRadius: 4,
-                                            pointHoverRadius: 7,
-                                            borderWidth: 2,
-                                            fill: true,
-                                            tension: 0,
-                                            spanGaps: true
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: true,
-                                        animation: { duration: 150 },
-                                        parsing: false,
-                                        plugins: {
-                                            legend: { display: false },
-                                            tooltip: {
-                                                callbacks: {
-                                                    title: ctx => ctx[0] ? new Date(ctx[0].parsed.x)
-                                                        .toLocaleString() : '',
-                                                    label: ctx => {
-                                                        const place = ctx.raw && ctx.raw.place ? ctx
-                                                            .raw.place : '';
-                                                        return `M${ctx.parsed.y.toFixed(1)} - ${place}`;
-                                                    }
-                                                }
-                                            }
-                                        },
-                                        scales: {
-                                            x: {
-                                                type: 'time',
-                                                min: initialRange.min,
-                                                max: initialRange.max,
-                                                time: {
-                                                    unit: 'day',
-                                                    displayFormats: { day: 'MMM d' },
-                                                    tooltipFormat: 'PPpp'
-                                                },
-                                                ticks: {
-                                                    maxTicksLimit: 8,
-                                                    font: { size: 8 },
-                                                    maxRotation: 30
-                                                },
-                                                grid: { display: false }
-                                            },
-                                            y: {
-                                                beginAtZero: true,
-                                                suggestedMax: 9,
-                                                ticks: {
-                                                    font: { size: 8 },
-                                                    callback: value => value.toFixed(1)
-                                                },
-                                                grid: { color: 'rgba(0,0,0,0.06)' }
-                                            }
-                                        }
-                                    }
-                                });
-                                chartInstances['earthquakes'] = chart;
-                            } catch (e) {
-                                console.warn('Error gráfica de sismos:', e);
-                            }
-                        }
-
-                        isUpdatingSeismic = false;
-                    }).catch(error => {
-                        clearTimeout(timeoutId);
-                        console.warn('Error al actualizar sismos USGS:', error);
-
-                        const countEl = document.getElementById('earthquakeCount');
-                        if (countEl) countEl.textContent = '🌍 Sismos M≥6: ⚠️';
-
-                        isUpdatingSeismic = false;
-
-                        if (seismicRetryTimeoutId) clearTimeout(seismicRetryTimeoutId);
-                        seismicRetryTimeoutId = setTimeout(updateEarthquakeChart, 60000);
-                    });
             }
 
-            // --- INICIALIZACIÓN ---
-            function init() {
-                createChartWrappers();
+            function buildUrls(range) {
+                const { particle, acceleration } = CONFIG.channels;
+                const baseUrl = (id, key) =>
+                    `https://api.thingspeak.com/channels/${id}/feeds.json?api_key=${key}&start=${range.start}&end=${range.end}&results=${CONFIG.maxResults}`;
+                return [baseUrl(particle.id, particle.key), baseUrl(acceleration.id, acceleration.key)];
+            }
 
-                const checkChart = () => {
-                    if (typeof Chart !== 'undefined') {
-                        updateCharts();
-                        updateEarthquakeChart();
-                        return true;
+            function updateTimeRange(feeds) {
+                let minT = Infinity;
+                let maxT = -Infinity;
+                feeds.forEach(f => {
+                    if (!f.created_at) return;
+                    const t = new Date(f.created_at).getTime();
+                    if (t < minT) minT = t;
+                    if (t > maxT) maxT = t;
+                });
+                if (minT !== Infinity && maxT !== -Infinity) {
+                    state.sensorMinTime = minT;
+                    state.sensorMaxTime = maxT;
+                }
+            }
+
+            function updateIndividualChart(id, cfg, labels, data) {
+                const canvas = document.getElementById(`chart-${id}`);
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+
+                if (state.chartInstances[id]) {
+                    const chart = state.chartInstances[id];
+                    chart.data.labels = labels;
+                    chart.data.datasets[0].data = data;
+                    chart.update('none');
+                } else {
+                    try {
+                        state.chartInstances[id] = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: cfg.label,
+                                    data: data,
+                                    borderColor: cfg.color,
+                                    backgroundColor: cfg.color + '33',
+                                    borderWidth: 2,
+                                    pointRadius: 1,
+                                    pointHoverRadius: 4,
+                                    fill: true,
+                                    tension: 0.2
+                                }]
+                            },
+                            options: buildChartOptions(cfg)
+                        });
+                    } catch (e) {
+                        console.warn('Error gráfica:', id, e);
                     }
-                    return false;
+                }
+            }
+
+            function updateCombinedChart(labels, datasets) {
+                const canvas = document.getElementById('chart-combined');
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+
+                if (state.combinedChart) {
+                    state.combinedChart.data.labels = labels;
+                    state.combinedChart.data.datasets = datasets;
+                    state.combinedChart.update('none');
+                } else {
+                    try {
+                        state.combinedChart = new Chart(ctx, {
+                            type: 'line',
+                            data: { labels, datasets },
+                            options: buildCombinedOptions()
+                        });
+                    } catch (e) {
+                        console.warn('Error gráfica combinada:', e);
+                    }
+                }
+            }
+
+            function handleUpdateError() {
+                const statusText = document.getElementById('statusText');
+                if (statusText) statusText.textContent = '⚠️ Error de conexión';
+                const statusCircle = document.querySelector('.status-circle');
+                if (statusCircle) statusCircle.style.backgroundColor = '#FF1744';
+
+                setTimeout(updateCharts, CONFIG.retryDelay);
+            }
+
+            // ============================================================
+            // GRÁFICA DE SISMOS
+            // ============================================================
+
+            async function updateEarthquakeChart() {
+                if (state.isUpdatingSeismic) return;
+                state.isUpdatingSeismic = true;
+
+                try {
+                    const range = utils.getTimeRange();
+                    const url = buildSeismicUrl(range);
+
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Error USGS');
+
+                    const geojson = await response.json();
+                    const features = geojson.features || [];
+                    const points = processEarthquakes(features);
+
+                    // Actualizar contador
+                    const countEl = document.getElementById('earthquakeCount');
+                    if (countEl) countEl.textContent = `🌍 Sismos M≥6: ${points.length}`;
+
+                    // Actualizar gráfica
+                    const canvas = document.getElementById('chart-earthquakes');
+                    if (!canvas) return;
+
+                    updateSeismicChart(canvas, points, range);
+
+                } catch (error) {
+                    console.warn('Error al actualizar sismos USGS:', error);
+                    const countEl = document.getElementById('earthquakeCount');
+                    if (countEl) countEl.textContent = '🌍 Sismos M≥6: ⚠️';
+                    setTimeout(updateEarthquakeChart, 60000);
+                } finally {
+                    state.isUpdatingSeismic = false;
+                }
+            }
+
+            function buildSeismicUrl(range) {
+                const start = new Date(range.min).toISOString().slice(0, 10);
+                const end = new Date(range.max).toISOString().slice(0, 10);
+                return `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${start}&endtime=${end}&minmagnitude=6&orderby=time`;
+            }
+
+            function updateSeismicChart(canvas, points, range) {
+                const ctx = canvas.getContext('2d');
+
+                const pointColor = (context) => {
+                    const m = context.raw?.y;
+                    if (m === null) return '#FF8C00';
+                    return m >= 8 ? '#8B0000' : m >= 7 ? '#FF0000' : '#FF8C00';
                 };
 
-                if (document.readyState === 'complete' || document.readyState === 'interactive') {
-                    if (!checkChart()) {
-                        const interval = setInterval(() => {
-                            if (checkChart()) clearInterval(interval);
-                        }, 200);
-                    }
-                } else {
-                    document.addEventListener('DOMContentLoaded', () => {
-                        if (!checkChart()) {
-                            const interval = setInterval(() => {
-                                if (checkChart()) clearInterval(interval);
-                            }, 200);
+                const chartData = {
+                    datasets: [{
+                        label: 'Magnitud',
+                        data: points,
+                        borderColor: '#FF4444',
+                        backgroundColor: 'rgba(255, 68, 68, 0.15)',
+                        pointBackgroundColor: pointColor,
+                        pointBorderColor: '#fff',
+                        pointRadius: 4,
+                        pointHoverRadius: 7,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0,
+                        spanGaps: true
+                    }]
+                };
+
+                const chartOptions = {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    animation: { duration: 150 },
+                    parsing: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                title: ctx => ctx[0] ? new Date(ctx[0].parsed.x).toLocaleString() : '',
+                                label: ctx => {
+                                    const place = ctx.raw?.place || '';
+                                    return `M${ctx.parsed.y.toFixed(1)} - ${place}`;
+                                }
+                            }
                         }
-                    });
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            min: range.min,
+                            max: range.max,
+                            time: {
+                                unit: 'day',
+                                displayFormats: { day: 'MMM d' },
+                                tooltipFormat: 'PPpp'
+                            },
+                            ticks: {
+                                maxTicksLimit: 8,
+                                font: { size: 8 },
+                                maxRotation: 30
+                            },
+                            grid: { display: false }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 9,
+                            ticks: {
+                                font: { size: 8 },
+                                callback: value => value.toFixed(1)
+                            },
+                            grid: { color: 'rgba(0,0,0,0.06)' }
+                        }
+                    }
+                };
+
+                if (state.chartInstances['earthquakes']) {
+                    const chart = state.chartInstances['earthquakes'];
+                    chart.data = chartData;
+                    chart.options = chartOptions;
+                    chart.update('none');
+                } else {
+                    try {
+                        state.chartInstances['earthquakes'] = new Chart(ctx, {
+                            type: 'line',
+                            data: chartData,
+                            options: chartOptions
+                        });
+                    } catch (e) {
+                        console.warn('Error gráfica de sismos:', e);
+                    }
                 }
+            }
 
-                setInterval(updateCharts, 20000);
-                // Los sismos M>=6 no cambian con la misma frecuencia que el sensor;
-                // se refresca cada 5 minutos para no saturar la API pública de USGS.
-                setInterval(updateEarthquakeChart, 300000);
+            function syncEarthquakeChartBounds() {
+                const chart = state.chartInstances['earthquakes'];
+                if (!chart) return;
+                const range = utils.getTimeRange();
+                chart.options.scales.x.min = range.min;
+                chart.options.scales.x.max = range.max;
+                chart.update('none');
+            }
 
+            // ============================================================
+            // INICIALIZACIÓN
+            // ============================================================
+
+            function init() {
+                // Verificar que Chart.js esté disponible
+                if (typeof Chart === 'undefined') {
+                    const interval = setInterval(() => {
+                        if (typeof Chart !== 'undefined') {
+                            clearInterval(interval);
+                            initializeApp();
+                        }
+                    }, 200);
+                } else {
+                    initializeApp();
+                }
+            }
+
+            function initializeApp() {
+                createChartWrappers();
+                updateCharts();
+                updateEarthquakeChart();
+
+                // Actualizaciones periódicas
+                setInterval(updateCharts, CONFIG.updateInterval);
+                setInterval(updateEarthquakeChart, CONFIG.seismicInterval);
+
+                // Eventos de visibilidad
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
-                        if (updateTimeoutId) {
-                            clearTimeout(updateTimeoutId);
-                            updateTimeoutId = null;
-                        }
                         updateCharts();
                         updateEarthquakeChart();
                     }
                 }, { passive: true });
+
+                // Eventos del modal
+                document.getElementById('modalCloseBtn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeModal();
+                });
+
+                document.getElementById('chartModal').addEventListener('click', (e) => {
+                    if (e.target === e.currentTarget) closeModal();
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') closeModal();
+                });
+
+                console.log('Observatorio de Partículas del TOA - Inicializado correctamente');
             }
 
+            // Iniciar la aplicación
             if (document.readyState === 'loading') {
                 document.addEventListener('DOMContentLoaded', init);
             } else {
