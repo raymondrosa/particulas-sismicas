@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
+        /* ============================================================
+           OPTIMIZACIÓN PREMIUM - 2 DE AGOSTO DE 2026
+           Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
+           ============================================================ */
+
         * {
             box-sizing: border-box;
             margin: 0;
@@ -290,7 +295,7 @@
             background: #FFFFFF;
         }
 
-        /* SECCIÓN SÍSMICA - Tarjetas */
+        /* ===== SECCIÓN SÍSMICA ===== */
         .seismic-section {
             max-width: 1400px;
             margin: 20px auto 0;
@@ -310,7 +315,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            flex-wrap: wrap;
         }
 
         .seismic-section .section-title .badge {
@@ -378,15 +382,11 @@
         }
 
         @keyframes pulse {
-            0%,
-            100% {
-                opacity: 0.4;
-            }
-            50% {
-                opacity: 1;
-            }
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
         }
 
+        /* ===== FOOTER ===== */
         .footer {
             text-align: center;
             padding: 14px 12px;
@@ -415,7 +415,7 @@
             max-height: 200px;
         }
 
-        /* RESPONSIVE */
+        /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
             .charts-grid {
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -618,8 +618,7 @@
             font-weight: 700;
         }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer>
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 </head>
 <body>
 
@@ -658,9 +657,6 @@
         <div class="section-title">
             🌍 Eventos Sísmicos &gt; 6M (USGS)
             <span class="badge" id="quakeCount">0</span>
-            <span style="font-size:0.7rem; color:rgba(255,255,255,0.5); font-weight:400; margin-left:auto;">
-                ⚡ Líneas rojas en gráficas = eventos sísmicos
-            </span>
         </div>
         <div id="seismicContent">
             <div class="seismic-loading">⏳ Cargando datos sísmicos...</div>
@@ -750,9 +746,6 @@
             let updateTimeoutId = null;
             let retryTimeoutId = null;
 
-            // Almacenar eventos sísmicos para usar en gráficas
-            let seismicEvents = [];
-
             // ============================================================
             // DECODIFICADOR DE DATOS
             // ============================================================
@@ -793,51 +786,6 @@
             }
 
             // ============================================================
-            // CREAR ANOTACIONES DE SISMOS (líneas verticales)
-            // ============================================================
-            function getSeismicAnnotations(labels) {
-                if (!seismicEvents || seismicEvents.length === 0) return [];
-
-                const annotations = [];
-                seismicEvents.forEach(quake => {
-                    const quakeTime = new Date(quake.time);
-                    // Buscar el índice más cercano en los labels
-                    let closestIndex = -1;
-                    let closestDiff = Infinity;
-                    labels.forEach((label, idx) => {
-                        const labelDate = new Date(label);
-                        const diff = Math.abs(labelDate.getTime() - quakeTime.getTime());
-                        if (diff < closestDiff) {
-                            closestDiff = diff;
-                            closestIndex = idx;
-                        }
-                    });
-                    // Si la diferencia es menor a 1 hora, consideramos que coincide
-                    if (closestIndex >= 0 && closestDiff < 3600000) {
-                        annotations.push({
-                            type: 'line',
-                            xMin: closestIndex,
-                            xMax: closestIndex,
-                            borderColor: '#FF1744',
-                            borderWidth: 2,
-                            borderDash: [5, 5],
-                            label: {
-                                content: `⚡${quake.mag}M`,
-                                enabled: true,
-                                position: 'top',
-                                color: '#FF1744',
-                                font: {
-                                    weight: 'bold',
-                                    size: 10
-                                }
-                            }
-                        });
-                    }
-                });
-                return annotations;
-            }
-
-            // ============================================================
             // CREAR ELEMENTOS DE GRÁFICAS
             // ============================================================
             function createChartWrappers() {
@@ -874,7 +822,7 @@
                 combinedWrapper.dataset.chartId = 'combined';
                 const combinedLabel = document.createElement('div');
                 combinedLabel.className = 'chart-label';
-                combinedLabel.textContent = '📊 Todas las variables + Sismos ⚡';
+                combinedLabel.textContent = '📊 Todas las variables';
                 combinedWrapper.appendChild(combinedLabel);
                 const combinedCanvas = document.createElement('canvas');
                 combinedCanvas.id = 'chart-combined';
@@ -888,7 +836,7 @@
                 combinedWrapper.appendChild(hintCombined);
                 combinedWrapper.addEventListener('click', function(e) {
                     if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
-                    openModal('combined', '📊 Todas las variables + Sismos ⚡');
+                    openModal('combined', '📊 Todas las variables');
                 }, { passive: true });
                 grid.appendChild(combinedWrapper);
             }
@@ -909,15 +857,9 @@
                     modalCanvas._chart = null;
                 }
                 try {
-                    // Clonar datos y agregar anotaciones
-                    const dataClone = JSON.parse(JSON.stringify(originalChart.data));
-
-                    // Obtener anotaciones para el modal
-                    const annotations = getSeismicAnnotations(dataClone.labels);
-
                     const newChart = new Chart(ctx, {
                         type: 'line',
-                        data: dataClone,
+                        data: JSON.parse(JSON.stringify(originalChart.data)),
                         options: {
                             responsive: true,
                             maintainAspectRatio: true,
@@ -925,19 +867,14 @@
                             plugins: {
                                 legend: {
                                     display: true,
-                                    labels: { color: '#fff', font: { size: 13 }, boxWidth: 16,
-                                    padding: 12 }
+                                    labels: { color: '#fff', font: { size: 13 }, boxWidth: 16, padding: 12 }
                                 },
                                 tooltip: {
                                     mode: 'index',
                                     intersect: false,
                                     callbacks: {
-                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) :
-                                            'N/A'
+                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) : 'N/A'
                                     }
-                                },
-                                annotation: {
-                                    annotations: annotations
                                 }
                             },
                             scales: {
@@ -953,8 +890,7 @@
                                 }
                             },
                             elements: { point: { radius: 2, hoverRadius: 6 } }
-                        },
-                        plugins: [ChartAnnotation]
+                        }
                     });
                     modalCanvas._chart = newChart;
                     modal.classList.add('active');
@@ -1038,7 +974,7 @@
             }
 
             // ============================================================
-            // ACTUALIZAR GRÁFICAS CON ANOTACIONES SÍSMICAS
+            // ACTUALIZAR GRÁFICAS
             // ============================================================
             function updateCharts() {
                 if (isUpdating) return;
@@ -1068,28 +1004,18 @@
                     updateLiveData(latestFeed1, latestFeed2);
                     const combinedDatasets = [];
                     let allLabels = [];
-
                     CHART_CONFIGS.forEach(cfg => {
                         const feeds = cfg.channel === 2 ? feeds2 : feeds1;
                         const { labels, data } = processFeeds(feeds, cfg.field);
                         const canvas = document.getElementById(`chart-${cfg.id}`);
                         if (!canvas) return;
                         const ctx = canvas.getContext('2d');
-
-                        // Obtener anotaciones para esta gráfica
-                        const annotations = getSeismicAnnotations(labels);
-
                         if (chartInstances[cfg.id]) {
                             chartInstances[cfg.id].data.labels = labels;
                             chartInstances[cfg.id].data.datasets[0].data = data;
-                            // Actualizar anotaciones
-                            if (chartInstances[cfg.id].options.plugins) {
-                                chartInstances[cfg.id].options.plugins.annotation = { annotations: annotations };
-                            }
                             chartInstances[cfg.id].update('none');
                         } else {
                             try {
-                                // Crear gráfica con soporte para anotaciones
                                 chartInstances[cfg.id] = new Chart(ctx, {
                                     type: 'line',
                                     data: {
@@ -1119,9 +1045,6 @@
                                                     label: ctx => ctx.parsed.y !== null ? ctx
                                                         .parsed.y.toFixed(4) : 'N/A'
                                                 }
-                                            },
-                                            annotation: {
-                                                annotations: annotations
                                             }
                                         },
                                         scales: {
@@ -1140,8 +1063,7 @@
                                             }
                                         },
                                         elements: { line: { borderJoinStyle: 'round' } }
-                                    },
-                                    plugins: [ChartAnnotation]
+                                    }
                                 });
                             } catch (e) {
                                 console.warn('Error gráfica:', cfg.id, e);
@@ -1164,18 +1086,13 @@
                         }
                     });
 
-                    // Gráfica combinada con anotaciones
+                    // Gráfica combinada
                     const combinedCanvas = document.getElementById('chart-combined');
                     if (combinedCanvas) {
                         const ctxCombined = combinedCanvas.getContext('2d');
-                        const combinedAnnotations = getSeismicAnnotations(allLabels);
-
                         if (combinedChartInstance) {
                             combinedChartInstance.data.labels = allLabels;
                             combinedChartInstance.data.datasets = combinedDatasets;
-                            if (combinedChartInstance.options.plugins) {
-                                combinedChartInstance.options.plugins.annotation = { annotations: combinedAnnotations };
-                            }
                             combinedChartInstance.update('none');
                         } else {
                             try {
@@ -1200,9 +1117,6 @@
                                                         `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}` :
                                                         'N/A'
                                                 }
-                                            },
-                                            annotation: {
-                                                annotations: combinedAnnotations
                                             }
                                         },
                                         scales: {
@@ -1220,8 +1134,7 @@
                                         },
                                         elements: { point: { radius: 0.5, hoverRadius: 4 },
                                             line: { borderJoinStyle: 'round' } }
-                                    },
-                                    plugins: [ChartAnnotation]
+                                    }
                                 });
                             } catch (e) {
                                 console.warn('Error gráfica combinada:', e);
@@ -1259,19 +1172,8 @@
                         const countEl = document.getElementById('quakeCount');
                         countEl.textContent = features.length;
 
-                        // Almacenar eventos para usarlos en las gráficas
-                        seismicEvents = features.map(f => ({
-                            time: f.properties.time,
-                            mag: f.properties.mag,
-                            place: f.properties.place,
-                            url: f.properties.url
-                        }));
-
                         if (features.length === 0) {
-                            container.innerHTML =
-                                '<div class="seismic-empty">🌍 No se registraron eventos > 6M en el período.</div>';
-                            // Forzar actualización de gráficas para quitar anotaciones
-                            updateCharts();
+                            container.innerHTML = '<div class="seismic-empty">🌍 No se registraron eventos > 6M en el período.</div>';
                             return;
                         }
 
@@ -1281,25 +1183,22 @@
                             const mag = props.mag ? props.mag.toFixed(1) : 'N/A';
                             const place = props.place || 'Ubicación desconocida';
                             const time = new Date(props.time).toLocaleString();
+                            const url = props.url || '#';
                             html += `
                                 <div class="seismic-card">
                                     <div class="mag">⚡ ${mag} M</div>
                                     <div class="place">📍 ${place}</div>
                                     <div class="time">🕐 ${time}</div>
-                                    <div class="detail">${props.url ? '🔗 <a href="'+props.url+'" target="_blank" style="color:#FFD700;">Ver detalle</a>' : ''}</div>
+                                    <div class="detail">${props.detail ? '🔗 <a href="'+props.detail+'" target="_blank" style="color:#FFD700;">Ver detalle</a>' : ''}</div>
                                 </div>
                             `;
                         });
                         html += '</div>';
                         container.innerHTML = html;
-
-                        // Actualizar gráficas con los nuevos eventos sísmicos
-                        updateCharts();
                     })
                     .catch(error => {
                         console.warn('Error al obtener datos sísmicos:', error);
-                        container.innerHTML =
-                            `<div class="seismic-empty">⚠️ Error al cargar datos sísmicos: ${error.message || 'Desconocido'}</div>`;
+                        container.innerHTML = `<div class="seismic-empty">⚠️ Error al cargar datos sísmicos: ${error.message || 'Desconocido'}</div>`;
                     });
             }
 
@@ -1310,28 +1209,13 @@
                 createChartWrappers();
 
                 const checkChart = () => {
-                    if (typeof Chart !== 'undefined' && typeof ChartAnnotation !== 'undefined') {
+                    if (typeof Chart !== 'undefined') {
                         updateCharts();
                         fetchSeismicData();
                         return true;
                     }
                     return false;
                 };
-
-                // Cargar el plugin de anotaciones
-                const script = document.createElement('script');
-                script.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
-                script.onload = function() {
-                    if (typeof Chart !== 'undefined' && typeof ChartAnnotation !== 'undefined') {
-                        Chart.register(ChartAnnotation);
-                        checkChart();
-                    }
-                };
-                script.onerror = function() {
-                    console.warn('No se pudo cargar chartjs-plugin-annotation, las anotaciones no estarán disponibles');
-                    checkChart();
-                };
-                document.head.appendChild(script);
 
                 if (document.readyState === 'complete' || document.readyState === 'interactive') {
                     if (!checkChart()) {
