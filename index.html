@@ -25,6 +25,7 @@
             --radius: 10px;
             --transition-fast: 0.15s ease;
             --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
+            /* TAMAÑOS DE FUENTE MEJORADOS */
             --font-size-base: 16px;
             --font-size-small: 0.85rem;
             --font-size-medium: 1rem;
@@ -55,6 +56,7 @@
             line-height: 1.5;
         }
 
+        /* ===== HEADER ===== */
         .header-container {
             display: flex;
             flex-direction: column;
@@ -119,6 +121,7 @@
             transition: background-color 0.3s ease;
         }
 
+        /* ===== DATOS EN VIVO ===== */
         .data-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -145,6 +148,7 @@
             background-color: rgba(255, 255, 255, 0.1);
         }
 
+        /* ===== GRÁFICAS ===== */
         .charts-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -211,6 +215,7 @@
             font-weight: 600;
         }
 
+        /* ===== MODAL ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -295,97 +300,6 @@
             background: #FFFFFF;
         }
 
-        /* ===== SECCIÓN SÍSMICA ===== */
-        .seismic-section {
-            max-width: 1400px;
-            margin: 20px auto 0;
-            background: rgba(0, 0, 0, 0.55);
-            border-radius: var(--radius);
-            padding: 16px;
-            border: 1px solid rgba(255, 200, 50, 0.3);
-            backdrop-filter: blur(4px);
-            -webkit-backdrop-filter: blur(4px);
-        }
-
-        .seismic-section .section-title {
-            font-size: clamp(1rem, 1.5vw, 1.3rem);
-            font-weight: 700;
-            color: #FFD700;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .seismic-section .section-title .badge {
-            background: #FF1744;
-            color: #fff;
-            font-size: 0.7rem;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .seismic-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 10px;
-        }
-
-        .seismic-card {
-            background: rgba(255, 255, 255, 0.06);
-            border-radius: 8px;
-            padding: 12px 14px;
-            border-left: 4px solid #FF6B35;
-            transition: background 0.2s;
-        }
-
-        .seismic-card:hover {
-            background: rgba(255, 255, 255, 0.12);
-        }
-
-        .seismic-card .mag {
-            font-size: 1.3rem;
-            font-weight: 800;
-            color: #FF6B35;
-        }
-
-        .seismic-card .place {
-            font-size: 0.9rem;
-            font-weight: 500;
-            margin: 4px 0;
-        }
-
-        .seismic-card .time {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .seismic-card .detail {
-            font-size: 0.75rem;
-            color: rgba(255, 255, 255, 0.5);
-            margin-top: 4px;
-        }
-
-        .seismic-empty {
-            color: rgba(255, 255, 255, 0.5);
-            text-align: center;
-            padding: 20px;
-            font-size: 0.95rem;
-        }
-
-        .seismic-loading {
-            color: rgba(255, 255, 255, 0.6);
-            text-align: center;
-            padding: 20px;
-            animation: pulse 1.5s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 0.4; }
-            50% { opacity: 1; }
-        }
-
         /* ===== FOOTER ===== */
         .footer {
             text-align: center;
@@ -406,6 +320,7 @@
             color: rgba(255, 255, 255, 0.85);
         }
 
+        /* ===== GRÁFICA COMBINADA ===== */
         .chart-wrapper.combined {
             grid-column: 1 / -1;
             border-color: #FFD700;
@@ -415,7 +330,7 @@
             max-height: 200px;
         }
 
-        /* ===== RESPONSIVE ===== */
+        /* ===== RESPONSIVE AVANZADO ===== */
         @media (max-width: 1024px) {
             .charts-grid {
                 grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -428,22 +343,27 @@
                 padding-bottom: 40px;
                 font-size: 15px;
             }
+
             .header-container {
                 padding: 12px 14px;
             }
+
             .header-row {
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
                 gap: 10px;
             }
+
             .logo {
                 max-width: 100px;
             }
+
             h1 {
                 font-size: clamp(1.2rem, 4.5vw, 1.8rem);
                 min-width: auto;
             }
+
             .status {
                 white-space: normal;
                 width: 100%;
@@ -451,47 +371,54 @@
                 font-size: 0.9rem;
                 padding: 6px 14px;
             }
+
             .data-container {
                 grid-template-columns: repeat(3, 1fr);
                 gap: 6px;
             }
+
             .data {
                 font-size: 0.8rem;
                 padding: 8px 5px;
                 border-radius: 6px;
             }
+
             .charts-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
             }
+
             .chart-wrapper canvas {
                 max-height: 120px;
             }
+
             .chart-label {
                 font-size: 0.7rem;
                 padding: 4px 0;
             }
+
             .chart-wrapper .expand-hint {
                 font-size: 0.55rem;
                 top: 4px;
                 right: 6px;
                 padding: 1px 6px;
             }
+
             .chart-wrapper.combined canvas {
                 max-height: 140px;
             }
+
             .modal-content {
                 padding: 12px;
             }
+
             .modal-content .modal-header h2 {
                 font-size: 1rem;
             }
+
             .footer {
                 font-size: 0.7rem;
                 padding: 10px 8px;
-            }
-            .seismic-grid {
-                grid-template-columns: 1fr;
             }
         }
 
@@ -501,65 +428,82 @@
                 padding-bottom: 35px;
                 font-size: 14px;
             }
+
             .header-container {
                 padding: 10px 10px;
             }
+
             .logo {
                 max-width: 80px;
             }
+
             h1 {
                 font-size: clamp(1rem, 4.8vw, 1.4rem);
             }
+
             .data-container {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 4px;
             }
+
             .data {
                 font-size: 0.7rem;
                 padding: 6px 4px;
                 line-height: 1.3;
             }
+
             .charts-grid {
                 grid-template-columns: 1fr 1fr;
                 gap: 5px;
             }
+
             .chart-wrapper {
                 padding: 4px;
             }
+
             .chart-wrapper canvas {
                 max-height: 90px;
             }
+
             .chart-label {
                 font-size: 0.55rem;
                 padding: 3px 0;
             }
+
             .chart-wrapper .expand-hint {
                 font-size: 0.45rem;
                 top: 3px;
                 right: 5px;
                 padding: 1px 4px;
             }
+
             .chart-wrapper.combined canvas {
                 max-height: 110px;
             }
+
             .status {
                 font-size: 0.75rem;
                 padding: 4px 10px;
             }
+
             .status-circle {
                 width: 10px;
                 height: 10px;
             }
+
             .modal-content {
                 padding: 8px;
             }
+
             .modal-content .modal-header h2 {
                 font-size: 0.85rem;
             }
+
             .modal-content .modal-close {
                 font-size: 1.8rem;
                 padding: 0 8px;
             }
+
             .footer {
                 font-size: 0.55rem;
                 padding: 8px 6px;
@@ -570,9 +514,11 @@
             .charts-grid {
                 grid-template-columns: 1fr;
             }
+
             .data-container {
                 grid-template-columns: 1fr 1fr;
             }
+
             .chart-wrapper canvas {
                 max-height: 100px;
             }
@@ -582,14 +528,17 @@
             .charts-grid {
                 grid-template-columns: repeat(4, 1fr);
             }
+
             .chart-wrapper.combined {
                 grid-column: 1 / -1;
             }
+
             .chart-wrapper canvas {
                 max-height: 200px;
             }
         }
 
+        /* Soporte para preferencia de movimiento reducido */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -610,10 +559,12 @@
             touch-action: manipulation;
         }
 
+        /* Mejoras de legibilidad adicionales */
         .data .label {
             font-weight: 300;
             opacity: 0.8;
         }
+
         .data .value {
             font-weight: 700;
         }
@@ -622,7 +573,11 @@
 </head>
 <body>
 
-    <!-- HEADER -->
+    <!-- ============================================================
+    OPTIMIZACIÓN PREMIUM - 29 DE JULIO DE 2026
+    Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
+    ============================================================ -->
+
     <div class="header-container">
         <div class="header-row">
             <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto" decoding="async">
@@ -652,17 +607,6 @@
     <!-- Gráficas -->
     <div class="charts-grid" id="chartsGrid"></div>
 
-    <!-- SECCIÓN SÍSMICA USGS -->
-    <div class="seismic-section" id="seismicSection">
-        <div class="section-title">
-            🌍 Eventos Sísmicos &gt; 6M (USGS)
-            <span class="badge" id="quakeCount">0</span>
-        </div>
-        <div id="seismicContent">
-            <div class="seismic-loading">⏳ Cargando datos sísmicos...</div>
-        </div>
-    </div>
-
     <!-- Modal -->
     <div class="modal-overlay" id="chartModal">
         <div class="modal-content">
@@ -684,13 +628,16 @@
             'use strict';
 
             // ============================================================
-            // CONFIGURACIÓN IoT
+            // OPTIMIZACIÓN PREMIUM - 29 DE JULIO DE 2026
             // ============================================================
+
+            // --- CONFIGURACIÓN IoT ---
             const CHANNEL1 = 2439912;
             const KEY1 = 'BCX6UVTLQZ7VMK4F';
             const CHANNEL2 = 2972050;
             const KEY2 = '8LMMRSTHHX26Z4MI';
 
+            // MÁXIMA CAPTURA DE DATOS: 8000 registros
             const now = new Date();
             const startDate = new Date(now);
             startDate.setDate(startDate.getDate() - 7);
@@ -703,28 +650,74 @@
             const URL2 =
                 `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&start=${startStr}&end=${endStr}&results=8000`;
 
-            // ============================================================
-            // CONFIGURACIÓN USGS - Eventos > 6M en los últimos 7 días
-            // ============================================================
-            const USGS_URL =
-                `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startDate.toISOString().slice(0,10)}&endtime=${now.toISOString().slice(0,10)}&minmagnitude=6`;
-
-            // ============================================================
-            // CONFIGURACIÓN DE GRÁFICAS
-            // ============================================================
-            const CHART_CONFIGS = [
-                { id: 'realParticles', label: 'Partículas Reales', field: 'field1', color: '#36A2EB', channel: 1 },
-                { id: 'imaginaryParticles', label: 'Partículas Imag.', field: 'field2', color: '#FF6384', channel: 1 },
-                { id: 'molecularPhysics', label: 'Física Molecular', field: 'field3', color: '#4BC0C0', channel: 1 },
-                { id: 'xCoord', label: 'Coord. x', field: 'field4', color: '#FF9F40', channel: 1 },
-                { id: 'yCoord', label: 'Coord. y', field: 'field5', color: '#9966FF', channel: 1 },
-                { id: 'zCoord', label: 'Coord. z', field: 'field6', color: '#FFCD56', channel: 1 },
-                { id: 'angle', label: 'Ángulo', field: 'field7', color: '#C9CBCF', channel: 1 },
-                { id: 'accelX', label: 'Acel. X', field: 'field1', color: '#FF5733', channel: 2 },
-                { id: 'accelY', label: 'Acel. Y', field: 'field2', color: '#33FF57', channel: 2 },
-                { id: 'accelZ', label: 'Acel. Z', field: 'field3', color: '#5733FF', channel: 2 },
-                { id: 'accelResult', label: 'Acel. Result.', field: 'field4', color: '#FF33A1', channel: 2 }
-            ];
+            // --- CONFIGURACIÓN DE GRÁFICAS ---
+            const CHART_CONFIGS = [{
+                id: 'realParticles',
+                label: 'Partículas Reales',
+                field: 'field1',
+                color: '#36A2EB',
+                channel: 1
+            }, {
+                id: 'imaginaryParticles',
+                label: 'Partículas Imag.',
+                field: 'field2',
+                color: '#FF6384',
+                channel: 1
+            }, {
+                id: 'molecularPhysics',
+                label: 'Física Molecular',
+                field: 'field3',
+                color: '#4BC0C0',
+                channel: 1
+            }, {
+                id: 'xCoord',
+                label: 'Coord. x',
+                field: 'field4',
+                color: '#FF9F40',
+                channel: 1
+            }, {
+                id: 'yCoord',
+                label: 'Coord. y',
+                field: 'field5',
+                color: '#9966FF',
+                channel: 1
+            }, {
+                id: 'zCoord',
+                label: 'Coord. z',
+                field: 'field6',
+                color: '#FFCD56',
+                channel: 1
+            }, {
+                id: 'angle',
+                label: 'Ángulo',
+                field: 'field7',
+                color: '#C9CBCF',
+                channel: 1
+            }, {
+                id: 'accelX',
+                label: 'Acel. X',
+                field: 'field1',
+                color: '#FF5733',
+                channel: 2
+            }, {
+                id: 'accelY',
+                label: 'Acel. Y',
+                field: 'field2',
+                color: '#33FF57',
+                channel: 2
+            }, {
+                id: 'accelZ',
+                label: 'Acel. Z',
+                field: 'field3',
+                color: '#5733FF',
+                channel: 2
+            }, {
+                id: 'accelResult',
+                label: 'Acel. Result.',
+                field: 'field4',
+                color: '#FF33A1',
+                channel: 2
+            }];
 
             const DATA_ELEMENTS = {
                 realParticles: 'realParticles',
@@ -746,13 +739,13 @@
             let updateTimeoutId = null;
             let retryTimeoutId = null;
 
-            // ============================================================
-            // DECODIFICADOR DE DATOS
-            // ============================================================
+            // --- DECODIFICADOR DE DATOS CON MUESTREO INTELIGENTE ---
             function processFeeds(feeds, field, maxPoints = 500) {
                 if (!feeds || feeds.length === 0) return { labels: [], data: [] };
+
                 const result = { labels: [], data: [] };
                 const total = feeds.length;
+
                 if (total <= maxPoints) {
                     for (let i = 0; i < total; i++) {
                         const feed = feeds[i];
@@ -764,6 +757,7 @@
                     }
                     return result;
                 }
+
                 const step = Math.floor(total / maxPoints);
                 for (let i = 0; i < total; i += step) {
                     const feed = feeds[i];
@@ -773,6 +767,7 @@
                         result.data.push(val);
                     }
                 }
+
                 const last = feeds[total - 1];
                 const lastVal = parseFloat(last[field]);
                 if (lastVal !== undefined && !isNaN(lastVal)) {
@@ -782,37 +777,42 @@
                         result.data.push(lastVal);
                     }
                 }
+
                 return result;
             }
 
-            // ============================================================
-            // CREAR ELEMENTOS DE GRÁFICAS
-            // ============================================================
+            // --- CREAR ELEMENTOS DE GRÁFICAS EN EL GRID ---
             function createChartWrappers() {
                 const grid = document.getElementById('chartsGrid');
                 grid.innerHTML = '';
+
                 CHART_CONFIGS.forEach(cfg => {
                     const wrapper = document.createElement('div');
                     wrapper.className = 'chart-wrapper';
                     wrapper.dataset.chartId = cfg.id;
+
                     const label = document.createElement('div');
                     label.className = 'chart-label';
                     label.textContent = cfg.label;
                     wrapper.appendChild(label);
+
                     const canvas = document.createElement('canvas');
                     canvas.id = `chart-${cfg.id}`;
                     canvas.width = 300;
                     canvas.height = 150;
                     canvas.setAttribute('loading', 'lazy');
                     wrapper.appendChild(canvas);
+
                     const hint = document.createElement('span');
                     hint.className = 'expand-hint';
                     hint.textContent = '🔍 Ampliar';
                     wrapper.appendChild(hint);
+
                     wrapper.addEventListener('click', function(e) {
                         if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
                         openModal(cfg.id, cfg.label);
                     }, { passive: true });
+
                     grid.appendChild(wrapper);
                 });
 
@@ -820,42 +820,49 @@
                 const combinedWrapper = document.createElement('div');
                 combinedWrapper.className = 'chart-wrapper combined';
                 combinedWrapper.dataset.chartId = 'combined';
+
                 const combinedLabel = document.createElement('div');
                 combinedLabel.className = 'chart-label';
                 combinedLabel.textContent = '📊 Todas las variables';
                 combinedWrapper.appendChild(combinedLabel);
+
                 const combinedCanvas = document.createElement('canvas');
                 combinedCanvas.id = 'chart-combined';
                 combinedCanvas.width = 600;
                 combinedCanvas.height = 200;
                 combinedCanvas.setAttribute('loading', 'lazy');
                 combinedWrapper.appendChild(combinedCanvas);
+
                 const hintCombined = document.createElement('span');
                 hintCombined.className = 'expand-hint';
                 hintCombined.textContent = '🔍 Ampliar';
                 combinedWrapper.appendChild(hintCombined);
+
                 combinedWrapper.addEventListener('click', function(e) {
                     if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
                     openModal('combined', '📊 Todas las variables');
                 }, { passive: true });
+
                 grid.appendChild(combinedWrapper);
             }
 
-            // ============================================================
-            // MODAL
-            // ============================================================
+            // --- MODAL ---
             function openModal(chartId, label) {
                 const modal = document.getElementById('chartModal');
                 const modalCanvas = document.getElementById('modalCanvas');
                 const modalTitle = document.getElementById('modalTitle');
+
                 modalTitle.textContent = label;
+
                 const originalChart = chartId === 'combined' ? combinedChartInstance : chartInstances[chartId];
                 if (!originalChart) return;
+
                 const ctx = modalCanvas.getContext('2d');
                 if (modalCanvas._chart) {
                     modalCanvas._chart.destroy();
                     modalCanvas._chart = null;
                 }
+
                 try {
                     const newChart = new Chart(ctx, {
                         type: 'line',
@@ -867,31 +874,50 @@
                             plugins: {
                                 legend: {
                                     display: true,
-                                    labels: { color: '#fff', font: { size: 13 }, boxWidth: 16, padding: 12 }
+                                    labels: {
+                                        color: '#fff',
+                                        font: { size: 13 },
+                                        boxWidth: 16,
+                                        padding: 12
+                                    }
                                 },
                                 tooltip: {
                                     mode: 'index',
                                     intersect: false,
                                     callbacks: {
-                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) : 'N/A'
+                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) :
+                                            'N/A'
                                     }
                                 }
                             },
                             scales: {
                                 x: {
-                                    ticks: { color: '#ccc', font: { size: 11 }, maxTicksLimit: 20,
-                                        maxRotation: 45 },
+                                    ticks: {
+                                        color: '#ccc',
+                                        font: { size: 11 },
+                                        maxTicksLimit: 20,
+                                        maxRotation: 45
+                                    },
                                     grid: { color: 'rgba(255,255,255,0.08)' }
                                 },
                                 y: {
-                                    ticks: { color: '#ccc', font: { size: 11 } },
+                                    ticks: {
+                                        color: '#ccc',
+                                        font: { size: 11 }
+                                    },
                                     grid: { color: 'rgba(255,255,255,0.08)' },
                                     beginAtZero: false
                                 }
                             },
-                            elements: { point: { radius: 2, hoverRadius: 6 } }
+                            elements: {
+                                point: {
+                                    radius: 2,
+                                    hoverRadius: 6
+                                }
+                            }
                         }
                     });
+
                     modalCanvas._chart = newChart;
                     modal.classList.add('active');
                     document.body.style.overflow = 'hidden';
@@ -911,20 +937,21 @@
                 }
             }
 
+            // Eventos del modal
             document.getElementById('modalCloseBtn').addEventListener('click', function(e) {
                 e.stopPropagation();
                 closeModal();
             });
+
             document.getElementById('chartModal').addEventListener('click', function(e) {
                 if (e.target === this) closeModal();
             });
+
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape') closeModal();
             });
 
-            // ============================================================
-            // ACTUALIZAR DATOS EN VIVO
-            // ============================================================
+            // --- ACTUALIZAR DATOS EN VIVO ---
             function updateLiveData(latestFeed1, latestFeed2) {
                 const map1 = {
                     realParticles: 'field1',
@@ -941,6 +968,7 @@
                     accelZ: 'field3',
                     accelResult: 'field4'
                 };
+
                 Object.keys(map1).forEach(key => {
                     const field = map1[key];
                     const el = document.getElementById(DATA_ELEMENTS[key]);
@@ -951,6 +979,7 @@
                         el.textContent = `${label}: ${val}`;
                     }
                 });
+
                 Object.keys(map2).forEach(key => {
                     const field = map2[key];
                     const el = document.getElementById(DATA_ELEMENTS[key]);
@@ -961,10 +990,12 @@
                         el.textContent = `${label}: ${val}`;
                     }
                 });
+
                 const statusCircle = document.querySelector('.status-circle');
                 const statusText = document.getElementById('statusText');
                 const isActive = latestFeed1 && latestFeed1.field1 !== undefined && latestFeed1.field1 !== null &&
                     latestFeed1.field1 !== '' && latestFeed1.field1 !== '0';
+
                 if (statusCircle) {
                     statusCircle.style.backgroundColor = isActive ? '#00E676' : '#FF1744';
                 }
@@ -973,12 +1004,11 @@
                 }
             }
 
-            // ============================================================
-            // ACTUALIZAR GRÁFICAS
-            // ============================================================
+            // --- ACTUALIZAR GRÁFICAS CON MÁXIMA CAPTURA ---
             function updateCharts() {
                 if (isUpdating) return;
                 isUpdating = true;
+
                 if (updateTimeoutId) {
                     clearTimeout(updateTimeoutId);
                     updateTimeoutId = null;
@@ -987,6 +1017,7 @@
                     clearTimeout(retryTimeoutId);
                     retryTimeoutId = null;
                 }
+
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 25000);
 
@@ -997,19 +1028,24 @@
                         'Error canal 2'))
                 ]).then(([data1, data2]) => {
                     clearTimeout(timeoutId);
+
                     const feeds1 = data1.feeds || [];
                     const feeds2 = data2.feeds || [];
                     const latestFeed1 = feeds1.length ? feeds1[feeds1.length - 1] : null;
                     const latestFeed2 = feeds2.length ? feeds2[feeds2.length - 1] : null;
+
                     updateLiveData(latestFeed1, latestFeed2);
+
                     const combinedDatasets = [];
                     let allLabels = [];
+
                     CHART_CONFIGS.forEach(cfg => {
                         const feeds = cfg.channel === 2 ? feeds2 : feeds1;
                         const { labels, data } = processFeeds(feeds, cfg.field);
                         const canvas = document.getElementById(`chart-${cfg.id}`);
                         if (!canvas) return;
                         const ctx = canvas.getContext('2d');
+
                         if (chartInstances[cfg.id]) {
                             chartInstances[cfg.id].data.labels = labels;
                             chartInstances[cfg.id].data.datasets[0].data = data;
@@ -1050,14 +1086,19 @@
                                         scales: {
                                             x: {
                                                 display: true,
-                                                ticks: { maxTicksLimit: 8, font: { size: 8 },
-                                                    maxRotation: 30 },
+                                                ticks: {
+                                                    maxTicksLimit: 8,
+                                                    font: { size: 8 },
+                                                    maxRotation: 30
+                                                },
                                                 grid: { display: false }
                                             },
                                             y: {
                                                 display: true,
-                                                ticks: { font: { size: 8 }, callback: value => value
-                                                        .toFixed(2) },
+                                                ticks: {
+                                                    font: { size: 8 },
+                                                    callback: value => value.toFixed(2)
+                                                },
                                                 grid: { color: 'rgba(0,0,0,0.06)' },
                                                 beginAtZero: false
                                             }
@@ -1069,6 +1110,7 @@
                                 console.warn('Error gráfica:', cfg.id, e);
                             }
                         }
+
                         if (labels.length > 0 && data.length > 0) {
                             if (allLabels.length === 0) {
                                 allLabels = labels.slice();
@@ -1098,7 +1140,10 @@
                             try {
                                 combinedChartInstance = new Chart(ctxCombined, {
                                     type: 'line',
-                                    data: { labels: allLabels, datasets: combinedDatasets },
+                                    data: {
+                                        labels: allLabels,
+                                        datasets: combinedDatasets
+                                    },
                                     options: {
                                         responsive: true,
                                         maintainAspectRatio: true,
@@ -1106,8 +1151,12 @@
                                         plugins: {
                                             legend: {
                                                 display: true,
-                                                labels: { color: '#fff', font: { size: 9 },
-                                                    boxWidth: 12, padding: 8 }
+                                                labels: {
+                                                    color: '#fff',
+                                                    font: { size: 9 },
+                                                    boxWidth: 12,
+                                                    padding: 8
+                                                }
                                             },
                                             tooltip: {
                                                 mode: 'index',
@@ -1121,19 +1170,28 @@
                                         },
                                         scales: {
                                             x: {
-                                                ticks: { color: '#ccc', font: { size: 8 },
-                                                    maxTicksLimit: 12, maxRotation: 30 },
+                                                ticks: {
+                                                    color: '#ccc',
+                                                    font: { size: 8 },
+                                                    maxTicksLimit: 12,
+                                                    maxRotation: 30
+                                                },
                                                 grid: { color: 'rgba(255,255,255,0.06)' }
                                             },
                                             y: {
-                                                ticks: { color: '#ccc', font: { size: 8 },
-                                                    callback: value => value.toFixed(2) },
+                                                ticks: {
+                                                    color: '#ccc',
+                                                    font: { size: 8 },
+                                                    callback: value => value.toFixed(2)
+                                                },
                                                 grid: { color: 'rgba(255,255,255,0.06)' },
                                                 beginAtZero: false
                                             }
                                         },
-                                        elements: { point: { radius: 0.5, hoverRadius: 4 },
-                                            line: { borderJoinStyle: 'round' } }
+                                        elements: {
+                                            point: { radius: 0.5, hoverRadius: 4 },
+                                            line: { borderJoinStyle: 'round' }
+                                        }
                                     }
                                 });
                             } catch (e) {
@@ -1141,77 +1199,31 @@
                             }
                         }
                     }
+
                     isUpdating = false;
                 }).catch(error => {
                     clearTimeout(timeoutId);
                     console.warn('Error en actualización:', error);
+
                     const statusText = document.getElementById('statusText');
                     if (statusText) statusText.textContent = '⚠️ Error de conexión';
                     const statusCircle = document.querySelector('.status-circle');
                     if (statusCircle) statusCircle.style.backgroundColor = '#FF1744';
+
                     isUpdating = false;
+
                     if (retryTimeoutId) clearTimeout(retryTimeoutId);
                     retryTimeoutId = setTimeout(updateCharts, 15000);
                 });
             }
 
-            // ============================================================
-            // OBTENER DATOS SÍSMICOS DE USGS
-            // ============================================================
-            function fetchSeismicData() {
-                const container = document.getElementById('seismicContent');
-                container.innerHTML = '<div class="seismic-loading">⏳ Cargando datos sísmicos...</div>';
-
-                fetch(USGS_URL)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Error en la API de USGS');
-                        return response.json();
-                    })
-                    .then(data => {
-                        const features = data.features || [];
-                        const countEl = document.getElementById('quakeCount');
-                        countEl.textContent = features.length;
-
-                        if (features.length === 0) {
-                            container.innerHTML = '<div class="seismic-empty">🌍 No se registraron eventos > 6M en el período.</div>';
-                            return;
-                        }
-
-                        let html = '<div class="seismic-grid">';
-                        features.forEach(f => {
-                            const props = f.properties;
-                            const mag = props.mag ? props.mag.toFixed(1) : 'N/A';
-                            const place = props.place || 'Ubicación desconocida';
-                            const time = new Date(props.time).toLocaleString();
-                            const url = props.url || '#';
-                            html += `
-                                <div class="seismic-card">
-                                    <div class="mag">⚡ ${mag} M</div>
-                                    <div class="place">📍 ${place}</div>
-                                    <div class="time">🕐 ${time}</div>
-                                    <div class="detail">${props.detail ? '🔗 <a href="'+props.detail+'" target="_blank" style="color:#FFD700;">Ver detalle</a>' : ''}</div>
-                                </div>
-                            `;
-                        });
-                        html += '</div>';
-                        container.innerHTML = html;
-                    })
-                    .catch(error => {
-                        console.warn('Error al obtener datos sísmicos:', error);
-                        container.innerHTML = `<div class="seismic-empty">⚠️ Error al cargar datos sísmicos: ${error.message || 'Desconocido'}</div>`;
-                    });
-            }
-
-            // ============================================================
-            // INICIALIZACIÓN
-            // ============================================================
+            // --- INICIALIZACIÓN ---
             function init() {
                 createChartWrappers();
 
                 const checkChart = () => {
                     if (typeof Chart !== 'undefined') {
                         updateCharts();
-                        fetchSeismicData();
                         return true;
                     }
                     return false;
@@ -1234,7 +1246,6 @@
                 }
 
                 setInterval(updateCharts, 20000);
-                setInterval(fetchSeismicData, 60000);
 
                 document.addEventListener('visibilitychange', () => {
                     if (!document.hidden) {
@@ -1243,7 +1254,6 @@
                             updateTimeoutId = null;
                         }
                         updateCharts();
-                        fetchSeismicData();
                     }
                 }, { passive: true });
             }
