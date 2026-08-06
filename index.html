@@ -6,7 +6,7 @@
     <title>Observatorio de Partículas del TOA - Prof. Rosa</title>
     <style>
         /* ============================================================
-           OPTIMIZACIÓN PREMIUM - 2 DE AGOSTO DE 2026
+           OPTIMIZACIÓN PREMIUM - 5 DE AGOSTO DE 2026, Rev6
            Observatorio de Partículas del TOA - Prof. Raymond Rosa Ávila
            + GRÁFICA DE SISMOS USGS (M>=6.0) - 5 DE AGOSTO DE 2026
            ============================================================ */
@@ -768,6 +768,30 @@
             let retryTimeoutId = null;
             let seismicRetryTimeoutId = null;
 
+            // Rango real de fechas cubierto por las muestras del sensor (se calcula tras cada
+            // actualización de updateCharts). La gráfica de sismos usa este rango — no el rango
+            // solicitado a la API — para que las fechas coincidan exactamente con los datos.
+            let sensorMinTime = null;
+            let sensorMaxTime = null;
+
+            function getTimeRange() {
+                if (sensorMinTime !== null && sensorMaxTime !== null) {
+                    return { min: sensorMinTime, max: sensorMaxTime };
+                }
+                return { min: startDate.getTime(), max: now.getTime() };
+            }
+
+            // Ajusta el eje de tiempo de la gráfica de sismos al rango real de las muestras,
+            // sin volver a pedir datos a USGS.
+            function syncEarthquakeChartBounds() {
+                const chart = chartInstances['earthquakes'];
+                if (!chart) return;
+                const range = getTimeRange();
+                chart.options.scales.x.min = range.min;
+                chart.options.scales.x.max = range.max;
+                chart.update('none');
+            }
+
             // --- DECODIFICADOR DE DATOS CON MUESTREO INTELIGENTE ---
             function processFeeds(feeds, field, maxPoints = 500) {
                 if (!feeds || feeds.length === 0) return { labels: [], data: [] };
@@ -946,11 +970,12 @@
 
                 try {
                     const isSeismic = chartId === 'earthquakes';
+                    const seismicRange = getTimeRange();
 
                     const xScale = isSeismic ? {
                         type: 'time',
-                        min: startDate.getTime(),
-                        max: now.getTime(),
+                        min: seismicRange.min,
+                        max: seismicRange.max,
                         time: {
                             unit: 'day',
                             displayFormats: { day: 'MMM d' },
@@ -1145,6 +1170,27 @@
                     const latestFeed1 = feeds1.length ? feeds1[feeds1.length - 1] : null;
                     const latestFeed2 = feeds2.length ? feeds2[feeds2.length - 1] : null;
 
+                    // Rango real de fechas de las muestras recibidas (puede ser más angosto que
+                    // el rango solicitado, p. ej. si el sensor estuvo apagado parte del tiempo).
+                    let minT = Infinity;
+                    let maxT = -Infinity;
+                    feeds1.forEach(f => {
+                        if (!f.created_at) return;
+                        const t = new Date(f.created_at).getTime();
+                        if (t < minT) minT = t;
+                        if (t > maxT) maxT = t;
+                    });
+                    feeds2.forEach(f => {
+                        if (!f.created_at) return;
+                        const t = new Date(f.created_at).getTime();
+                        if (t < minT) minT = t;
+                        if (t > maxT) maxT = t;
+                    });
+                    if (minT !== Infinity && maxT !== -Infinity) {
+                        sensorMinTime = minT;
+                        sensorMaxTime = maxT;
+                    }
+
                     updateLiveData(latestFeed1, latestFeed2);
 
                     const combinedDatasets = [];
@@ -1311,6 +1357,10 @@
                         }
                     }
 
+                    // Alinear el eje de tiempo de la gráfica de sismos con las fechas
+                    // reales de las muestras que se acaban de recibir.
+                    syncEarthquakeChartBounds();
+
                     isUpdating = false;
                 }).catch(error => {
                     clearTimeout(timeoutId);
@@ -1367,12 +1417,14 @@
                         };
 
                         if (chartInstances['earthquakes']) {
+                            const range = getTimeRange();
                             chartInstances['earthquakes'].data.datasets[0].data = points;
-                            chartInstances['earthquakes'].options.scales.x.min = startDate.getTime();
-                            chartInstances['earthquakes'].options.scales.x.max = now.getTime();
+                            chartInstances['earthquakes'].options.scales.x.min = range.min;
+                            chartInstances['earthquakes'].options.scales.x.max = range.max;
                             chartInstances['earthquakes'].update('none');
                         } else {
                             try {
+                                const initialRange = getTimeRange();
                                 const chart = new Chart(ctx, {
                                     type: 'line',
                                     data: {
@@ -1413,8 +1465,8 @@
                                         scales: {
                                             x: {
                                                 type: 'time',
-                                                min: startDate.getTime(),
-                                                max: now.getTime(),
+                                                min: initialRange.min,
+                                                max: initialRange.max,
                                                 time: {
                                                     unit: 'day',
                                                     displayFormats: { day: 'MMM d' },
