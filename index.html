@@ -21,6 +21,10 @@
             --transition-fast: 0.15s ease;
             --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
             --font-size-base: 16px;
+            --font-size-small: 0.85rem;
+            --font-size-medium: 1rem;
+            --font-size-large: 1.2rem;
+            --font-size-xl: 1.4rem;
         }
 
         html {
@@ -217,3 +221,1157 @@
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
         }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            border-radius: 14px;
+            padding: 16px;
+            max-width: 95vw;
+            max-height: 95vh;
+            width: 1000px;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.95);
+            animation: modalIn 0.2s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-content .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #fff;
+        }
+
+        .modal-content .modal-header h2 {
+            font-size: clamp(1.1rem, 2vw, 1.6rem);
+            margin: 0;
+            font-weight: 700;
+        }
+
+        .modal-content .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 2.2rem;
+            cursor: pointer;
+            padding: 0 14px;
+            transition: transform 0.2s;
+            line-height: 1;
+            touch-action: manipulation;
+        }
+
+        .modal-content .modal-close:hover,
+        .modal-content .modal-close:active {
+            transform: rotate(90deg);
+            color: #ff6b6b;
+        }
+
+        .modal-content canvas {
+            width: 100% !important;
+            height: auto !important;
+            max-height: 70vh;
+            border-radius: 6px;
+            background: #FFFFFF;
+        }
+
+        /* SECCIÓN SÍSMICA - Tarjetas */
+        .seismic-section {
+            max-width: 1400px;
+            margin: 20px auto 0;
+            background: rgba(0, 0, 0, 0.55);
+            border-radius: var(--radius);
+            padding: 16px;
+            border: 1px solid rgba(255, 200, 50, 0.3);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .seismic-section .section-title {
+            font-size: clamp(1rem, 1.5vw, 1.3rem);
+            font-weight: 700;
+            color: #FFD700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .seismic-section .section-title .badge {
+            background: #FF1744;
+            color: #fff;
+            font-size: 0.7rem;
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .seismic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        .seismic-card {
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: 12px 14px;
+            border-left: 4px solid #FF6B35;
+            transition: background 0.2s;
+        }
+
+        .seismic-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .seismic-card .mag {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #FF6B35;
+        }
+
+        .seismic-card .place {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: 4px 0;
+        }
+
+        .seismic-card .time {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .seismic-card .detail {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+        }
+
+        .seismic-empty {
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            padding: 20px;
+            font-size: 0.95rem;
+        }
+
+        .seismic-loading {
+            color: rgba(255, 255, 255, 0.6);
+            text-align: center;
+            padding: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+
+        .footer {
+            text-align: center;
+            padding: 14px 12px;
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: clamp(0.8rem, 0.9vw, 0.95rem);
+            color: rgba(255, 255, 255, 0.6);
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: var(--radius);
+            max-width: 1400px;
+            margin-left: auto;
+            margin-right: auto;
+            backdrop-filter: blur(2px);
+        }
+
+        .footer strong {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .chart-wrapper.combined {
+            grid-column: 1 / -1;
+            border-color: #FFD700;
+        }
+
+        .chart-wrapper.combined canvas {
+            max-height: 200px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 8px;
+                padding-bottom: 40px;
+                font-size: 15px;
+            }
+            .header-container {
+                padding: 12px 14px;
+            }
+            .header-row {
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                gap: 10px;
+            }
+            .logo {
+                max-width: 100px;
+            }
+            h1 {
+                font-size: clamp(1.2rem, 4.5vw, 1.8rem);
+                min-width: auto;
+            }
+            .status {
+                white-space: normal;
+                width: 100%;
+                justify-content: center;
+                font-size: 0.9rem;
+                padding: 6px 14px;
+            }
+            .data-container {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 6px;
+            }
+            .data {
+                font-size: 0.8rem;
+                padding: 8px 5px;
+                border-radius: 6px;
+            }
+            .charts-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .chart-wrapper canvas {
+                max-height: 120px;
+            }
+            .chart-label {
+                font-size: 0.7rem;
+                padding: 4px 0;
+            }
+            .chart-wrapper .expand-hint {
+                font-size: 0.55rem;
+                top: 4px;
+                right: 6px;
+                padding: 1px 6px;
+            }
+            .chart-wrapper.combined canvas {
+                max-height: 140px;
+            }
+            .modal-content {
+                padding: 12px;
+            }
+            .modal-content .modal-header h2 {
+                font-size: 1rem;
+            }
+            .footer {
+                font-size: 0.7rem;
+                padding: 10px 8px;
+            }
+            .seismic-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+                padding-bottom: 35px;
+                font-size: 14px;
+            }
+            .header-container {
+                padding: 10px 10px;
+            }
+            .logo {
+                max-width: 80px;
+            }
+            h1 {
+                font-size: clamp(1rem, 4.8vw, 1.4rem);
+            }
+            .data-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 4px;
+            }
+            .data {
+                font-size: 0.7rem;
+                padding: 6px 4px;
+                line-height: 1.3;
+            }
+            .charts-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 5px;
+            }
+            .chart-wrapper {
+                padding: 4px;
+            }
+            .chart-wrapper canvas {
+                max-height: 90px;
+            }
+            .chart-label {
+                font-size: 0.55rem;
+                padding: 3px 0;
+            }
+            .chart-wrapper .expand-hint {
+                font-size: 0.45rem;
+                top: 3px;
+                right: 5px;
+                padding: 1px 4px;
+            }
+            .chart-wrapper.combined canvas {
+                max-height: 110px;
+            }
+            .status {
+                font-size: 0.75rem;
+                padding: 4px 10px;
+            }
+            .status-circle {
+                width: 10px;
+                height: 10px;
+            }
+            .modal-content {
+                padding: 8px;
+            }
+            .modal-content .modal-header h2 {
+                font-size: 0.85rem;
+            }
+            .modal-content .modal-close {
+                font-size: 1.8rem;
+                padding: 0 8px;
+            }
+            .footer {
+                font-size: 0.55rem;
+                padding: 8px 6px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            .data-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            .chart-wrapper canvas {
+                max-height: 100px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .charts-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .chart-wrapper.combined {
+                grid-column: 1 / -1;
+            }
+            .chart-wrapper canvas {
+                max-height: 200px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        .chart-wrapper canvas {
+            background-color: #fafafa;
+        }
+
+        .chart-wrapper,
+        .modal-close,
+        .data {
+            touch-action: manipulation;
+        }
+
+        .data .label {
+            font-weight: 300;
+            opacity: 0.8;
+        }
+        .data .value {
+            font-weight: 700;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer>
+    </script>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <div class="header-container">
+        <div class="header-row">
+            <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto" decoding="async">
+            <h1>Observatorio de Partículas del TOA</h1>
+            <div class="status" id="stationStatus">
+                <span class="status-circle" style="background-color: #FFA500;"></span>
+                <span id="statusText">Cargando...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Datos en tiempo real -->
+    <div class="data-container" id="dataContainer">
+        <div class="data" id="realParticles">🔬 Partículas Reales: ⏳</div>
+        <div class="data" id="imaginaryParticles">🌀 Partículas Imag.: ⏳</div>
+        <div class="data" id="molecularPhysics">🧪 Física Molecular: ⏳</div>
+        <div class="data" id="x">📍 Coord. x: ⏳</div>
+        <div class="data" id="y">📍 Coord. y: ⏳</div>
+        <div class="data" id="z">📍 Coord. z: ⏳</div>
+        <div class="data" id="angle">📐 Ángulo: ⏳</div>
+        <div class="data" id="accelX">⬆ Acel. X: ⏳</div>
+        <div class="data" id="accelY">⬆ Acel. Y: ⏳</div>
+        <div class="data" id="accelZ">⬆ Acel. Z: ⏳</div>
+        <div class="data" id="accelResult">📊 Acel. Result.: ⏳</div>
+    </div>
+
+    <!-- Gráficas -->
+    <div class="charts-grid" id="chartsGrid"></div>
+
+    <!-- SECCIÓN SÍSMICA USGS -->
+    <div class="seismic-section" id="seismicSection">
+        <div class="section-title">
+            🌍 Eventos Sísmicos &gt; 6M (USGS)
+            <span class="badge" id="quakeCount">0</span>
+            <span style="font-size:0.7rem; color:rgba(255,255,255,0.5); font-weight:400; margin-left:auto;">
+                ⚡ Líneas rojas en gráficas = eventos sísmicos
+            </span>
+        </div>
+        <div id="seismicContent">
+            <div class="seismic-loading">⏳ Cargando datos sísmicos...</div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="chartModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Gráfica</h2>
+                <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">&times;</button>
+            </div>
+            <canvas id="modalCanvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio de Partículas del TOA &bull; 2026
+    </div>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // ============================================================
+            // CONFIGURACIÓN IoT
+            // ============================================================
+            const CHANNEL1 = 2439912;
+            const KEY1 = 'BCX6UVTLQZ7VMK4F';
+            const CHANNEL2 = 2972050;
+            const KEY2 = '8LMMRSTHHX26Z4MI';
+
+            const now = new Date();
+            const startDate = new Date(now);
+            startDate.setDate(startDate.getDate() - 7);
+
+            const startStr = startDate.toISOString().replace('T', '%20').slice(0, 19);
+            const endStr = now.toISOString().replace('T', '%20').slice(0, 19);
+
+            const URL1 =
+                `https://api.thingspeak.com/channels/${CHANNEL1}/feeds.json?api_key=${KEY1}&start=${startStr}&end=${endStr}&results=8000`;
+            const URL2 =
+                `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&start=${startStr}&end=${endStr}&results=8000`;
+
+            // ============================================================
+            // CONFIGURACIÓN USGS - Eventos > 6M en los últimos 7 días
+            // ============================================================
+            const USGS_URL =
+                `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startDate.toISOString().slice(0,10)}&endtime=${now.toISOString().slice(0,10)}&minmagnitude=6`;
+
+            // ============================================================
+            // CONFIGURACIÓN DE GRÁFICAS
+            // ============================================================
+            const CHART_CONFIGS = [
+                { id: 'realParticles', label: 'Partículas Reales', field: 'field1', color: '#36A2EB', channel: 1 },
+                { id: 'imaginaryParticles', label: 'Partículas Imag.', field: 'field2', color: '#FF6384', channel: 1 },
+                { id: 'molecularPhysics', label: 'Física Molecular', field: 'field3', color: '#4BC0C0', channel: 1 },
+                { id: 'xCoord', label: 'Coord. x', field: 'field4', color: '#FF9F40', channel: 1 },
+                { id: 'yCoord', label: 'Coord. y', field: 'field5', color: '#9966FF', channel: 1 },
+                { id: 'zCoord', label: 'Coord. z', field: 'field6', color: '#FFCD56', channel: 1 },
+                { id: 'angle', label: 'Ángulo', field: 'field7', color: '#C9CBCF', channel: 1 },
+                { id: 'accelX', label: 'Acel. X', field: 'field1', color: '#FF5733', channel: 2 },
+                { id: 'accelY', label: 'Acel. Y', field: 'field2', color: '#33FF57', channel: 2 },
+                { id: 'accelZ', label: 'Acel. Z', field: 'field3', color: '#5733FF', channel: 2 },
+                { id: 'accelResult', label: 'Acel. Result.', field: 'field4', color: '#FF33A1', channel: 2 }
+            ];
+
+            const DATA_ELEMENTS = {
+                realParticles: 'realParticles',
+                imaginaryParticles: 'imaginaryParticles',
+                molecularPhysics: 'molecularPhysics',
+                xCoord: 'x',
+                yCoord: 'y',
+                zCoord: 'z',
+                angle: 'angle',
+                accelX: 'accelX',
+                accelY: 'accelY',
+                accelZ: 'accelZ',
+                accelResult: 'accelResult'
+            };
+
+            const chartInstances = {};
+            let combinedChartInstance = null;
+            let isUpdating = false;
+            let updateTimeoutId = null;
+            let retryTimeoutId = null;
+
+            // Almacenar eventos sísmicos para usar en gráficas
+            let seismicEvents = [];
+
+            // ============================================================
+            // DECODIFICADOR DE DATOS
+            // ============================================================
+            function processFeeds(feeds, field, maxPoints = 500) {
+                if (!feeds || feeds.length === 0) return { labels: [], data: [] };
+                const result = { labels: [], data: [] };
+                const total = feeds.length;
+                if (total <= maxPoints) {
+                    for (let i = 0; i < total; i++) {
+                        const feed = feeds[i];
+                        const val = parseFloat(feed[field]);
+                        if (val !== undefined && !isNaN(val)) {
+                            result.labels.push(new Date(feed.created_at).toLocaleString());
+                            result.data.push(val);
+                        }
+                    }
+                    return result;
+                }
+                const step = Math.floor(total / maxPoints);
+                for (let i = 0; i < total; i += step) {
+                    const feed = feeds[i];
+                    const val = parseFloat(feed[field]);
+                    if (val !== undefined && !isNaN(val)) {
+                        result.labels.push(new Date(feed.created_at).toLocaleString());
+                        result.data.push(val);
+                    }
+                }
+                const last = feeds[total - 1];
+                const lastVal = parseFloat(last[field]);
+                if (lastVal !== undefined && !isNaN(lastVal)) {
+                    const lastLabel = new Date(last.created_at).toLocaleString();
+                    if (result.labels.length === 0 || result.labels[result.labels.length - 1] !== lastLabel) {
+                        result.labels.push(lastLabel);
+                        result.data.push(lastVal);
+                    }
+                }
+                return result;
+            }
+
+            // ============================================================
+            // CREAR ANOTACIONES DE SISMOS (líneas verticales)
+            // ============================================================
+            function getSeismicAnnotations(labels) {
+                if (!seismicEvents || seismicEvents.length === 0) return [];
+
+                const annotations = [];
+                seismicEvents.forEach(quake => {
+                    const quakeTime = new Date(quake.time);
+                    // Buscar el índice más cercano en los labels
+                    let closestIndex = -1;
+                    let closestDiff = Infinity;
+                    labels.forEach((label, idx) => {
+                        const labelDate = new Date(label);
+                        const diff = Math.abs(labelDate.getTime() - quakeTime.getTime());
+                        if (diff < closestDiff) {
+                            closestDiff = diff;
+                            closestIndex = idx;
+                        }
+                    });
+                    // Si la diferencia es menor a 1 hora, consideramos que coincide
+                    if (closestIndex >= 0 && closestDiff < 3600000) {
+                        annotations.push({
+                            type: 'line',
+                            xMin: closestIndex,
+                            xMax: closestIndex,
+                            borderColor: '#FF1744',
+                            borderWidth: 2,
+                            borderDash: [5, 5],
+                            label: {
+                                content: `⚡${quake.mag}M`,
+                                enabled: true,
+                                position: 'top',
+                                color: '#FF1744',
+                                font: {
+                                    weight: 'bold',
+                                    size: 10
+                                }
+                            }
+                        });
+                    }
+                });
+                return annotations;
+            }
+
+            // ============================================================
+            // CREAR ELEMENTOS DE GRÁFICAS
+            // ============================================================
+            function createChartWrappers() {
+                const grid = document.getElementById('chartsGrid');
+                grid.innerHTML = '';
+                CHART_CONFIGS.forEach(cfg => {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'chart-wrapper';
+                    wrapper.dataset.chartId = cfg.id;
+                    const label = document.createElement('div');
+                    label.className = 'chart-label';
+                    label.textContent = cfg.label;
+                    wrapper.appendChild(label);
+                    const canvas = document.createElement('canvas');
+                    canvas.id = `chart-${cfg.id}`;
+                    canvas.width = 300;
+                    canvas.height = 150;
+                    canvas.setAttribute('loading', 'lazy');
+                    wrapper.appendChild(canvas);
+                    const hint = document.createElement('span');
+                    hint.className = 'expand-hint';
+                    hint.textContent = '🔍 Ampliar';
+                    wrapper.appendChild(hint);
+                    wrapper.addEventListener('click', function(e) {
+                        if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
+                        openModal(cfg.id, cfg.label);
+                    }, { passive: true });
+                    grid.appendChild(wrapper);
+                });
+
+                // Gráfica combinada
+                const combinedWrapper = document.createElement('div');
+                combinedWrapper.className = 'chart-wrapper combined';
+                combinedWrapper.dataset.chartId = 'combined';
+                const combinedLabel = document.createElement('div');
+                combinedLabel.className = 'chart-label';
+                combinedLabel.textContent = '📊 Todas las variables + Sismos ⚡';
+                combinedWrapper.appendChild(combinedLabel);
+                const combinedCanvas = document.createElement('canvas');
+                combinedCanvas.id = 'chart-combined';
+                combinedCanvas.width = 600;
+                combinedCanvas.height = 200;
+                combinedCanvas.setAttribute('loading', 'lazy');
+                combinedWrapper.appendChild(combinedCanvas);
+                const hintCombined = document.createElement('span');
+                hintCombined.className = 'expand-hint';
+                hintCombined.textContent = '🔍 Ampliar';
+                combinedWrapper.appendChild(hintCombined);
+                combinedWrapper.addEventListener('click', function(e) {
+                    if (e.target.closest('.modal-close') || e.target.closest('.modal-overlay')) return;
+                    openModal('combined', '📊 Todas las variables + Sismos ⚡');
+                }, { passive: true });
+                grid.appendChild(combinedWrapper);
+            }
+
+            // ============================================================
+            // MODAL
+            // ============================================================
+            function openModal(chartId, label) {
+                const modal = document.getElementById('chartModal');
+                const modalCanvas = document.getElementById('modalCanvas');
+                const modalTitle = document.getElementById('modalTitle');
+                modalTitle.textContent = label;
+                const originalChart = chartId === 'combined' ? combinedChartInstance : chartInstances[chartId];
+                if (!originalChart) return;
+                const ctx = modalCanvas.getContext('2d');
+                if (modalCanvas._chart) {
+                    modalCanvas._chart.destroy();
+                    modalCanvas._chart = null;
+                }
+                try {
+                    // Clonar datos y agregar anotaciones
+                    const dataClone = JSON.parse(JSON.stringify(originalChart.data));
+
+                    // Obtener anotaciones para el modal
+                    const annotations = getSeismicAnnotations(dataClone.labels);
+
+                    const newChart = new Chart(ctx, {
+                        type: 'line',
+                        data: dataClone,
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            animation: { duration: 200 },
+                            plugins: {
+                                legend: {
+                                    display: true,
+                                    labels: { color: '#fff', font: { size: 13 }, boxWidth: 16,
+                                    padding: 12 }
+                                },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) :
+                                            'N/A'
+                                    }
+                                },
+                                annotation: {
+                                    annotations: annotations
+                                }
+                            },
+                            scales: {
+                                x: {
+                                    ticks: { color: '#ccc', font: { size: 11 }, maxTicksLimit: 20,
+                                        maxRotation: 45 },
+                                    grid: { color: 'rgba(255,255,255,0.08)' }
+                                },
+                                y: {
+                                    ticks: { color: '#ccc', font: { size: 11 } },
+                                    grid: { color: 'rgba(255,255,255,0.08)' },
+                                    beginAtZero: false
+                                }
+                            },
+                            elements: { point: { radius: 2, hoverRadius: 6 } }
+                        },
+                        plugins: [ChartAnnotation]
+                    });
+                    modalCanvas._chart = newChart;
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                } catch (e) {
+                    console.warn('Error en modal:', e);
+                }
+            }
+
+            function closeModal() {
+                const modal = document.getElementById('chartModal');
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+                const modalCanvas = document.getElementById('modalCanvas');
+                if (modalCanvas._chart) {
+                    modalCanvas._chart.destroy();
+                    modalCanvas._chart = null;
+                }
+            }
+
+            document.getElementById('modalCloseBtn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                closeModal();
+            });
+            document.getElementById('chartModal').addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') closeModal();
+            });
+
+            // ============================================================
+            // ACTUALIZAR DATOS EN VIVO
+            // ============================================================
+            function updateLiveData(latestFeed1, latestFeed2) {
+                const map1 = {
+                    realParticles: 'field1',
+                    imaginaryParticles: 'field2',
+                    molecularPhysics: 'field3',
+                    xCoord: 'field4',
+                    yCoord: 'field5',
+                    zCoord: 'field6',
+                    angle: 'field7'
+                };
+                const map2 = {
+                    accelX: 'field1',
+                    accelY: 'field2',
+                    accelZ: 'field3',
+                    accelResult: 'field4'
+                };
+                Object.keys(map1).forEach(key => {
+                    const field = map1[key];
+                    const el = document.getElementById(DATA_ELEMENTS[key]);
+                    if (el) {
+                        const val = latestFeed1 && latestFeed1[field] !== undefined && latestFeed1[field] !==
+                            null && latestFeed1[field] !== '' ? latestFeed1[field] : 'En Reposo';
+                        const label = el.textContent.split(':')[0];
+                        el.textContent = `${label}: ${val}`;
+                    }
+                });
+                Object.keys(map2).forEach(key => {
+                    const field = map2[key];
+                    const el = document.getElementById(DATA_ELEMENTS[key]);
+                    if (el) {
+                        const val = latestFeed2 && latestFeed2[field] !== undefined && latestFeed2[field] !==
+                            null && latestFeed2[field] !== '' ? latestFeed2[field] : 'En Reposo';
+                        const label = el.textContent.split(':')[0];
+                        el.textContent = `${label}: ${val}`;
+                    }
+                });
+                const statusCircle = document.querySelector('.status-circle');
+                const statusText = document.getElementById('statusText');
+                const isActive = latestFeed1 && latestFeed1.field1 !== undefined && latestFeed1.field1 !== null &&
+                    latestFeed1.field1 !== '' && latestFeed1.field1 !== '0';
+                if (statusCircle) {
+                    statusCircle.style.backgroundColor = isActive ? '#00E676' : '#FF1744';
+                }
+                if (statusText) {
+                    statusText.textContent = isActive ? '🟢 En Monitoreo Activo' : '🔴 En Reposo';
+                }
+            }
+
+            // ============================================================
+            // ACTUALIZAR GRÁFICAS CON ANOTACIONES SÍSMICAS
+            // ============================================================
+            function updateCharts() {
+                if (isUpdating) return;
+                isUpdating = true;
+                if (updateTimeoutId) {
+                    clearTimeout(updateTimeoutId);
+                    updateTimeoutId = null;
+                }
+                if (retryTimeoutId) {
+                    clearTimeout(retryTimeoutId);
+                    retryTimeoutId = null;
+                }
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 25000);
+
+                Promise.all([
+                    fetch(URL1, { signal: controller.signal }).then(r => r.ok ? r.json() : Promise.reject(
+                        'Error canal 1')),
+                    fetch(URL2, { signal: controller.signal }).then(r => r.ok ? r.json() : Promise.reject(
+                        'Error canal 2'))
+                ]).then(([data1, data2]) => {
+                    clearTimeout(timeoutId);
+                    const feeds1 = data1.feeds || [];
+                    const feeds2 = data2.feeds || [];
+                    const latestFeed1 = feeds1.length ? feeds1[feeds1.length - 1] : null;
+                    const latestFeed2 = feeds2.length ? feeds2[feeds2.length - 1] : null;
+                    updateLiveData(latestFeed1, latestFeed2);
+                    const combinedDatasets = [];
+                    let allLabels = [];
+
+                    CHART_CONFIGS.forEach(cfg => {
+                        const feeds = cfg.channel === 2 ? feeds2 : feeds1;
+                        const { labels, data } = processFeeds(feeds, cfg.field);
+                        const canvas = document.getElementById(`chart-${cfg.id}`);
+                        if (!canvas) return;
+                        const ctx = canvas.getContext('2d');
+
+                        // Obtener anotaciones para esta gráfica
+                        const annotations = getSeismicAnnotations(labels);
+
+                        if (chartInstances[cfg.id]) {
+                            chartInstances[cfg.id].data.labels = labels;
+                            chartInstances[cfg.id].data.datasets[0].data = data;
+                            // Actualizar anotaciones
+                            if (chartInstances[cfg.id].options.plugins) {
+                                chartInstances[cfg.id].options.plugins.annotation = { annotations: annotations };
+                            }
+                            chartInstances[cfg.id].update('none');
+                        } else {
+                            try {
+                                // Crear gráfica con soporte para anotaciones
+                                chartInstances[cfg.id] = new Chart(ctx, {
+                                    type: 'line',
+                                    data: {
+                                        labels: labels,
+                                        datasets: [{
+                                            label: cfg.label,
+                                            data: data,
+                                            borderColor: cfg.color,
+                                            backgroundColor: cfg.color + '33',
+                                            borderWidth: 2,
+                                            pointRadius: 1,
+                                            pointHoverRadius: 4,
+                                            fill: true,
+                                            tension: 0.2
+                                        }]
+                                    },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: true,
+                                        animation: { duration: 150 },
+                                        plugins: {
+                                            legend: { display: false },
+                                            tooltip: {
+                                                mode: 'index',
+                                                intersect: false,
+                                                callbacks: {
+                                                    label: ctx => ctx.parsed.y !== null ? ctx
+                                                        .parsed.y.toFixed(4) : 'N/A'
+                                                }
+                                            },
+                                            annotation: {
+                                                annotations: annotations
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                display: true,
+                                                ticks: { maxTicksLimit: 8, font: { size: 8 },
+                                                    maxRotation: 30 },
+                                                grid: { display: false }
+                                            },
+                                            y: {
+                                                display: true,
+                                                ticks: { font: { size: 8 }, callback: value => value
+                                                        .toFixed(2) },
+                                                grid: { color: 'rgba(0,0,0,0.06)' },
+                                                beginAtZero: false
+                                            }
+                                        },
+                                        elements: { line: { borderJoinStyle: 'round' } }
+                                    },
+                                    plugins: [ChartAnnotation]
+                                });
+                            } catch (e) {
+                                console.warn('Error gráfica:', cfg.id, e);
+                            }
+                        }
+                        if (labels.length > 0 && data.length > 0) {
+                            if (allLabels.length === 0) {
+                                allLabels = labels.slice();
+                            }
+                            combinedDatasets.push({
+                                label: cfg.label,
+                                data: data,
+                                borderColor: cfg.color,
+                                backgroundColor: cfg.color + '22',
+                                borderWidth: 1.5,
+                                pointRadius: 0.5,
+                                fill: false,
+                                tension: 0.2
+                            });
+                        }
+                    });
+
+                    // Gráfica combinada con anotaciones
+                    const combinedCanvas = document.getElementById('chart-combined');
+                    if (combinedCanvas) {
+                        const ctxCombined = combinedCanvas.getContext('2d');
+                        const combinedAnnotations = getSeismicAnnotations(allLabels);
+
+                        if (combinedChartInstance) {
+                            combinedChartInstance.data.labels = allLabels;
+                            combinedChartInstance.data.datasets = combinedDatasets;
+                            if (combinedChartInstance.options.plugins) {
+                                combinedChartInstance.options.plugins.annotation = { annotations: combinedAnnotations };
+                            }
+                            combinedChartInstance.update('none');
+                        } else {
+                            try {
+                                combinedChartInstance = new Chart(ctxCombined, {
+                                    type: 'line',
+                                    data: { labels: allLabels, datasets: combinedDatasets },
+                                    options: {
+                                        responsive: true,
+                                        maintainAspectRatio: true,
+                                        animation: { duration: 150 },
+                                        plugins: {
+                                            legend: {
+                                                display: true,
+                                                labels: { color: '#fff', font: { size: 9 },
+                                                    boxWidth: 12, padding: 8 }
+                                            },
+                                            tooltip: {
+                                                mode: 'index',
+                                                intersect: false,
+                                                callbacks: {
+                                                    label: ctx => ctx.parsed.y !== null ?
+                                                        `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(4)}` :
+                                                        'N/A'
+                                                }
+                                            },
+                                            annotation: {
+                                                annotations: combinedAnnotations
+                                            }
+                                        },
+                                        scales: {
+                                            x: {
+                                                ticks: { color: '#ccc', font: { size: 8 },
+                                                    maxTicksLimit: 12, maxRotation: 30 },
+                                                grid: { color: 'rgba(255,255,255,0.06)' }
+                                            },
+                                            y: {
+                                                ticks: { color: '#ccc', font: { size: 8 },
+                                                    callback: value => value.toFixed(2) },
+                                                grid: { color: 'rgba(255,255,255,0.06)' },
+                                                beginAtZero: false
+                                            }
+                                        },
+                                        elements: { point: { radius: 0.5, hoverRadius: 4 },
+                                            line: { borderJoinStyle: 'round' } }
+                                    },
+                                    plugins: [ChartAnnotation]
+                                });
+                            } catch (e) {
+                                console.warn('Error gráfica combinada:', e);
+                            }
+                        }
+                    }
+                    isUpdating = false;
+                }).catch(error => {
+                    clearTimeout(timeoutId);
+                    console.warn('Error en actualización:', error);
+                    const statusText = document.getElementById('statusText');
+                    if (statusText) statusText.textContent = '⚠️ Error de conexión';
+                    const statusCircle = document.querySelector('.status-circle');
+                    if (statusCircle) statusCircle.style.backgroundColor = '#FF1744';
+                    isUpdating = false;
+                    if (retryTimeoutId) clearTimeout(retryTimeoutId);
+                    retryTimeoutId = setTimeout(updateCharts, 15000);
+                });
+            }
+
+            // ============================================================
+            // OBTENER DATOS SÍSMICOS DE USGS
+            // ============================================================
+            function fetchSeismicData() {
+                const container = document.getElementById('seismicContent');
+                container.innerHTML = '<div class="seismic-loading">⏳ Cargando datos sísmicos...</div>';
+
+                fetch(USGS_URL)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Error en la API de USGS');
+                        return response.json();
+                    })
+                    .then(data => {
+                        const features = data.features || [];
+                        const countEl = document.getElementById('quakeCount');
+                        countEl.textContent = features.length;
+
+                        // Almacenar eventos para usarlos en las gráficas
+                        seismicEvents = features.map(f => ({
+                            time: f.properties.time,
+                            mag: f.properties.mag,
+                            place: f.properties.place,
+                            url: f.properties.url
+                        }));
+
+                        if (features.length === 0) {
+                            container.innerHTML =
+                                '<div class="seismic-empty">🌍 No se registraron eventos > 6M en el período.</div>';
+                            // Forzar actualización de gráficas para quitar anotaciones
+                            updateCharts();
+                            return;
+                        }
+
+                        let html = '<div class="seismic-grid">';
+                        features.forEach(f => {
+                            const props = f.properties;
+                            const mag = props.mag ? props.mag.toFixed(1) : 'N/A';
+                            const place = props.place || 'Ubicación desconocida';
+                            const time = new Date(props.time).toLocaleString();
+                            html += `
+                                <div class="seismic-card">
+                                    <div class="mag">⚡ ${mag} M</div>
+                                    <div class="place">📍 ${place}</div>
+                                    <div class="time">🕐 ${time}</div>
+                                    <div class="detail">${props.url ? '🔗 <a href="'+props.url+'" target="_blank" style="color:#FFD700;">Ver detalle</a>' : ''}</div>
+                                </div>
+                            `;
+                        });
+                        html += '</div>';
+                        container.innerHTML = html;
+
+                        // Actualizar gráficas con los nuevos eventos sísmicos
+                        updateCharts();
+                    })
+                    .catch(error => {
+                        console.warn('Error al obtener datos sísmicos:', error);
+                        container.innerHTML =
+                            `<div class="seismic-empty">⚠️ Error al cargar datos sísmicos: ${error.message || 'Desconocido'}</div>`;
+                    });
+            }
+
+            // ============================================================
+            // INICIALIZACIÓN
+            // ============================================================
+            function init() {
+                createChartWrappers();
+
+                const checkChart = () => {
+                    if (typeof Chart !== 'undefined' && typeof ChartAnnotation !== 'undefined') {
+                        updateCharts();
+                        fetchSeismicData();
+                        return true;
+                    }
+                    return false;
+                };
+
+                // Cargar el plugin de anotaciones
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js';
+                script.onload = function() {
+                    if (typeof Chart !== 'undefined' && typeof ChartAnnotation !== 'undefined') {
+                        Chart.register(ChartAnnotation);
+                        checkChart();
+                    }
+                };
+                script.onerror = function() {
+                    console.warn('No se pudo cargar chartjs-plugin-annotation, las anotaciones no estarán disponibles');
+                    checkChart();
+                };
+                document.head.appendChild(script);
+
+                if (document.readyState === 'complete' || document.readyState === 'interactive') {
+                    if (!checkChart()) {
+                        const interval = setInterval(() => {
+                            if (checkChart()) clearInterval(interval);
+                        }, 200);
+                    }
+                } else {
+                    document.addEventListener('DOMContentLoaded', () => {
+                        if (!checkChart()) {
+                            const interval = setInterval(() => {
+                                if (checkChart()) clearInterval(interval);
+                            }, 200);
+                        }
+                    });
+                }
+
+                setInterval(updateCharts, 20000);
+                setInterval(fetchSeismicData, 60000);
+
+                document.addEventListener('visibilitychange', () => {
+                    if (!document.hidden) {
+                        if (updateTimeoutId) {
+                            clearTimeout(updateTimeoutId);
+                            updateTimeoutId = null;
+                        }
+                        updateCharts();
+                        fetchSeismicData();
+                    }
+                }, { passive: true });
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+
+        })();
+    </script>
+
+</body>
+</html>
