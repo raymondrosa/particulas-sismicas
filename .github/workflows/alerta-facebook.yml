@@ -1,0 +1,48 @@
+name: Aviso sísmico a Facebook
+
+on:
+  schedule:
+    # Cada 10 minutos. GitHub puede retrasar la ejecución unos minutos.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+    inputs:
+      force:
+        description: "Publicar una prueba aunque no haya alerta"
+        required: false
+        default: false
+        type: boolean
+      dry_run:
+        description: "Solo mostrar el mensaje, sin publicar"
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: alerta-facebook
+  cancel-in-progress: false
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Evaluar sensores y publicar si hay alerta
+        env:
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          COOLDOWN_HOURS: "12"
+          FORCE: ${{ inputs.force }}
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: python scripts/alerta_facebook.py
