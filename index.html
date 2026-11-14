@@ -1122,7 +1122,7 @@
                 const bg = data.map((_, i) => i === maxIdx ? MAX_COLOR : baseColor);
                 const border = data.map((_, i) => i === maxIdx ? MAX_BORDER : baseColor);
                 const width = data.map((_, i) => i === maxIdx ? 2 : 0);
-                const radius = data.map((_, i) => i === maxIdx ? 7 : 1);
+                const radius = data.map((_, i) => i === maxIdx ? 4 : 1);
                 return { maxIdx: maxIdx, maxVal: maxVal, bg: bg, border: border, width: width, radius: radius };
             }
 
@@ -1751,6 +1751,8 @@
                             ? '⚠️ Sin datos — Observatorio de Partículas del TOA'
                             : 'Observatorio de Partículas del TOA - Prof. Rosa');
                 }
+
+                updateStationStatus(level, !!result.stale);
             }
 
             function updateTrend(feeds1, feeds2) {
@@ -1830,16 +1832,25 @@
                     }
                 });
 
-                const statusCircle = document.querySelector('.status-circle');
-                const statusText = document.getElementById('statusText');
-                const isActive = latestFeed1 && latestFeed1.field1 !== undefined && latestFeed1.field1 !== null &&
-                    latestFeed1.field1 !== '' && latestFeed1.field1 !== '0';
+            }
 
-                if (statusCircle) {
-                    statusCircle.style.backgroundColor = isActive ? '#00E676' : '#FF1744';
-                }
-                if (statusText) {
-                    statusText.textContent = isActive ? '🟢 En Monitoreo Activo' : '🔴 En Reposo';
+            function updateStationStatus(level, stale) {
+                const statusText = document.getElementById('statusText');
+                const statusCircle = document.querySelector('.status-circle');
+                if (!statusText || !statusCircle) return;
+
+                if (stale || level === 'nodata') {
+                    statusText.textContent = '⚪ Sin datos';
+                    statusCircle.style.backgroundColor = '#9E9E9E';
+                } else if (level === 'alerta') {
+                    statusText.textContent = '🟠 Actividad detectada';
+                    statusCircle.style.backgroundColor = '#FF9800';
+                } else if (level === 'vigilancia') {
+                    statusText.textContent = '🟡 Variación detectada';
+                    statusCircle.style.backgroundColor = '#FFC107';
+                } else {
+                    statusText.textContent = '🟢 En Reposo';
+                    statusCircle.style.backgroundColor = '#00E676';
                 }
             }
 
@@ -1998,7 +2009,7 @@
                                 pointBackgroundColor: hl.bg,
                                 pointBorderColor: hl.border,
                                 pointBorderWidth: hl.width,
-                                pointRadius: data.map((_, i) => i === hl.maxIdx ? 6 : 0.5),
+                                pointRadius: data.map((_, i) => i === hl.maxIdx ? 4 : 0.5),
                                 fill: false,
                                 tension: 0.2
                             });
@@ -2146,8 +2157,8 @@
                         const quakeBg = points.map((p, i) => i === maxQuakeIdx ? MAX_COLOR :
                             (p.y >= 8 ? '#8B0000' : p.y >= 7 ? '#FF0000' : '#FF8C00'));
                         const quakeBorder = points.map((_, i) => i === maxQuakeIdx ? MAX_BORDER : '#FFFFFF');
-                        const quakeWidth = points.map((_, i) => i === maxQuakeIdx ? 3 : 1);
-                        const quakeRadius = points.map((_, i) => i === maxQuakeIdx ? 9 : 4);
+                        const quakeWidth = points.map((_, i) => i === maxQuakeIdx ? 2 : 1);
+                        const quakeRadius = points.map((_, i) => i === maxQuakeIdx ? 6 : 4);
                         setMaxCaption('earthquakes', points.length ? 'M' + maxQuakeMag.toFixed(1) : '');
 
                         if (chartInstances['earthquakes']) {
