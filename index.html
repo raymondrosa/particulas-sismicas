@@ -202,6 +202,20 @@
             text-transform: uppercase;
         }
 
+        .chart-max {
+            display: block;
+            margin-top: 2px;
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 0;
+            text-transform: none;
+            color: #FFD700;
+        }
+
+        .chart-max:empty {
+            display: none;
+        }
+
         .chart-wrapper .expand-hint {
             position: absolute;
             top: 6px;
@@ -531,57 +545,6 @@
         }
 
         /* ===== DONATIVOS ===== */
-        .header-donate {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            min-height: 48px;
-            padding: 10px 20px;
-            border-radius: 999px;
-            background: #FFC439;
-            color: #08213A;
-            font-size: 1rem;
-            font-weight: 800;
-            text-decoration: none;
-            flex-shrink: 0;
-            box-shadow: 0 6px 18px rgba(255, 196, 57, 0.35);
-            transition: background-color 0.15s ease, transform 0.15s ease;
-        }
-
-        .header-donate:hover {
-            background: #FFD45F;
-            color: #08213A;
-            transform: translateY(-1px);
-        }
-
-        .donation-strip {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            flex-wrap: wrap;
-            max-width: 1400px;
-            margin: 0 auto 16px;
-            padding: 12px 18px;
-            background: rgba(255, 196, 57, 0.12);
-            border: 1px solid rgba(255, 215, 0, 0.45);
-            border-radius: var(--radius);
-        }
-
-        .donation-strip p {
-            margin: 0;
-            font-size: 1rem;
-            color: rgba(255, 255, 255, 0.92);
-        }
-
-        .donation-strip .donate-btn {
-            min-height: 48px;
-            padding: 10px 22px;
-            font-size: 1rem;
-            flex-shrink: 0;
-        }
-
         .donation {
             max-width: 1400px;
             margin: 22px auto 0;
@@ -702,20 +665,6 @@
                 justify-content: center;
                 font-size: 0.98rem;
                 padding: 6px 14px;
-            }
-
-            .header-donate {
-                width: 100%;
-            }
-
-            .donation-strip {
-                flex-direction: column;
-                align-items: stretch;
-                text-align: center;
-            }
-
-            .donation-strip .donate-btn {
-                width: 100%;
             }
 
             .data-container {
@@ -849,10 +798,6 @@
                 padding: 5px 12px;
             }
 
-            .header-donate {
-                font-size: 0.95rem;
-            }
-
             .status-circle {
                 width: 10px;
                 height: 10px;
@@ -967,7 +912,6 @@
                 <span class="status-circle" style="background-color: #FFA500;"></span>
                 <span id="statusText">Cargando...</span>
             </div>
-            <a class="header-donate" href="#donativos" aria-label="Ir a la sección de donativos">❤ Donar</a>
         </div>
     </div>
 
@@ -989,14 +933,6 @@
         <p class="trend-disclaimer"><strong>Información de un estudio en desarrollo.</strong> Este aviso no proviene de una autoridad oficial ni de un organismo de alerta, y su hipótesis <strong>aún no ha sido validada científicamente</strong>. No lo use para tomar decisiones de seguridad; ante un sismo, siga los protocolos oficiales.</p>
     </section>
     <p class="sr-only" id="trendLive" aria-live="polite"></p>
-
-    <!-- ============ DONATIVOS (ACCESO RÁPIDO) ============ -->
-    <div class="donation-strip">
-        <p><strong>¿Quieres apoyar esta investigación?</strong> Tu donativo ayuda a mantener los sensores y la plataforma.</p>
-        <a class="donate-btn" href="https://www.paypal.com/ncp/payment/5NS4XFJZK5UE8" target="_blank" rel="noopener noreferrer" aria-label="Donar con PayPal (se abre en una pestaña nueva)">
-            <span aria-hidden="true">❤</span> Donar con PayPal
-        </a>
-    </div>
 
     <!-- Datos en tiempo real -->
     <div class="data-container" id="dataContainer">
@@ -1027,7 +963,7 @@
                 <span aria-hidden="true">❤</span> Donar con PayPal
             </a>
             <p class="donation-note">Pago seguro procesado por PayPal · Puedes donar con tarjeta o cuenta PayPal</p>
-            <p class="donation-alt">¿Prefieres otro método o una colaboración institucional? <a href="mailto:raymondrosaavila@gmail.com?subject=Donativo%20-%20Observatorio%20de%20Part%C3%ADculas%20del%20TOA">Escríbeme</a></p>
+            <p class="donation-alt">¿Prefieres otro método o una colaboración institucional? <a href="mailto:raymondrosaavila@gmail.com">raymondrosaavila@gmail.com</a></p>
         </div>
     </section>
 
@@ -1166,6 +1102,43 @@
                 accelResult: 'accelResult'
             };
 
+            // Colores legibles sobre el fondo blanco de las gráficas
+            const AXIS_COLOR = '#334155';
+            const GRID_COLOR = 'rgba(15, 23, 42, 0.12)';
+            const LEGEND_COLOR = '#1F2937';
+            const MAX_COLOR = '#FFB000';
+            const MAX_BORDER = '#1F2937';
+
+            function highlightMax(data, baseColor) {
+                let maxIdx = -1;
+                let maxVal = -Infinity;
+                for (let i = 0; i < data.length; i++) {
+                    const v = data[i];
+                    if (typeof v === 'number' && isFinite(v) && v > maxVal) {
+                        maxVal = v;
+                        maxIdx = i;
+                    }
+                }
+                const bg = data.map((_, i) => i === maxIdx ? MAX_COLOR : baseColor);
+                const border = data.map((_, i) => i === maxIdx ? MAX_BORDER : baseColor);
+                const width = data.map((_, i) => i === maxIdx ? 2 : 0);
+                const radius = data.map((_, i) => i === maxIdx ? 7 : 1);
+                return { maxIdx: maxIdx, maxVal: maxVal, bg: bg, border: border, width: width, radius: radius };
+            }
+
+            function formatMaxValue(value) {
+                if (value === null || value === undefined || !isFinite(value)) return '';
+                const abs = Math.abs(value);
+                if (abs >= 100) return value.toFixed(0);
+                if (abs >= 10) return value.toFixed(1);
+                return value.toFixed(2);
+            }
+
+            function setMaxCaption(chartId, text) {
+                const el = document.getElementById(`max-${chartId}`);
+                if (el) el.textContent = text ? `máx: ${text}` : '';
+            }
+
             const chartInstances = {};
             let combinedChartInstance = null;
             let isUpdating = false;
@@ -1276,6 +1249,10 @@
                     const label = document.createElement('div');
                     label.className = 'chart-label';
                     label.textContent = cfg.label;
+                    const maxLabel = document.createElement('span');
+                    maxLabel.className = 'chart-max';
+                    maxLabel.id = `max-${cfg.id}`;
+                    label.appendChild(maxLabel);
                     wrapper.appendChild(label);
 
                     const canvas = document.createElement('canvas');
@@ -1335,6 +1312,10 @@
                 const seismicLabel = document.createElement('div');
                 seismicLabel.className = 'chart-label';
                 seismicLabel.textContent = '🌍 Sismos M≥6.0 (USGS)';
+                const seismicMaxLabel = document.createElement('span');
+                seismicMaxLabel.className = 'chart-max';
+                seismicMaxLabel.id = 'max-earthquakes';
+                seismicLabel.appendChild(seismicMaxLabel);
                 seismicWrapper.appendChild(seismicLabel);
 
                 const seismicCanvas = document.createElement('canvas');
@@ -1388,20 +1369,20 @@
                             tooltipFormat: 'lll'
                         },
                         ticks: {
-                            color: '#ccc',
+                            color: AXIS_COLOR,
                             font: { size: 14 },
                             maxTicksLimit: 14,
                             maxRotation: 45
                         },
-                        grid: { color: 'rgba(255,255,255,0.08)' }
+                        grid: { color: GRID_COLOR }
                     } : {
                         ticks: {
-                            color: '#ccc',
+                            color: AXIS_COLOR,
                             font: { size: 14 },
                             maxTicksLimit: 20,
                             maxRotation: 45
                         },
-                        grid: { color: 'rgba(255,255,255,0.08)' }
+                        grid: { color: GRID_COLOR }
                     };
 
                     const newChart = new Chart(ctx, {
@@ -1416,7 +1397,7 @@
                                 legend: {
                                     display: !isSeismic,
                                     labels: {
-                                        color: '#fff',
+                                        color: LEGEND_COLOR,
                                         font: { size: 15 },
                                         boxWidth: 16,
                                         padding: 12
@@ -1445,10 +1426,10 @@
                                     beginAtZero: isSeismic,
                                     suggestedMax: isSeismic ? 9 : undefined,
                                     ticks: {
-                                        color: '#ccc',
+                                        color: AXIS_COLOR,
                                         font: { size: 14 }
                                     },
-                                    grid: { color: 'rgba(255,255,255,0.08)' }
+                                    grid: { color: GRID_COLOR }
                                 }
                             },
                             elements: {
@@ -1926,9 +1907,17 @@
                         if (!canvas) return;
                         const ctx = canvas.getContext('2d');
 
+                        const hl = highlightMax(data, cfg.color);
+                        setMaxCaption(cfg.id, data.length ? formatMaxValue(hl.maxVal) : '');
+
                         if (chartInstances[cfg.id]) {
+                            const ds = chartInstances[cfg.id].data.datasets[0];
                             chartInstances[cfg.id].data.labels = labels;
-                            chartInstances[cfg.id].data.datasets[0].data = data;
+                            ds.data = data;
+                            ds.pointBackgroundColor = hl.bg;
+                            ds.pointBorderColor = hl.border;
+                            ds.pointBorderWidth = hl.width;
+                            ds.pointRadius = hl.radius;
                             chartInstances[cfg.id].update('none');
                         } else {
                             try {
@@ -1942,8 +1931,11 @@
                                             borderColor: cfg.color,
                                             backgroundColor: cfg.color + '33',
                                             borderWidth: 2,
-                                            pointRadius: 1,
-                                            pointHoverRadius: 4,
+                                            pointBackgroundColor: hl.bg,
+                                            pointBorderColor: hl.border,
+                                            pointBorderWidth: hl.width,
+                                            pointRadius: hl.radius,
+                                            pointHoverRadius: 5,
                                             fill: true,
                                             tension: 0.2
                                         }]
@@ -1967,6 +1959,7 @@
                                             x: {
                                                 display: true,
                                                 ticks: {
+                                                    color: AXIS_COLOR,
                                                     maxTicksLimit: 6,
                                                     font: { size: 12 },
                                                     maxRotation: 30
@@ -1976,10 +1969,11 @@
                                             y: {
                                                 display: true,
                                                 ticks: {
+                                                    color: AXIS_COLOR,
                                                     font: { size: 12 },
                                                     callback: value => value.toFixed(2)
                                                 },
-                                                grid: { color: 'rgba(0,0,0,0.06)' },
+                                                grid: { color: GRID_COLOR },
                                                 beginAtZero: false
                                             }
                                         },
@@ -2001,7 +1995,10 @@
                                 borderColor: cfg.color,
                                 backgroundColor: cfg.color + '22',
                                 borderWidth: 1.5,
-                                pointRadius: 0.5,
+                                pointBackgroundColor: hl.bg,
+                                pointBorderColor: hl.border,
+                                pointBorderWidth: hl.width,
+                                pointRadius: data.map((_, i) => i === hl.maxIdx ? 6 : 0.5),
                                 fill: false,
                                 tension: 0.2
                             });
@@ -2032,7 +2029,7 @@
                                             legend: {
                                                 display: true,
                                                 labels: {
-                                                    color: '#fff',
+                                                    color: LEGEND_COLOR,
                                                     font: { size: 13 },
                                                     boxWidth: 12,
                                                     padding: 8
@@ -2051,20 +2048,20 @@
                                         scales: {
                                             x: {
                                                 ticks: {
-                                                    color: '#ccc',
+                                                    color: AXIS_COLOR,
                                                     font: { size: 12 },
                                                     maxTicksLimit: 8,
                                                     maxRotation: 30
                                                 },
-                                                grid: { color: 'rgba(255,255,255,0.06)' }
+                                                grid: { color: GRID_COLOR }
                                             },
                                             y: {
                                                 ticks: {
-                                                    color: '#ccc',
+                                                    color: AXIS_COLOR,
                                                     font: { size: 12 },
                                                     callback: value => value.toFixed(2)
                                                 },
-                                                grid: { color: 'rgba(255,255,255,0.06)' },
+                                                grid: { color: GRID_COLOR },
                                                 beginAtZero: false
                                             }
                                         },
@@ -2137,16 +2134,30 @@
                         }
                         const ctx = canvas.getContext('2d');
 
-                        // Color por rango de magnitud (función scriptable de Chart.js)
-                        const pointColor = context => {
-                            const m = context.raw ? context.raw.y : null;
-                            if (m === null) return '#FF8C00';
-                            return m >= 8 ? '#8B0000' : m >= 7 ? '#FF0000' : '#FF8C00';
-                        };
+                        // Punto máximo del periodo (mayor magnitud)
+                        let maxQuakeIdx = -1;
+                        let maxQuakeMag = -Infinity;
+                        points.forEach((p, i) => {
+                            if (p.y > maxQuakeMag) {
+                                maxQuakeMag = p.y;
+                                maxQuakeIdx = i;
+                            }
+                        });
+                        const quakeBg = points.map((p, i) => i === maxQuakeIdx ? MAX_COLOR :
+                            (p.y >= 8 ? '#8B0000' : p.y >= 7 ? '#FF0000' : '#FF8C00'));
+                        const quakeBorder = points.map((_, i) => i === maxQuakeIdx ? MAX_BORDER : '#FFFFFF');
+                        const quakeWidth = points.map((_, i) => i === maxQuakeIdx ? 3 : 1);
+                        const quakeRadius = points.map((_, i) => i === maxQuakeIdx ? 9 : 4);
+                        setMaxCaption('earthquakes', points.length ? 'M' + maxQuakeMag.toFixed(1) : '');
 
                         if (chartInstances['earthquakes']) {
                             const range = getTimeRange();
-                            chartInstances['earthquakes'].data.datasets[0].data = points;
+                            const dsQuake = chartInstances['earthquakes'].data.datasets[0];
+                            dsQuake.data = points;
+                            dsQuake.pointBackgroundColor = quakeBg;
+                            dsQuake.pointBorderColor = quakeBorder;
+                            dsQuake.pointBorderWidth = quakeWidth;
+                            dsQuake.pointRadius = quakeRadius;
                             chartInstances['earthquakes'].options.scales.x.min = range.min;
                             chartInstances['earthquakes'].options.scales.x.max = range.max;
                             chartInstances['earthquakes'].update('none');
@@ -2161,9 +2172,10 @@
                                             data: points,
                                             borderColor: '#FF4444',
                                             backgroundColor: 'rgba(255, 68, 68, 0.15)',
-                                            pointBackgroundColor: pointColor,
-                                            pointBorderColor: '#fff',
-                                            pointRadius: 4,
+                                            pointBackgroundColor: quakeBg,
+                                            pointBorderColor: quakeBorder,
+                                            pointBorderWidth: quakeWidth,
+                                            pointRadius: quakeRadius,
                                             pointHoverRadius: 7,
                                             borderWidth: 2,
                                             fill: true,
@@ -2201,6 +2213,7 @@
                                                     tooltipFormat: 'lll'
                                                 },
                                                 ticks: {
+                                                    color: AXIS_COLOR,
                                                     maxTicksLimit: 6,
                                                     font: { size: 12 },
                                                     maxRotation: 30
@@ -2211,10 +2224,11 @@
                                                 beginAtZero: true,
                                                 suggestedMax: 9,
                                                 ticks: {
+                                                    color: AXIS_COLOR,
                                                     font: { size: 12 },
                                                     callback: value => value.toFixed(1)
                                                 },
-                                                grid: { color: 'rgba(0,0,0,0.06)' }
+                                                grid: { color: GRID_COLOR }
                                             }
                                         }
                                     }
