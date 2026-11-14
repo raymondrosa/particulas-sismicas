@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Aviso experimental de tendencia sísmica -> página de Facebook.
+Anomalía estadística multivariable -> página de Facebook.
 
 Lee los canales públicos de ThingSpeak del Observatorio de Partículas del TOA,
 aplica la misma detección que la página y, si el nivel es "alerta", publica
 un aviso en la página de Facebook indicada.
+
+La alerta exige coincidencia en al menos DOS familias de medición
+(partículas, molecular o aceleración), igual que la página.
 
 Requisitos:
   - Variable de entorno FB_PAGE_TOKEN con un token de página (nunca en el HTML).
@@ -43,20 +46,22 @@ CHANNELS = {
     "ch2": (2972050, "8LMMRSTHHX26Z4MI"),
 }
 
-# (canal, campo, etiqueta, unidad, minSigma, minDelta)
+# (canal, campo, etiqueta, unidad, grupo, minSigma, minDelta)
 SERIES = [
-    ("ch1", "field1", "Partículas reales", "u", 15.0, 20.0),
-    ("ch1", "field2", "Partículas imaginarias", "u", 15.0, 20.0),
-    ("ch1", "field3", "Física molecular", "u", 8.0, 10.0),
-    ("ch2", "field1", "Aceleración X", "m/s²", 0.05, 0.15),
-    ("ch2", "field2", "Aceleración Y", "m/s²", 0.05, 0.15),
-    ("ch2", "field3", "Aceleración Z", "m/s²", 0.05, 0.15),
-    ("ch2", "field4", "Aceleración resultante", "m/s²", 0.10, 0.20),
+    ("ch1", "field1", "Partículas reales", "u", "particulas", 15.0, 20.0),
+    ("ch1", "field2", "Partículas imaginarias", "u", "particulas", 15.0, 20.0),
+    ("ch1", "field3", "Física molecular", "u", "molecular", 8.0, 10.0),
+    ("ch2", "field1", "Aceleración X", "m/s²", "aceleracion", 0.05, 0.15),
+    ("ch2", "field2", "Aceleración Y", "m/s²", "aceleracion", 0.05, 0.15),
+    ("ch2", "field3", "Aceleración Z", "m/s²", "aceleracion", 0.05, 0.15),
+    ("ch2", "field4", "Aceleración resultante", "m/s²", "aceleracion", 0.10, 0.20),
 ]
+CORE_COUNT = len(SERIES)
 
 RECENT_POINTS = 240       # ~1 hora con muestreo de ~15 s
 BASELINE_POINTS = 1200    # ~5 horas previas
 MIN_BASELINE = 90
+MIN_RECENT = 120
 Z_WATCH = 4.5
 Z_STRONG = 6.0
 Z_SPIKE = 10.0
@@ -95,7 +100,7 @@ def fetch_feeds(channel_id, api_key):
 
 def analyze(feeds_by_channel):
     results = []
-    for channel, field, label, unit, min_sigma, min_delta in SERIES:
+    for channel, field, label, unit, group, min_sigma, min_delta in SERIES:
         values = []
         for feed in feeds_by_channel.get(channel, []):
             raw = feed.get(field)
@@ -111,7 +116,7 @@ def analyze(feeds_by_channel):
 
         recent = values[-RECENT_POINTS:]
         baseline = values[-(RECENT_POINTS + BASELINE_POINTS):-RECENT_POINTS]
-        if len(baseline) < MIN_BASELINE or len(recent) < 30:
+        if len(baseline) < MIN_BASELINE or len(recent) < MIN_RECENT:
             continue
 
         center = median(baseline)
@@ -123,18 +128,18 @@ def analyze(feeds_by_channel):
         meaningful = abs(delta) >= min_delta
 
         state = "normal"
-        if meaningful:
-            if abs(z_recent) >= Z_STRONG:
-                state = "strong"
-            elif abs(z_recent) >= Z_WATCH:
-                state = "watch"
-            elif abs(z_last) >= Z_SPIKE:
-                state = "spike"
+        if meaningful and abs(z_recent) >= Z_STRONG:
+            state = "strong"
+        elif meaningful and abs(z_recent) >= Z_WATCH:
+            state = "watch"
+        elif abs(values[-1] - center) >= min_delta and abs(z_last) >= Z_SPIKE:
+            state = "spike"
 
         results.append(
             {
                 "label": label,
                 "unit": unit,
+                "group": group,
                 "state": state,
                 "delta": delta,
                 "z_recent": z_recent,
@@ -147,30 +152,34 @@ def analyze(feeds_by_channel):
     strong = [r for r in results if r["state"] == "strong"]
     watch = [r for r in results if r["state"] == "watch"]
     spikes = [r for r in results if r["state"] == "spike"]
+    active = [r for r in results if r["state"] != "normal"]
+    strong_groups = sorted({r["group"] for r in strong})
+    active_groups = sorted({r["group"] for r in active})
 
-    if not results:
+    if len(results) < CORE_COUNT:
         level = "nodata"
-    elif strong:
+        reason = "partial"
+    elif len(strong_groups) >= 2:
         level = "alerta"
-    elif watch or spikes:
+        reason = ""
+    elif active:
         level = "vigilancia"
+        reason = ""
     else:
         level = "estable"
-
-    if len(strong) >= 3:
-        confidence = "alta"
-    elif len(strong) == 2:
-        confidence = "media"
-    else:
-        confidence = "baja"
+        reason = ""
 
     return {
         "level": level,
-        "confidence": confidence,
+        "reason": reason,
+        "available": len(results),
+        "required": CORE_COUNT,
         "strong": strong,
         "watch": watch,
         "spikes": spikes,
-        "signals": strong + watch + spikes,
+        "signals": active,
+        "strong_groups": strong_groups,
+        "active_groups": active_groups,
         "evaluated_at": datetime.now(timezone.utc),
     }
 
@@ -195,6 +204,7 @@ def build_message(result, is_test=False):
         )
 
     count = len(result["strong"])
+    groups = len(result["strong_groups"])
     details = []
     for item in result["strong"]:
         details.append(
@@ -211,10 +221,12 @@ def build_message(result, is_test=False):
     details_text = "\n".join(details) if details else "• Variación sostenida en los sensores."
 
     return (
-        "🟠 Aviso experimental: posible aumento en la tendencia sísmica\n\n"
+        "🟠 Anomalía estadística multivariable detectada\n\n"
         "El Observatorio de Partículas del TOA detectó una variación sostenida en "
         + str(count)
-        + " variable(s) de sus sensores. Ventana de referencia: próximas 24 horas (aprox.).\n\n"
+        + " variable(s) de "
+        + str(groups)
+        + " familia(s) de medición. Es un indicador experimental: no predice terremotos.\n\n"
         + details_text
         + "\n\n⚠️ Información de un estudio en desarrollo. No proviene de una autoridad oficial "
         "ni de un organismo de alerta, y su hipótesis aún no ha sido validada científicamente. "
@@ -319,11 +331,17 @@ def main():
         + str(len(result["watch"]))
         + " | picos: "
         + str(len(result["spikes"]))
+        + " | familias fuertes: "
+        + str(len(result["strong_groups"]))
+        + " | core: "
+        + str(result["available"])
+        + "/"
+        + str(result["required"])
     )
     for item in result["signals"]:
         print(
             f"  - {item['label']}: Δ {format_delta(item['delta'])} {item['unit']} "
-            f"(z={item['z_recent']:.1f}) estado={item['state']}"
+            f"(z={item['z_recent']:.1f}) estado={item['state']} grupo={item['group']}"
         )
 
     message = build_message(result, is_test=force)
