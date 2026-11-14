@@ -920,7 +920,7 @@
         <div class="trend-top">
             <span class="trend-badge">Experimental</span>
             <span class="trend-dot" id="trendDot" aria-hidden="true"></span>
-            <h2 class="trend-title" id="trendTitle">Evaluando tendencia sísmica…</h2>
+            <h2 class="trend-title" id="trendTitle">Evaluando anomalías…</h2>
             <span class="trend-time" id="trendTime"></span>
         </div>
         <p class="trend-detail" id="trendDetail">Esperando datos de los sensores…</p>
@@ -928,7 +928,7 @@
         <ul class="trend-signals" id="trendSignals" hidden></ul>
         <details class="trend-method">
             <summary>¿Cómo se calcula este aviso?</summary>
-            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a picos aislados. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no un pico de un solo dato) que supera un umbral estadístico y un cambio mínimo. La ventana de «24 horas» es el horizonte de referencia del proyecto, no una predicción. La coincidencia indica cuántas variables se mueven a la vez (baja: 1, media: 2, alta: 3 o más); no es una probabilidad.</p>
+            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a picos aislados. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no un pico de un solo dato) que supera un umbral estadístico y un cambio mínimo. Los picos aislados se evalúan por separado de los cambios sostenidos. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado no predice terremotos.</p>
         </details>
         <p class="trend-disclaimer"><strong>Información de un estudio en desarrollo.</strong> Este aviso no proviene de una autoridad oficial ni de un organismo de alerta, y su hipótesis <strong>aún no ha sido validada científicamente</strong>. No lo use para tomar decisiones de seguridad; ante un sismo, siga los protocolos oficiales.</p>
     </section>
@@ -1483,10 +1483,12 @@
                 recentPoints: 240,      // ~1 hora con muestreo de ~15 s
                 baselinePoints: 1200,   // ~5 horas previas de referencia
                 minBaselinePoints: 90,
+                minRecentPoints: 120,
                 zWatch: 4.5,
                 zStrong: 6,
                 zSpike: 10,
                 core: ['realParticles', 'imaginaryParticles', 'molecularPhysics', 'accelX', 'accelY', 'accelZ', 'accelResult'],
+                groups: { realParticles: 'particulas', imaginaryParticles: 'particulas', molecularPhysics: 'molecular', accelX: 'aceleracion', accelY: 'aceleracion', accelZ: 'aceleracion', accelResult: 'aceleracion' },
                 series: {
                     realParticles: { minSigma: 15, minDelta: 20, unit: 'u' },
                     imaginaryParticles: { minSigma: 15, minDelta: 20, unit: 'u' },
@@ -1512,14 +1514,14 @@
                 },
                 vigilancia: {
                     title: '🟡 Variación moderada detectada en los sensores',
-                    detail: 'Se detectó una variación en {n} variable(s) respecto a su comportamiento reciente. Aún no se emite aviso de tendencia sísmica.'
+                    detail: 'Se detectó una variación en {n} variable(s) de {groups} familia(s) de medición. Aún no se emite un aviso de anomalía multivariable.'
                 },
                 alerta: {
-                    title: '⚠️ Posible aumento en la tendencia sísmica — próximas 24 horas (aprox.)',
-                    detail: 'Se detectó una variación sostenida en {n} variable(s) del observatorio. Coincidencia de señales: {confianza}. Es un indicador experimental, no una predicción: no garantiza que ocurra un sismo.'
+                    title: '⚠️ Anomalía estadística multivariable detectada',
+                    detail: 'Se detectó una variación sostenida en {n} variable(s) de {groups} familia(s) de medición. La coincidencia entre familias es un indicador experimental; no predice terremotos.'
                 },
                 nodata: {
-                    title: '⚪ Estado de tendencia sísmica no disponible',
+                    title: '⚪ Estado de anomalías no disponible',
                     detail: 'No se pudieron leer los datos de los sensores en este momento. El estado no se puede determinar.'
                 }
             };
@@ -1555,7 +1557,7 @@
 
                 const recent = vals.slice(-TREND.recentPoints);
                 const baseline = vals.slice(-(TREND.recentPoints + TREND.baselinePoints), -TREND.recentPoints);
-                if (baseline.length < TREND.minBaselinePoints || recent.length < 30) return null;
+                if (baseline.length < TREND.minBaselinePoints || recent.length < TREND.minRecentPoints) return null;
 
                 const baseMed = trendMedian(baseline);
                 const sigma = Math.max(trendMad(baseline, baseMed), Math.abs(baseMed) * 0.005, cfg.minSigma, 1e-9);
@@ -1566,11 +1568,10 @@
                 const meaningful = Math.abs(delta) >= cfg.minDelta;
 
                 let state = 'normal';
-                if (meaningful) {
-                    if (Math.abs(zRecent) >= TREND.zStrong) state = 'strong';
-                    else if (Math.abs(zRecent) >= TREND.zWatch) state = 'watch';
-                    else if (Math.abs(zLast) >= TREND.zSpike) state = 'spike';
-                }
+                if (meaningful && Math.abs(zRecent) >= TREND.zStrong) state = 'strong';
+                else if (meaningful && Math.abs(zRecent) >= TREND.zWatch) state = 'watch';
+                // Un pico extremo se evalúa aparte: no depende de que cambie la mediana reciente.
+                else if (Math.abs(vals[vals.length - 1] - baseMed) >= cfg.minDelta && Math.abs(zLast) >= TREND.zSpike) state = 'spike';
 
                 return { state, zRecent, zLast, delta, baseMed, recentMed, last: vals[vals.length - 1] };
             }
@@ -1581,29 +1582,27 @@
                     const feeds = cfg.channel === 1 ? feeds1 : feeds2;
                     const stats = analyzeTrendSeries(feeds, cfg.field, TREND.series[cfg.id]);
                     if (!stats) return;
-                    results.push(Object.assign({
-                        id: cfg.id,
-                        label: cfg.label,
-                        unit: TREND.series[cfg.id].unit,
-                        core: TREND.core.indexOf(cfg.id) !== -1
-                    }, stats));
+                    results.push(Object.assign({ id: cfg.id, label: cfg.label, unit: TREND.series[cfg.id].unit,
+                        core: TREND.core.indexOf(cfg.id) !== -1,
+                        group: TREND.groups[cfg.id] || 'contexto' }, stats));
                 });
-
+                const coreResults = results.filter(r => r.core);
                 const signals = results.filter(r => r.state !== 'normal');
-                const coreStrong = results.filter(r => r.core && r.state === 'strong');
-                const coreWatch = results.filter(r => r.core && r.state === 'watch');
-                const coreSpike = results.filter(r => r.core && r.state === 'spike');
-
-                let level = results.length ? 'estable' : 'nodata';
-                if (coreStrong.length > 0) level = 'alerta';
-                else if (coreWatch.length > 0 || coreSpike.length > 0) level = 'vigilancia';
-
-                let confidence = '';
-                if (level === 'alerta') {
-                    confidence = coreStrong.length >= 3 ? 'alta' : (coreStrong.length === 2 ? 'media' : 'baja');
+                const coreStrong = coreResults.filter(r => r.state === 'strong');
+                const coreWatch = coreResults.filter(r => r.state === 'watch');
+                const coreSpike = coreResults.filter(r => r.state === 'spike');
+                const strongGroups = [...new Set(coreStrong.map(r => r.group))];
+                const activeGroups = [...new Set(coreResults.filter(r => r.state !== 'normal').map(r => r.group))];
+                if (coreResults.length < TREND.core.length) {
+                    return { level: 'nodata', reason: 'partial', availableCore: coreResults.length,
+                        requiredCore: TREND.core.length, signals, coreStrong, coreWatch, coreSpike,
+                        strongGroups, activeGroups, evaluatedAt: new Date(), stale: false };
                 }
-
-                return { level, confidence, signals, coreStrong, coreWatch, coreSpike, evaluatedAt: new Date(), stale: false };
+                let level = 'estable';
+                if (strongGroups.length >= 2) level = 'alerta';
+                else if (coreStrong.length || coreWatch.length || coreSpike.length) level = 'vigilancia';
+                return { level, signals, coreStrong, coreWatch, coreSpike, strongGroups, activeGroups,
+                    evaluatedAt: new Date(), stale: false };
             }
 
             function updateQuakeContext() {
@@ -1678,19 +1677,19 @@
                     if (!signals.length) {
                         if (level === 'alerta') {
                             signals = [
-                                { id: 'accelResult', label: 'Acel. Result.', unit: 'm/s²', core: true, state: 'strong', zRecent: 6.4, delta: 0.42 },
-                                { id: 'molecularPhysics', label: 'Física Molecular', unit: 'u', core: true, state: 'strong', zRecent: 5.8, delta: 18 }
+                                { id: 'accelResult', label: 'Acel. Result.', unit: 'm/s²', core: true, group: 'aceleracion', state: 'strong', zRecent: 6.4, delta: 0.42 },
+                                { id: 'molecularPhysics', label: 'Física Molecular', unit: 'u', core: true, group: 'molecular', state: 'strong', zRecent: 5.8, delta: 18 }
                             ];
                             coreStrong = signals;
+                            result.strongGroups = ['aceleracion', 'molecular'];
+                            result.activeGroups = ['aceleracion', 'molecular'];
                         } else if (level === 'vigilancia') {
                             signals = [
-                                { id: 'molecularPhysics', label: 'Física Molecular', unit: 'u', core: true, state: 'watch', zRecent: 4.8, delta: 12 }
+                                { id: 'molecularPhysics', label: 'Física Molecular', unit: 'u', core: true, group: 'molecular', state: 'watch', zRecent: 4.8, delta: 12 }
                             ];
+                            result.activeGroups = ['molecular'];
                         }
                     }
-                    result.confidence = level === 'alerta'
-                        ? (signals.length >= 3 ? 'alta' : 'media')
-                        : 'baja';
                 }
 
                 panel.dataset.level = level;
@@ -1703,18 +1702,12 @@
                 const list = document.getElementById('trendSignals');
                 const live = document.getElementById('trendLive');
                 let text = TREND_TEXT[level];
-                if (level === 'nodata' && result.reason === 'reposo') {
-                    text = {
-                        title: '⚪ Sensores en reposo',
-                        detail: 'Los sensores no están reportando datos activos en este momento. El estado de tendencia sísmica no se puede evaluar.'
-                    };
-                }
-
+                if (level === 'nodata' && result.reason === 'partial') { text = { title: '⚪ Evaluación parcial: datos insuficientes', detail: `Solo ${result.availableCore} de ${result.requiredCore} variables esenciales cuentan con datos suficientes. No se clasifica como estable.` }; }
                 if (title) title.textContent = text.title;
                 if (detail) {
                     detail.textContent = text.detail
                         .replace('{n}', String(level === 'alerta' ? coreStrong.length : signals.length))
-                        .replace('{confianza}', result.confidence || 'baja');
+                        .replace('{groups}', String((level === 'alerta' ? (result.strongGroups || []) : (result.activeGroups || [])).length));
                 }
                 if (time) {
                     time.textContent = trendDemo ? 'Modo demostración' : formatTrendTime(result.evaluatedAt, result.stale);
@@ -1729,8 +1722,9 @@
                         const li = document.createElement('li');
                         const sign = r.delta >= 0 ? '+' : '−';
                         const abs = Math.abs(r.delta);
+                        const zShown = r.state === 'spike' ? r.zLast : r.zRecent;
                         const dec = abs >= 10 ? 0 : (abs >= 1 ? 1 : 2);
-                        li.textContent = `${r.label}: Δ ${sign}${abs.toFixed(dec)} ${r.unit} · z=${r.zRecent.toFixed(1)}${r.core ? '' : ' · contexto'}`;
+                        li.textContent = `${r.label}: Δ ${sign}${abs.toFixed(dec)} ${r.unit} · z=${Number.isFinite(zShown) ? zShown.toFixed(1) : 'N/D'}${r.state === 'spike' ? ' (pico)' : ''}${r.core ? '' : ' · contexto'}`;
                         if (r.state === 'strong') li.className = 'strong';
                         list.appendChild(li);
                     });
@@ -1747,7 +1741,7 @@
 
                 if (!trendDemo) {
                     document.title = level === 'alerta'
-                        ? '⚠️ Aviso de tendencia sísmica — Observatorio de Partículas del TOA'
+                        ? '⚠️ Anomalía multivariable detectada — Observatorio de Partículas del TOA'
                         : (level === 'nodata'
                             ? '⚠️ Sin datos — Observatorio de Partículas del TOA'
                             : 'Observatorio de Partículas del TOA - Prof. Rosa');
@@ -1756,27 +1750,13 @@
             }
 
             function updateTrend(feeds1, feeds2) {
-                if (!feeds1 || !feeds2 || !feeds1.length || !feeds2.length) {
+                feeds1 = Array.isArray(feeds1) ? feeds1 : [];
+                feeds2 = Array.isArray(feeds2) ? feeds2 : [];
+                if (!feeds1.length && !feeds2.length) {
                     handleTrendUnavailable();
                     return;
                 }
 
-                const latest1 = feeds1[feeds1.length - 1] || {};
-                const latest2 = feeds2[feeds2.length - 1] || {};
-                const isActive = v => v !== undefined && v !== null && v !== '' && v !== '0';
-                if (!isActive(latest1.field1) && !isActive(latest2.field1)) {
-                    lastTrendResult = null;
-                    renderTrend({
-                        level: 'nodata',
-                        reason: 'reposo',
-                        signals: [],
-                        coreStrong: [],
-                        coreWatch: [],
-                        coreSpike: [],
-                        evaluatedAt: new Date()
-                    });
-                    return;
-                }
                 const result = evaluateTrend(feeds1, feeds2);
                 lastTrendResult = result;
                 trendStale = false;
