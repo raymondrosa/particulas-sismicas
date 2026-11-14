@@ -27,7 +27,7 @@
             --transition-fast: 0.15s ease;
             --shadow-card: 0 4px 12px rgba(0, 0, 0, 0.4);
             /* TAMAÑOS DE FUENTE MEJORADOS */
-            --font-size-base: 16px;
+            --font-size-base: 18px;
             --font-size-small: 0.85rem;
             --font-size-medium: 1rem;
             --font-size-large: 1.2rem;
@@ -54,7 +54,7 @@
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             font-size: var(--font-size-base);
-            line-height: 1.5;
+            line-height: 1.55;
         }
 
         /* ===== HEADER ===== */
@@ -132,14 +132,14 @@
         }
 
         .data {
-            font-size: clamp(0.85rem, 1.1vw, 1.05rem);
-            padding: 10px 8px;
+            font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+            padding: 12px 9px;
             background-color: var(--bg-card);
             border-radius: var(--radius);
             box-shadow: var(--shadow-card);
             text-align: center;
             word-break: break-word;
-            line-height: 1.4;
+            line-height: 1.45;
             border: 1px solid rgba(255, 255, 255, 0.05);
             transition: background-color 0.2s;
             font-weight: 500;
@@ -182,7 +182,7 @@
         .chart-wrapper canvas {
             width: 100% !important;
             height: auto !important;
-            max-height: 180px;
+            max-height: 220px;
             border-radius: 4px;
             background-color: #FFFFFF;
             display: block;
@@ -192,8 +192,8 @@
         .chart-label {
             color: var(--text-primary);
             text-align: center;
-            font-size: clamp(0.8rem, 1vw, 0.95rem);
-            padding: 5px 0 4px;
+            font-size: clamp(0.9rem, 1vw, 1.05rem);
+            padding: 6px 0 5px;
             font-weight: 700;
             background: rgba(0, 0, 0, 0.4);
             border-radius: 4px 4px 0 0;
@@ -206,8 +206,8 @@
             position: absolute;
             top: 6px;
             right: 10px;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.55);
             background: rgba(0, 0, 0, 0.6);
             padding: 2px 8px;
             border-radius: 12px;
@@ -270,7 +270,7 @@
         }
 
         .modal-content .modal-header h2 {
-            font-size: clamp(1.1rem, 2vw, 1.6rem);
+            font-size: clamp(1.3rem, 2.2vw, 1.9rem);
             margin: 0;
             font-weight: 700;
         }
@@ -279,7 +279,7 @@
             background: none;
             border: none;
             color: #fff;
-            font-size: 2.2rem;
+            font-size: 2.4rem;
             cursor: pointer;
             padding: 0 14px;
             transition: transform 0.2s;
@@ -307,8 +307,8 @@
             padding: 14px 12px;
             margin-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
-            font-size: clamp(0.8rem, 0.9vw, 0.95rem);
-            color: rgba(255, 255, 255, 0.6);
+            font-size: clamp(0.9rem, 0.9vw, 1.05rem);
+            color: rgba(255, 255, 255, 0.7);
             background: rgba(0, 0, 0, 0.3);
             border-radius: var(--radius);
             max-width: 1400px;
@@ -328,7 +328,7 @@
         }
 
         .chart-wrapper.combined canvas {
-            max-height: 200px;
+            max-height: 240px;
         }
 
         /* ===== GRÁFICA DE SISMOS (USGS, M >= 6.0) ===== */
@@ -338,7 +338,7 @@
         }
 
         .chart-wrapper.seismic canvas {
-            max-height: 200px;
+            max-height: 240px;
         }
 
         /* ===== AVISO DE TENDENCIA SÍSMICA (EXPERIMENTAL) ===== */
@@ -399,7 +399,7 @@
         }
 
         .trend-badge {
-            font-size: 0.62rem;
+            font-size: 0.7rem;
             font-weight: 800;
             letter-spacing: 0.08em;
             text-transform: uppercase;
@@ -424,31 +424,31 @@
             flex: 1;
             min-width: 220px;
             margin: 0;
-            font-size: clamp(1rem, 2.2vw, 1.3rem);
+            font-size: clamp(1.1rem, 2.2vw, 1.45rem);
             font-weight: 800;
             line-height: 1.25;
         }
 
         .trend-time {
             margin-left: auto;
-            font-size: 0.7rem;
-            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.7);
             font-variant-numeric: tabular-nums;
             white-space: nowrap;
         }
 
         .trend-detail {
             margin: 8px 0 0;
-            font-size: 0.88rem;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.92);
             line-height: 1.45;
         }
 
         .trend-context {
             margin: 6px 0 0;
-            font-size: 0.76rem;
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.4;
+            font-size: 0.86rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.45;
         }
 
         .trend-context:empty { display: none; }
@@ -463,7 +463,7 @@
         }
 
         .trend-signals li {
-            font-size: 0.72rem;
+            font-size: 0.8rem;
             color: #fff;
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid rgba(255, 255, 255, 0.16);
@@ -479,8 +479,8 @@
 
         .trend-method {
             margin-top: 10px;
-            font-size: 0.76rem;
-            color: rgba(255, 255, 255, 0.72);
+            font-size: 0.86rem;
+            color: rgba(255, 255, 255, 0.78);
         }
 
         .trend-method summary {
@@ -496,9 +496,9 @@
             margin: 10px 0 0;
             padding-top: 10px;
             border-top: 1px dashed rgba(255, 255, 255, 0.18);
-            font-size: 0.76rem;
+            font-size: 0.86rem;
             line-height: 1.55;
-            color: rgba(255, 255, 255, 0.78);
+            color: rgba(255, 255, 255, 0.82);
         }
 
         .trend-disclaimer strong { color: #FFD700; }
@@ -517,17 +517,149 @@
             border-radius: 8px;
             background: #FF5252;
             color: #fff;
-            font-size: 0.58rem;
+            font-size: 0.66rem;
             font-weight: 800;
             letter-spacing: 0.03em;
             pointer-events: none;
         }
 
         @media (max-width: 480px) {
-            .trend-panel { padding: 12px; }
-            .trend-title { font-size: 0.98rem; min-width: 160px; }
+            .trend-panel { padding: 14px; }
+            .trend-title { font-size: 1.1rem; min-width: 160px; }
             .trend-time { width: 100%; margin-left: 0; white-space: normal; }
-            .trend-signals li { font-size: 0.66rem; }
+            .trend-signals li { font-size: 0.78rem; }
+        }
+
+        /* ===== DONATIVOS ===== */
+        .header-donate {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            min-height: 48px;
+            padding: 10px 20px;
+            border-radius: 999px;
+            background: #FFC439;
+            color: #08213A;
+            font-size: 1rem;
+            font-weight: 800;
+            text-decoration: none;
+            flex-shrink: 0;
+            box-shadow: 0 6px 18px rgba(255, 196, 57, 0.35);
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .header-donate:hover {
+            background: #FFD45F;
+            color: #08213A;
+            transform: translateY(-1px);
+        }
+
+        .donation-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            max-width: 1400px;
+            margin: 0 auto 16px;
+            padding: 12px 18px;
+            background: rgba(255, 196, 57, 0.12);
+            border: 1px solid rgba(255, 215, 0, 0.45);
+            border-radius: var(--radius);
+        }
+
+        .donation-strip p {
+            margin: 0;
+            font-size: 1rem;
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .donation-strip .donate-btn {
+            min-height: 48px;
+            padding: 10px 22px;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .donation {
+            max-width: 1400px;
+            margin: 22px auto 0;
+            scroll-margin-top: 16px;
+        }
+
+        .donation-card {
+            padding: clamp(22px, 4vw, 38px);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 215, 0, 0.4);
+            background: linear-gradient(135deg, rgba(8, 26, 42, 0.96), rgba(4, 14, 24, 0.96));
+            text-align: center;
+            box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+        }
+
+        .donation-kicker {
+            margin: 0;
+            color: #FFD700;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .donation-card h2 {
+            margin: 8px 0 10px;
+            font-size: clamp(1.4rem, 3vw, 2rem);
+            line-height: 1.2;
+        }
+
+        .donation-text {
+            max-width: 62ch;
+            margin: 0 auto 20px;
+            color: rgba(255, 255, 255, 0.92);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .donate-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-height: 58px;
+            padding: 14px 34px;
+            border-radius: 999px;
+            background: #FFC439;
+            color: #08213A;
+            font-size: 1.15rem;
+            font-weight: 800;
+            text-decoration: none;
+            box-shadow: 0 10px 28px rgba(255, 196, 57, 0.35);
+            transition: background-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .donate-btn:hover {
+            background: #FFD45F;
+            color: #08213A;
+            transform: translateY(-1px);
+        }
+
+        .donation-note {
+            margin: 12px 0 0;
+            font-size: 0.92rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .donation-alt {
+            margin: 16px 0 0;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.18);
+            font-size: 0.92rem;
+            color: rgba(255, 255, 255, 0.82);
+        }
+
+        .donation-alt a {
+            color: #FFD700;
+            font-weight: 700;
         }
 
         /* ===== RESPONSIVE AVANZADO ===== */
@@ -541,7 +673,7 @@
             body {
                 padding: 8px;
                 padding-bottom: 40px;
-                font-size: 15px;
+                font-size: 17px;
             }
 
             .header-container {
@@ -568,8 +700,22 @@
                 white-space: normal;
                 width: 100%;
                 justify-content: center;
-                font-size: 0.9rem;
+                font-size: 0.98rem;
                 padding: 6px 14px;
+            }
+
+            .header-donate {
+                width: 100%;
+            }
+
+            .donation-strip {
+                flex-direction: column;
+                align-items: stretch;
+                text-align: center;
+            }
+
+            .donation-strip .donate-btn {
+                width: 100%;
             }
 
             .data-container {
@@ -578,8 +724,8 @@
             }
 
             .data {
-                font-size: 0.8rem;
-                padding: 8px 5px;
+                font-size: 0.95rem;
+                padding: 10px 6px;
                 border-radius: 6px;
             }
 
@@ -589,24 +735,24 @@
             }
 
             .chart-wrapper canvas {
-                max-height: 120px;
+                max-height: 170px;
             }
 
             .chart-label {
-                font-size: 0.7rem;
-                padding: 4px 0;
+                font-size: 0.86rem;
+                padding: 5px 0;
             }
 
             .chart-wrapper .expand-hint {
-                font-size: 0.55rem;
+                font-size: 0.68rem;
                 top: 4px;
                 right: 6px;
-                padding: 1px 6px;
+                padding: 1px 7px;
             }
 
             .chart-wrapper.combined canvas,
             .chart-wrapper.seismic canvas {
-                max-height: 140px;
+                max-height: 190px;
             }
 
             .modal-content {
@@ -614,12 +760,27 @@
             }
 
             .modal-content .modal-header h2 {
-                font-size: 1rem;
+                font-size: 1.2rem;
             }
 
             .footer {
-                font-size: 0.7rem;
-                padding: 10px 8px;
+                font-size: 0.82rem;
+                padding: 12px 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .charts-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .chart-wrapper canvas {
+                max-height: 210px;
+            }
+
+            .chart-wrapper.combined canvas,
+            .chart-wrapper.seismic canvas {
+                max-height: 230px;
             }
         }
 
@@ -627,7 +788,7 @@
             body {
                 padding: 5px;
                 padding-bottom: 35px;
-                font-size: 14px;
+                font-size: 16px;
             }
 
             .header-container {
@@ -648,14 +809,14 @@
             }
 
             .data {
-                font-size: 0.7rem;
-                padding: 6px 4px;
-                line-height: 1.3;
+                font-size: 0.85rem;
+                padding: 9px 5px;
+                line-height: 1.35;
             }
 
             .charts-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 5px;
+                grid-template-columns: 1fr !important;
+                gap: 8px;
             }
 
             .chart-wrapper {
@@ -663,29 +824,33 @@
             }
 
             .chart-wrapper canvas {
-                max-height: 90px;
+                max-height: 190px;
             }
 
             .chart-label {
-                font-size: 0.55rem;
-                padding: 3px 0;
+                font-size: 0.8rem;
+                padding: 4px 0;
             }
 
             .chart-wrapper .expand-hint {
-                font-size: 0.45rem;
+                font-size: 0.62rem;
                 top: 3px;
                 right: 5px;
-                padding: 1px 4px;
+                padding: 1px 5px;
             }
 
             .chart-wrapper.combined canvas,
             .chart-wrapper.seismic canvas {
-                max-height: 110px;
+                max-height: 200px;
             }
 
             .status {
-                font-size: 0.75rem;
-                padding: 4px 10px;
+                font-size: 0.9rem;
+                padding: 5px 12px;
+            }
+
+            .header-donate {
+                font-size: 0.95rem;
             }
 
             .status-circle {
@@ -698,7 +863,7 @@
             }
 
             .modal-content .modal-header h2 {
-                font-size: 0.85rem;
+                font-size: 1rem;
             }
 
             .modal-content .modal-close {
@@ -707,8 +872,18 @@
             }
 
             .footer {
-                font-size: 0.55rem;
-                padding: 8px 6px;
+                font-size: 0.75rem;
+                padding: 10px 8px;
+            }
+
+            .donate-btn {
+                width: 100%;
+                font-size: 1.05rem;
+                padding: 12px 18px;
+            }
+
+            .donation-text {
+                font-size: 1rem;
             }
         }
 
@@ -722,7 +897,7 @@
             }
 
             .chart-wrapper canvas {
-                max-height: 100px;
+                max-height: 180px;
             }
         }
 
@@ -737,7 +912,7 @@
             }
 
             .chart-wrapper canvas {
-                max-height: 200px;
+                max-height: 240px;
             }
         }
 
@@ -792,6 +967,7 @@
                 <span class="status-circle" style="background-color: #FFA500;"></span>
                 <span id="statusText">Cargando...</span>
             </div>
+            <a class="header-donate" href="#donativos" aria-label="Ir a la sección de donativos">❤ Donar</a>
         </div>
     </div>
 
@@ -814,6 +990,14 @@
     </section>
     <p class="sr-only" id="trendLive" aria-live="polite"></p>
 
+    <!-- ============ DONATIVOS (ACCESO RÁPIDO) ============ -->
+    <div class="donation-strip">
+        <p><strong>¿Quieres apoyar esta investigación?</strong> Tu donativo ayuda a mantener los sensores y la plataforma.</p>
+        <a class="donate-btn" href="https://www.paypal.com/ncp/payment/5NS4XFJZK5UE8" target="_blank" rel="noopener noreferrer" aria-label="Donar con PayPal (se abre en una pestaña nueva)">
+            <span aria-hidden="true">❤</span> Donar con PayPal
+        </a>
+    </div>
+
     <!-- Datos en tiempo real -->
     <div class="data-container" id="dataContainer">
         <div class="data" id="realParticles">🔬 Partículas Reales: ⏳</div>
@@ -832,6 +1016,20 @@
 
     <!-- Gráficas -->
     <div class="charts-grid" id="chartsGrid"></div>
+
+    <!-- ============ DONATIVOS ============ -->
+    <section class="donation" id="donativos">
+        <div class="donation-card">
+            <p class="donation-kicker">Apoya el proyecto</p>
+            <h2>Tu donativo sostiene esta investigación</h2>
+            <p class="donation-text">El Observatorio de Partículas del TOA y el Proyecto EESE son una iniciativa independiente de investigación científica. Tu aporte ayuda a mantener los sensores, la plataforma de monitoreo y la divulgación de los resultados.</p>
+            <a class="donate-btn" href="https://www.paypal.com/ncp/payment/5NS4XFJZK5UE8" target="_blank" rel="noopener noreferrer" aria-label="Donar con PayPal (se abre en una pestaña nueva)">
+                <span aria-hidden="true">❤</span> Donar con PayPal
+            </a>
+            <p class="donation-note">Pago seguro procesado por PayPal · Puedes donar con tarjeta o cuenta PayPal</p>
+            <p class="donation-alt">¿Prefieres otro método o una colaboración institucional? <a href="mailto:raymondrosaavila@gmail.com?subject=Donativo%20-%20Observatorio%20de%20Part%C3%ADculas%20del%20TOA">Escríbeme</a></p>
+        </div>
+    </section>
 
     <!-- Modal -->
     <div class="modal-overlay" id="chartModal">
@@ -1191,7 +1389,7 @@
                         },
                         ticks: {
                             color: '#ccc',
-                            font: { size: 11 },
+                            font: { size: 14 },
                             maxTicksLimit: 14,
                             maxRotation: 45
                         },
@@ -1199,7 +1397,7 @@
                     } : {
                         ticks: {
                             color: '#ccc',
-                            font: { size: 11 },
+                            font: { size: 14 },
                             maxTicksLimit: 20,
                             maxRotation: 45
                         },
@@ -1219,7 +1417,7 @@
                                     display: !isSeismic,
                                     labels: {
                                         color: '#fff',
-                                        font: { size: 13 },
+                                        font: { size: 15 },
                                         boxWidth: 16,
                                         padding: 12
                                     }
@@ -1248,7 +1446,7 @@
                                     suggestedMax: isSeismic ? 9 : undefined,
                                     ticks: {
                                         color: '#ccc',
-                                        font: { size: 11 }
+                                        font: { size: 14 }
                                     },
                                     grid: { color: 'rgba(255,255,255,0.08)' }
                                 }
@@ -1769,8 +1967,8 @@
                                             x: {
                                                 display: true,
                                                 ticks: {
-                                                    maxTicksLimit: 8,
-                                                    font: { size: 8 },
+                                                    maxTicksLimit: 6,
+                                                    font: { size: 12 },
                                                     maxRotation: 30
                                                 },
                                                 grid: { display: false }
@@ -1778,7 +1976,7 @@
                                             y: {
                                                 display: true,
                                                 ticks: {
-                                                    font: { size: 8 },
+                                                    font: { size: 12 },
                                                     callback: value => value.toFixed(2)
                                                 },
                                                 grid: { color: 'rgba(0,0,0,0.06)' },
@@ -1835,7 +2033,7 @@
                                                 display: true,
                                                 labels: {
                                                     color: '#fff',
-                                                    font: { size: 9 },
+                                                    font: { size: 13 },
                                                     boxWidth: 12,
                                                     padding: 8
                                                 }
@@ -1854,8 +2052,8 @@
                                             x: {
                                                 ticks: {
                                                     color: '#ccc',
-                                                    font: { size: 8 },
-                                                    maxTicksLimit: 12,
+                                                    font: { size: 12 },
+                                                    maxTicksLimit: 8,
                                                     maxRotation: 30
                                                 },
                                                 grid: { color: 'rgba(255,255,255,0.06)' }
@@ -1863,7 +2061,7 @@
                                             y: {
                                                 ticks: {
                                                     color: '#ccc',
-                                                    font: { size: 8 },
+                                                    font: { size: 12 },
                                                     callback: value => value.toFixed(2)
                                                 },
                                                 grid: { color: 'rgba(255,255,255,0.06)' },
@@ -2003,8 +2201,8 @@
                                                     tooltipFormat: 'lll'
                                                 },
                                                 ticks: {
-                                                    maxTicksLimit: 8,
-                                                    font: { size: 8 },
+                                                    maxTicksLimit: 6,
+                                                    font: { size: 12 },
                                                     maxRotation: 30
                                                 },
                                                 grid: { display: false }
@@ -2013,7 +2211,7 @@
                                                 beginAtZero: true,
                                                 suggestedMax: 9,
                                                 ticks: {
-                                                    font: { size: 8 },
+                                                    font: { size: 12 },
                                                     callback: value => value.toFixed(1)
                                                 },
                                                 grid: { color: 'rgba(0,0,0,0.06)' }
