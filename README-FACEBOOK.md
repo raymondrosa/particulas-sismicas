@@ -1,8 +1,8 @@
 # Aviso automático en Facebook
 
 Este automatizador revisa los sensores del **Observatorio de Partículas del TOA**
-y, cuando la página muestra el nivel **“Actividad detectada”** (alerta experimental),
-publica un aviso en la página de Facebook:
+y, cuando el nivel es **`alerta`** (anomalía coincidente en al menos dos familias
+de medición), publica un aviso en la página de Facebook:
 
 https://www.facebook.com/estudioenergeticodesismos/
 
@@ -10,10 +10,13 @@ https://www.facebook.com/estudioenergeticodesismos/
 
 - Un **GitHub Action** se ejecuta cada 10 minutos (GitHub puede retrasarlo).
 - Lee los mismos canales de ThingSpeak que la página.
-- Aplica la misma detección: mediana y MAD de las últimas horas, con umbrales
-  de 6 desviaciones para una señal fuerte.
+- Aplica la misma detección que la página: mediana y MAD de las últimas horas,
+  umbral de 6 desviaciones para una señal fuerte y coincidencia en al menos
+  **dos familias de medición** (partículas, molecular o aceleración).
 - Si el nivel es `alerta`, publica en la página de Facebook con el descargo
   científico incluido.
+- También se ejecuta al subir cambios al propio workflow o al script, para
+  probar de inmediato.
 - Tiene un **tiempo de espera de 12 horas** entre avisos para no repetir el mismo
   mensaje mientras la alerta siga activa.
 - Si no hay alerta, no publica nada.
