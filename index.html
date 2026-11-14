@@ -1525,6 +1525,7 @@
             };
 
             const trendDemo = new URLSearchParams(window.location.search).get('demo');
+            const DATA_FRESH_MS = 5 * 60 * 1000; // 5 minutos sin datos -> En Reposo
             let lastTrendResult = null;
             let lastQuakePoints = [];
             let trendStale = false;
@@ -1752,7 +1753,6 @@
                             : 'Observatorio de Partículas del TOA - Prof. Rosa');
                 }
 
-                updateStationStatus(level, !!result.stale);
             }
 
             function updateTrend(feeds1, feeds2) {
@@ -1834,24 +1834,37 @@
 
             }
 
-            function updateStationStatus(level, stale) {
+            function updateStationStatusFromFeeds(feeds1, feeds2) {
                 const statusText = document.getElementById('statusText');
                 const statusCircle = document.querySelector('.status-circle');
                 if (!statusText || !statusCircle) return;
 
-                if (stale || level === 'nodata') {
-                    statusText.textContent = '⚪ Sin datos';
-                    statusCircle.style.backgroundColor = '#9E9E9E';
-                } else if (level === 'alerta') {
-                    statusText.textContent = '🔴 Actividad detectada';
-                    statusCircle.style.backgroundColor = '#FF5252';
-                } else if (level === 'vigilancia') {
-                    statusText.textContent = '🟡 Variación detectada';
-                    statusCircle.style.backgroundColor = '#FFC107';
+                let latest = 0;
+                const consider = feeds => {
+                    (feeds || []).forEach(feed => {
+                        if (!feed || !feed.created_at) return;
+                        const t = Date.parse(feed.created_at);
+                        if (!isNaN(t) && t > latest) latest = t;
+                    });
+                };
+                consider(feeds1);
+                consider(feeds2);
+
+                const receivingData = latest > 0 && (Date.now() - latest) <= DATA_FRESH_MS;
+                if (receivingData) {
+                    statusText.textContent = '🟢 En Monitoreo Activo';
+                    statusCircle.style.backgroundColor = '#00E676';
                 } else {
                     statusText.textContent = '🟠 En Reposo';
                     statusCircle.style.backgroundColor = '#FF9800';
                 }
+            }
+
+            function setStationOffline() {
+                const statusText = document.getElementById('statusText');
+                const statusCircle = document.querySelector('.status-circle');
+                if (statusText) statusText.textContent = '⚪ Sin conexión';
+                if (statusCircle) statusCircle.style.backgroundColor = '#9E9E9E';
             }
 
             // --- ACTUALIZAR GRÁFICAS CON MÁXIMA CAPTURA ---
@@ -1906,6 +1919,7 @@
                     }
 
                     updateLiveData(latestFeed1, latestFeed2);
+                    updateStationStatusFromFeeds(feeds1, feeds2);
                     updateTrend(feeds1, feeds2);
 
                     const combinedDatasets = [];
@@ -2097,10 +2111,7 @@
                     clearTimeout(timeoutId);
                     console.warn('Error en actualización:', error);
 
-                    const statusText = document.getElementById('statusText');
-                    if (statusText) statusText.textContent = '⚠️ Error de conexión';
-                    const statusCircle = document.querySelector('.status-circle');
-                    if (statusCircle) statusCircle.style.backgroundColor = '#FF1744';
+                    setStationOffline();
 
                     handleTrendUnavailable();
 
