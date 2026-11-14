@@ -909,7 +909,7 @@
             <img src="logo.jpg" alt="Logo Observatorio de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto" decoding="async">
             <h1>Observatorio de Partículas del TOA</h1>
             <div class="status" id="stationStatus">
-                <span class="status-circle" style="background-color: #FFA500;"></span>
+                <span class="status-circle" style="background-color: #FF9800;"></span>
                 <span id="statusText">Cargando...</span>
             </div>
         </div>
@@ -1843,14 +1843,14 @@
                     statusText.textContent = '⚪ Sin datos';
                     statusCircle.style.backgroundColor = '#9E9E9E';
                 } else if (level === 'alerta') {
-                    statusText.textContent = '🟠 Actividad detectada';
-                    statusCircle.style.backgroundColor = '#FF9800';
+                    statusText.textContent = '🔴 Actividad detectada';
+                    statusCircle.style.backgroundColor = '#FF5252';
                 } else if (level === 'vigilancia') {
                     statusText.textContent = '🟡 Variación detectada';
                     statusCircle.style.backgroundColor = '#FFC107';
                 } else {
-                    statusText.textContent = '🟢 En Reposo';
-                    statusCircle.style.backgroundColor = '#00E676';
+                    statusText.textContent = '🟠 En Reposo';
+                    statusCircle.style.backgroundColor = '#FF9800';
                 }
             }
 
