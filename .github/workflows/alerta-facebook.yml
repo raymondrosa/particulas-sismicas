@@ -1,6 +1,11 @@
 name: Aviso sísmico a Facebook
 
 on:
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/alerta-facebook.yml"
+      - "scripts/alerta_facebook.py"
   schedule:
     # Cada 10 minutos. GitHub puede retrasar la ejecución unos minutos.
     - cron: "*/10 * * * *"
@@ -43,6 +48,6 @@ jobs:
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
           FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           COOLDOWN_HOURS: "12"
-          FORCE: ${{ inputs.force }}
-          DRY_RUN: ${{ inputs.dry_run }}
+          FORCE: ${{ github.event.inputs.force || 'false' }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
         run: python scripts/alerta_facebook.py
