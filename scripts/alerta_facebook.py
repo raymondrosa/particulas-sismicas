@@ -3,23 +3,26 @@
 """
 Anomalía estadística multivariable -> página de Facebook.
 
-Lee los canales públicos de ThingSpeak del Observatorio de Partículas del TOA,
-aplica la misma detección que la página y, si el nivel es "alerta", publica
-un aviso en la página de Facebook indicada.
+Modos de autenticación (elige uno):
+
+A) TOKEN DE USUARIO (recomendado si administras la página desde tu perfil):
+   - FB_USER_TOKEN = token de usuario con pages_show_list,
+     pages_read_engagement y pages_manage_posts.
+   - El script pide /me/accounts, obtiene el token de la página y publica
+     en /{FB_PAGE_ID}/feed.
+   - Tu usuario debe ser administrador de la página.
+
+B) TOKEN DE PÁGINA O DE SYSTEM USER:
+   - FB_PAGE_TOKEN = token de página (o de System User con la página asignada).
+   - FB_PAGE_ID = ID numérico de la página (obligatorio si es System User).
 
 La alerta exige coincidencia en al menos DOS familias de medición
 (partículas, molecular o aceleración), igual que la página.
 
-Requisitos:
-  - Variable de entorno FB_PAGE_TOKEN con un token de página (nunca en el HTML).
-  - Permisos: pages_manage_posts y pages_read_engagement.
-  - Opcional: FB_PAGE_ID (si no se indica, se usa "me").
-  - Opcional: DRY_RUN=1 para mostrar el mensaje sin publicar.
-  - Opcional: FORCE=1 para publicar una prueba aunque no haya alerta.
-  - Opcional: COOLDOWN_HOURS (por defecto 12).
-
-Uso local:
-  DRY_RUN=1 python scripts/alerta_facebook.py
+Opcionales:
+  DRY_RUN=1       -> muestra el mensaje y valida credenciales sin publicar.
+  FORCE=1         -> publica una prueba aunque no haya alerta.
+  COOLDOWN_HOURS  -> horas entre avisos (por defecto 12).
 """
 
 import json
@@ -41,6 +44,10 @@ MARKER = "#AvisoTendenciaEESE"
 GRAPH_VERSION = os.environ.get("GRAPH_API_VERSION", "v23.0").strip() or "v23.0"
 GRAPH = "https://graph.facebook.com/" + GRAPH_VERSION
 
+# ID público de la página "Proyecto EESE".
+# Se puede sobrescribir con el secreto FB_PAGE_ID.
+DEFAULT_PAGE_ID = "10329524066772157"
+
 CHANNELS = {
     "ch1": (2439912, "BCX6UVTLQZ7VMK4F"),
     "ch2": (2972050, "8LMMRSTHHX26Z4MI"),
@@ -58,8 +65,8 @@ SERIES = [
 ]
 CORE_COUNT = len(SERIES)
 
-RECENT_POINTS = 240       # ~1 hora con muestreo de ~15 s
-BASELINE_POINTS = 1200    # ~5 horas previas
+RECENT_POINTS = 240
+BASELINE_POINTS = 1200
 MIN_BASELINE = 90
 MIN_RECENT = 120
 Z_WATCH = 4.5
@@ -260,17 +267,77 @@ def facebook_get(path, params, token):
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.load(response)
     except urllib.error.HTTPError as error:
-        body = error.read().decode("utf-8", "replace")[:500]
+        body = error.read().decode("utf-8", "replace")[:600]
         raise RuntimeError(f"Facebook GET {path} falló (HTTP {error.code}): {body}")
     except urllib.error.URLError as error:
         raise RuntimeError(f"No se pudo conectar con Facebook: {error.reason}")
 
 
-def last_marked_post(token):
+def resolve_page_credentials():
+    """Devuelve (page_token, page_id, page_name).
+
+    Si hay FB_USER_TOKEN, lo cambia por el token de la página usando
+    /me/accounts. Si hay FB_PAGE_TOKEN, lo usa directamente y valida la página.
+    """
+    user_token = os.environ.get("FB_USER_TOKEN", "").strip()
+    page_token = os.environ.get("FB_PAGE_TOKEN", "").strip()
+    page_id = os.environ.get("FB_PAGE_ID", "").strip() or DEFAULT_PAGE_ID
+
+    if user_token:
+        data = facebook_get(
+            "/me/accounts",
+            {"fields": "id,name,access_token", "limit": "100"},
+            user_token,
+        )
+        pages = [p for p in data.get("data", []) if p.get("access_token")]
+        if not pages:
+            raise RuntimeError(
+                "El token de usuario no administra ninguna página. "
+                "Agrega tu usuario como administrador de la página "
+                "(Configuración de la página > Acceso a la página) y vuelve a intentar."
+            )
+
+        target = None
+        if page_id:
+            for page in pages:
+                if str(page.get("id")) == str(page_id):
+                    target = page
+                    break
+        if target is None:
+            for page in pages:
+                name = (page.get("name") or "").lower()
+                if "proyecto eese" in name or "eese" in name or "estudio energ" in name:
+                    target = page
+                    break
+        if target is None:
+            available = ", ".join(p.get("name", "?") for p in pages)
+            raise RuntimeError(
+                "No encontré la página en las que administra tu usuario. "
+                "Páginas disponibles: " + available + ". Ajusta FB_PAGE_ID."
+            )
+
+        return (
+            target["access_token"],
+            str(target.get("id", page_id)),
+            target.get("name", "?"),
+        )
+
+    if page_token:
+        info = facebook_get("/" + page_id, {"fields": "id,name"}, page_token)
+        return (
+            page_token,
+            str(info.get("id", page_id)),
+            info.get("name", "?"),
+        )
+
+    return None, page_id, None
+
+
+def last_marked_post(page_token, page_id):
     data = facebook_get(
-        "/me/posts",
+        "/" + page_id + "/posts",
         {"fields": "created_time,message", "limit": "25"},
-        token,
+        page_token,
     )
     for post in data.get("data", []):
         message = post.get("message") or ""
@@ -279,11 +346,10 @@ def last_marked_post(token):
     return None
 
 
-def publish(token, message):
-    page = os.environ.get("FB_PAGE_ID", "").strip() or "me"
-    url = GRAPH + "/" + page + "/feed"
+def publish(page_token, page_id, message):
+    url = GRAPH + "/" + page_id + "/feed"
     body = urllib.parse.urlencode(
-        {"message": message, "link": PAGE_URL, "access_token": token}
+        {"message": message, "link": PAGE_URL, "access_token": page_token}
     ).encode("utf-8")
     request = urllib.request.Request(
         url,
@@ -295,7 +361,7 @@ def publish(token, message):
         with urllib.request.urlopen(request, timeout=30) as response:
             return json.load(response)
     except urllib.error.HTTPError as error:
-        body_text = error.read().decode("utf-8", "replace")[:500]
+        body_text = error.read().decode("utf-8", "replace")[:600]
         raise RuntimeError(f"Facebook POST falló (HTTP {error.code}): {body_text}")
 
 
@@ -306,11 +372,24 @@ def env_flag(name):
 def main():
     dry_run = env_flag("DRY_RUN")
     force = env_flag("FORCE")
-    token = os.environ.get("FB_PAGE_TOKEN", "").strip()
     try:
         cooldown_hours = float(os.environ.get("COOLDOWN_HOURS", "12") or 12)
     except ValueError:
         cooldown_hours = 12.0
+
+    try:
+        page_token, page_id, page_name = resolve_page_credentials()
+    except Exception as error:  # noqa: BLE001
+        print(f"ERROR de credenciales de Facebook: {error}", file=sys.stderr)
+        return 1
+
+    if page_token:
+        print(f"Página de Facebook: {page_name} (id {page_id})")
+    else:
+        print(
+            "AVISO: no hay FB_USER_TOKEN ni FB_PAGE_TOKEN. "
+            "Se evaluarán los sensores, pero no se publicará nada."
+        )
 
     try:
         feeds = {
@@ -347,6 +426,8 @@ def main():
     message = build_message(result, is_test=force)
 
     if dry_run:
+        if page_token:
+            print("Token de página OK: se puede publicar en la página indicada.")
         if result["level"] != "alerta" and not force:
             print("\nSin alerta activa: no se publicaría nada.")
             return 0
@@ -354,12 +435,14 @@ def main():
         print(message)
         return 0
 
-    if not token:
-        print(
-            "AVISO: falta el secreto FB_PAGE_TOKEN; no se publica nada. "
-            "Configúralo en GitHub > Settings > Secrets and variables > Actions.",
-            file=sys.stderr,
-        )
+    if not page_token:
+        if force:
+            print(
+                "ERROR: no hay credenciales de Facebook para la prueba de publicación.",
+                file=sys.stderr,
+            )
+            return 1
+        print("Sin credenciales de Facebook: no se publica.")
         return 0
 
     if not force:
@@ -367,7 +450,7 @@ def main():
             print("Sin alerta activa: no se publica.")
             return 0
         try:
-            last_post = last_marked_post(token)
+            last_post = last_marked_post(page_token, page_id)
         except Exception as error:  # noqa: BLE001
             print(f"ERROR al consultar publicaciones recientes: {error}", file=sys.stderr)
             return 1
@@ -382,7 +465,7 @@ def main():
                 return 0
 
     try:
-        response = publish(token, message)
+        response = publish(page_token, page_id, message)
     except Exception as error:  # noqa: BLE001
         print(f"ERROR al publicar en Facebook: {error}", file=sys.stderr)
         return 1
