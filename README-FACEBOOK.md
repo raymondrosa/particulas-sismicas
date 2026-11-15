@@ -10,60 +10,106 @@ https://www.facebook.com/estudioenergeticodesismos/
 
 - Un **GitHub Action** se ejecuta cada 10 minutos (GitHub puede retrasarlo).
 - Lee los mismos canales de ThingSpeak que la página.
-- Aplica la misma detección que la página: mediana y MAD de las últimas horas,
-  umbral de 6 desviaciones para una señal fuerte y coincidencia en al menos
-  **dos familias de medición** (partículas, molecular o aceleración).
+- Aplica la misma detección: mediana y MAD de las últimas horas, umbral de
+  6 desviaciones para una señal fuerte y coincidencia en al menos **dos familias**
+  de medición (partículas, molecular o aceleración).
 - Si el nivel es `alerta`, publica en la página de Facebook con el descargo
   científico incluido.
-- También se ejecuta al subir cambios al propio workflow o al script, para
-  probar de inmediato.
-- Tiene un **tiempo de espera de 12 horas** entre avisos para no repetir el mismo
-  mensaje mientras la alerta siga activa.
 - Si no hay alerta, no publica nada.
+- Tiene un **tiempo de espera de 12 horas** entre avisos.
 
-## Configuración (una sola vez)
+## Configuración recomendada: token de usuario
 
-### 1. Crear la app de Meta
+El script puede tomar un **token de usuario** y obtener automáticamente el token
+de la página que administras. Para eso:
 
-1. Entra a https://developers.facebook.com/ y crea una app tipo **Business**.
-2. Agrega el producto **Facebook Login** o usa directamente **Graph API Explorer**.
-3. La app puede quedar en modo desarrollo si la usarás solo tú como administrador
-   de la página. Si Meta te pide revisión para `pages_manage_posts`, solicítala.
+### 1. Tu usuario debe ser administrador de la página
 
-### 2. Obtener el token de la página
+En Facebook, abre la página → **Configuración de la página → Acceso a la página**
+y confirma que tu usuario tenga **Control total** o **Administrador**.
 
-Necesitas un **Page Access Token** (no un token personal) con estos permisos:
+Si no lo tienes, pídelo a quien administre la página o agrégalo desde
+**Meta Business Suite → Configuración → Cuentas → Páginas → Proyecto EESE →
+Personas**.
 
-- `pages_manage_posts` — para publicar en la página.
-- `pages_read_engagement` — para leer las publicaciones recientes y evitar duplicados.
-- `pages_show_list` — para listar tus páginas y obtener el token.
+### 2. Crear la app de Meta
 
-Pasos con Graph API Explorer:
+1. Entra a https://developers.facebook.com/ y usa una app tipo **Business**
+   (por ejemplo **Avisos EESE**).
+2. Agrega **Facebook Login** o usa directamente **Graph API Explorer**.
+3. La app puede quedar en modo desarrollo si la usarás solo tú como
+   administrador de la página.
 
-1. Selecciona tu app.
-2. Pide un **User Access Token** con los permisos anteriores.
-3. Llama a `GET /me/accounts` y localiza la página **Estudio Energético de Sismos**.
-4. Copia el `access_token` de esa página (es el token de página).
-5. Si quieres que no caduque pronto, genera un **System User Token** desde
-   Meta Business Suite con los mismos permisos. Es la opción más estable.
+### 3. Obtener el token de usuario
 
-### 3. Guardar el token en GitHub
+En **Graph API Explorer**:
 
-En el repositorio `raymondrosa/particulas-sismicas`:
+1. Selecciona la app **Avisos EESE**.
+2. Agrega los permisos:
+   - `pages_show_list`
+   - `pages_read_engagement`
+   - `pages_manage_posts`
+3. Pulsa **Generate Access Token** y autoriza.
+4. Comprueba que tu usuario administra la página:
+   ```
+   me/accounts?fields=name,id,access_token
+   ```
+   Debe aparecer **Proyecto EESE**. Si sale `{"data":[]}`, tu usuario no es
+   administrador de la página: vuelve al paso 1.
+5. Guarda el **token de usuario** (el que aparece arriba, no el de la página).
+
+Para que no caduque en 1–2 horas, cámbialo por uno de **larga duración**
+(60 días) con:
+```
+GET /oauth/access_token?grant_type=fb_exchange_token
+    &client_id=APP_ID
+    &client_secret=APP_SECRET
+    &fb_exchange_token=TOKEN_CORTO
+```
+También puedes usar un **token de System User** (no caduca) como alternativa.
+
+### 4. Guardar en GitHub
+
+En `raymondrosa/particulas-sismicas`:
 
 1. **Settings → Secrets and variables → Actions → New repository secret**
-2. Nombre: `FB_PAGE_TOKEN`
-3. Valor: el token de página.
-4. Opcional: si `me` no funciona, crea el secreto `FB_PAGE_ID` con el ID numérico
-   de la página.
+2. Crea **`FB_USER_TOKEN`** con el token de usuario de larga duración.
+3. Opcional: crea **`FB_PAGE_ID`** con el ID numérico de la página
+   (por defecto el script usa `10329524066772157`).
 
-### 4. Probar
+El script llama a `/me/accounts`, encuentra la página, obtiene su token y publica
+en `/{FB_PAGE_ID}/feed`.
+
+> También se admite un **token de página** o de **System User** en
+> `FB_PAGE_TOKEN` (con `FB_PAGE_ID`). Si existen ambos, tiene prioridad el flujo
+> de `FB_USER_TOKEN`.
+
+### 5. Probar
 
 En **Actions → Aviso sísmico a Facebook → Run workflow**:
 
-- `dry_run = true`: muestra en el log el mensaje que se publicaría, sin publicar.
-- `force = true`: publica un mensaje de prueba en la página.
-- Después de probar, deja el flujo programado activo.
+- `dry_run = true`: valida las credenciales y muestra el mensaje, sin publicar.
+- `force = true` (con `dry_run = false`): publica un mensaje de prueba.
+
+En el log debe aparecer:
+```
+Página de Facebook: Proyecto EESE (id ...)
+Publicado en Facebook. id=...
+```
+
+Después de probar, deja el flujo programado activo.
+
+## Si algo falla
+
+- **`/me/accounts` sale vacío** → tu usuario no es administrador de la página.
+  Agrégalo en Configuración de la página → Acceso a la página.
+- **Error `#200`** → el token no tiene `pages_manage_posts` o no es administrador
+  de la página. Revisa los permisos en Graph API Explorer.
+- **`No encontré la página`** → revisa el nombre o ajusta `FB_PAGE_ID`.
+- **Token inválido o caducado** → genera uno nuevo. Los tokens de usuario cortos
+  duran 1–2 horas; usa uno de larga duración o un System User.
+- **Facebook no permite notificaciones push** a todos los seguidores; el script
+  publica en el muro de la página y Facebook decide a quién mostrarlo.
 
 ## Seguridad
 
@@ -75,13 +121,7 @@ En **Actions → Aviso sísmico a Facebook → Run workflow**:
 
 ## Notas
 
-- Facebook **no permite enviar notificaciones push** a todos los seguidores desde
-  una página. Lo que hace este automatizador es **publicar en el muro de la página**;
-  Facebook decide a quién mostrárselo.
 - El aviso incluye siempre el descargo: estudio en desarrollo, no es una autoridad
   oficial y la hipótesis no ha sido validada científicamente.
-- Si la página se ve con datos pero el Action no publica, revisa el log:
-  puede que el nivel sea `estable` o que ya se publicó un aviso en las últimas
-  12 horas.
 - GitHub puede pausar los flujos programados si el repositorio pasa 60 días sin
-  actividad; revive el flujo desde la pestaña **Actions**.
+  actividad; revívelo desde la pestaña **Actions**.

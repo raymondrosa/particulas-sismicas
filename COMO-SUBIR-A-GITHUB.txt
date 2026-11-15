@@ -1,0 +1,82 @@
+CÓMO SUBIR ESTO A GITHUB
+=========================
+
+Repositorio: https://github.com/raymondrosa/particulas-sismicas
+
+Archivos incluidos:
+- index.html
+- .github/workflows/alerta-facebook.yml
+- scripts/alerta_facebook.py
+- README-FACEBOOK.md
+- fondo.png, logo.jpg (sin cambios; solo por si acaso)
+
+PASO 1. Reemplaza los archivos en la rama main
+----------------------------------------------
+Sube/reemplaza estos tres archivos (los demás son opcionales):
+1. index.html
+2. .github/workflows/alerta-facebook.yml
+3. scripts/alerta_facebook.py
+
+Si usas la web de GitHub:
+- Abre el archivo en el repositorio.
+- Pulsa el lápiz (Edit).
+- Borra el contenido y pega el del archivo nuevo.
+- Commit a la rama main.
+
+Al subir el workflow o el script, el flujo se ejecuta solo
+(por el disparador "push" del workflow).
+
+PASO 2. Configura los secretos en GitHub
+---------------------------------------
+Settings > Secrets and variables > Actions
+
+FB_USER_TOKEN (recomendado)
+  Token de USUARIO de Facebook, de larga duración, con permisos:
+  - pages_show_list
+  - pages_read_engagement
+  - pages_manage_posts
+
+  El script pedirá /me/accounts, encontrará la página y publicará en ella.
+
+FB_PAGE_ID (opcional)
+  ID numérico de la página. Por defecto el script usa:
+  10329524066772157
+  Si la página tiene otro ID, crea este secreto con el correcto.
+
+FB_PAGE_TOKEN (alternativa)
+  Token de PÁGINA o de SYSTEM USER. Si lo usas, también necesitas FB_PAGE_ID.
+  Si existe FB_USER_TOKEN, el script usa primero el flujo de usuario.
+
+IMPORTANTE:
+- Tu usuario de Facebook debe ser ADMINISTRADOR de la página.
+- Para comprobarlo, en Graph API Explorer ejecuta:
+      me/accounts?fields=name,id,access_token
+  Debe aparecer "Proyecto EESE". Si sale {"data":[]}, agrega tu usuario
+  como administrador en Configuración de la página > Acceso a la página.
+- Los tokens de usuario cortos duran 1-2 horas. Para el flujo automático
+  usa un token de larga duración (60 días) o un token de System User.
+- Nunca pongas el token en index.html ni en el repositorio.
+
+PASO 3. Prueba
+--------------
+Actions > Aviso sísmico a Facebook > Run workflow
+
+1) Primero: dry_run = true, force = false
+   Debe validar las credenciales y mostrar el mensaje sin publicar.
+
+2) Luego: force = true, dry_run = false
+   Debe publicar una prueba en la página.
+
+En el log debe aparecer:
+  Página de Facebook: Proyecto EESE (id ...)
+  Publicado en Facebook. id=...
+
+Si aparece un error:
+- "El token de usuario no administra ninguna página":
+  tu usuario no es administrador de la página.
+- "No encontré la página": ajusta FB_PAGE_ID.
+- "#200": faltan permisos o el usuario no es administrador.
+- Token inválido/caducado: genera uno nuevo.
+
+El aviso real solo se publica cuando el nivel es "alerta"
+(coincidencia en al menos 2 familias de medición).
