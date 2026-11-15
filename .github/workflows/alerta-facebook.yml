@@ -46,7 +46,6 @@ jobs:
       - name: Evaluar sensores y publicar si hay alerta
         env:
           FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
-          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
           COOLDOWN_HOURS: "12"
           FORCE: ${{ github.event.inputs.force || 'false' }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
