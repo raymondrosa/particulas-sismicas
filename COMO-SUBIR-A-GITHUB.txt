@@ -1,0 +1,100 @@
+CÓMO ACTUALIZAR LA PÁGINA (SIN FACEBOOK)
+========================================
+
+Ahora los avisos viven en la propia página. No se publica nada en Facebook.
+
+Archivos incluidos:
+- index.html
+- alertas.json
+- .github/workflows/actualizar-alertas.yml
+- scripts/actualizar_alertas.py
+
+PASO 1. Sube o reemplaza los archivos
+-------------------------------------
+En el repositorio https://github.com/raymondrosa/particulas-sismicas,
+rama main:
+
+1. index.html
+2. alertas.json
+3. .github/workflows/actualizar-alertas.yml
+4. scripts/actualizar_alertas.py
+
+PASO 2. Elimina o desactiva el workflow viejo de Facebook
+---------------------------------------------------------
+Es importante para que dejen de fallar las ejecuciones cada 10 minutos.
+
+Opción A (desactivar):
+- Actions → Aviso sísmico a Facebook → menú "..." → Disable workflow.
+
+Opción B (borrar el archivo):
+- Abre .github/workflows/alerta-facebook.yml → icono de basura → Commit.
+
+También puedes borrar scripts/alerta_facebook.py y README-FACEBOOK.md;
+ya no se usan.
+
+PASO 3. Permite que el workflow escriba en el repositorio
+---------------------------------------------------------
+Settings → Actions → General → Workflow permissions
+
+Marca: "Read and write permissions"
+Guarda.
+
+Sin esto, el workflow podrá leer los sensores pero no guardar alertas.json.
+
+PASO 4. Ejecuta el workflow una vez
+-----------------------------------
+Actions → "Actualizar historial de avisos" → Run workflow.
+
+Qué hace:
+- Cada 10 minutos lee los canales de ThingSpeak.
+- Si detecta una anomalía sostenida (2 familias) o un pico (al alza o a la
+  baja), agrega un evento a alertas.json.
+- Hace commit de alertas.json solo cuando hay un aviso nuevo.
+- La página lee ese archivo y muestra el historial.
+
+Si no hay alertas, el archivo queda igual y no hay commit.
+
+PASO 5. Comprueba la página
+---------------------------
+Abre https://raymondrosa.github.io/particulas-sismicas/
+
+Debajo del panel de estado debe aparecer:
+"Historial de avisos"
+
+- Si aún no hay eventos: "Aún no hay avisos registrados..."
+- Cuando ocurra un aviso: aparecerá con fecha, tipo (anomalía o pico),
+  dirección (al alza / a la baja) y variables.
+
+CÓMO FUNCIONA LA DETECCIÓN
+--------------------------
+- Variación sostenida: 2 o más familias de medición (partículas, molecular,
+  aceleración) con cambio fuerte.
+- Pico: un valor aislado que supera el umbral de pico (|z| >= 10 y cambio
+  mínimo). Se evalúa igual al alza y a la baja.
+- El historial empieza a llenarse desde la primera ejecución; no reconstruye
+  días anteriores.
+- El workflow revisa también la última hora de datos, para no perder picos
+  entre una ejecución y otra. El panel en vivo los muestra al ocurrir.
+
+SI ALGO NO FUNCIONA
+-------------------
+1. "Historial no disponible":
+   - Revisa que alertas.json exista en la raíz del repositorio.
+   - Revisa que la página esté desplegada.
+   - Recarga sin caché (Ctrl+F5).
+
+2. El workflow falla al hacer commit:
+   - Revisa Settings → Actions → General → Workflow permissions.
+   - Debe estar en "Read and write permissions".
+
+3. Siguen apareciendo ejecuciones fallidas de "Aviso sísmico a Facebook":
+   - El workflow viejo no se desactivó/eliminó. Haz el Paso 2.
+
+4. alertas.json se actualiza en GitHub pero la página muestra lo viejo:
+   - Espera el despliegue de Pages o revisa la pestaña Actions.
+   - Recarga sin caché.
+
+NOTA CIENTÍFICA
+---------------
+El historial es un registro experimental. Un pico o una anomalía estadística
+no predicen terremotos y no sustituyen a las autoridades oficiales.
