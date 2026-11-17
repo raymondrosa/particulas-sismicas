@@ -391,6 +391,12 @@
             box-shadow: 0 0 0 1px rgba(255, 82, 82, 0.3), 0 8px 30px rgba(255, 0, 0, 0.18);
         }
 
+        .trend-panel[data-level="pico"] {
+            border-left-color: #FF9800;
+            background: rgba(70, 42, 0, 0.55);
+            box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.28), 0 8px 30px rgba(255, 120, 0, 0.14);
+        }
+
         @keyframes trendPulse {
             0% { box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.55); }
             70% { box-shadow: 0 0 0 12px rgba(255, 82, 82, 0); }
@@ -542,6 +548,105 @@
             .trend-title { font-size: 1.1rem; min-width: 160px; }
             .trend-time { width: 100%; margin-left: 0; white-space: normal; }
             .trend-signals li { font-size: 0.78rem; }
+        }
+
+        /* ===== HISTORIAL DE AVISOS ===== */
+        .alert-history {
+            max-width: 1400px;
+            margin: 0 auto 16px;
+            padding: 14px 18px;
+            background: rgba(0, 0, 0, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-left: 6px solid #8ECAE6;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .alert-history-head {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .alert-history-head h2 {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 800;
+        }
+
+        .alert-history-time {
+            margin-left: auto;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .alert-history-note,
+        .alert-history-foot {
+            margin: 6px 0 0;
+            font-size: 0.84rem;
+            color: rgba(255, 255, 255, 0.72);
+            line-height: 1.45;
+        }
+
+        .alert-history-list {
+            display: grid;
+            gap: 8px;
+            margin: 10px 0 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .alert-history-item {
+            padding: 9px 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border-left: 4px solid #8ECAE6;
+        }
+
+        .alert-history-item.alerta { border-left-color: #FF5252; }
+        .alert-history-item.pico { border-left-color: #FF9800; }
+
+        .alert-history-row {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .alert-history-level {
+            font-size: 0.86rem;
+            font-weight: 800;
+        }
+
+        .alert-history-row time {
+            margin-left: auto;
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.65);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .alert-history-summary {
+            margin: 4px 0 0;
+            font-size: 0.86rem;
+            line-height: 1.45;
+        }
+
+        .alert-history-vars {
+            margin: 3px 0 0;
+            font-size: 0.78rem;
+            color: rgba(255, 255, 255, 0.66);
+            line-height: 1.4;
+        }
+
+        .alert-history-empty {
+            padding: 8px 2px;
+            font-size: 0.86rem;
+            color: rgba(255, 255, 255, 0.68);
+            list-style: none;
         }
 
         /* ===== DONATIVOS ===== */
@@ -928,11 +1033,24 @@
         <ul class="trend-signals" id="trendSignals" hidden></ul>
         <details class="trend-method">
             <summary>¿Cómo se calcula este aviso?</summary>
-            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a picos aislados. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no un pico de un solo dato) que supera un umbral estadístico y un cambio mínimo. Los picos aislados se evalúan por separado de los cambios sostenidos. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado no predice terremotos.</p>
+            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a picos aislados. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no un pico de un solo dato) que supera un umbral estadístico y un cambio mínimo. Los picos aislados, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de pico. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado no predice terremotos.</p>
         </details>
         <p class="trend-disclaimer"><strong>Información de un estudio en desarrollo.</strong> Este aviso no proviene de una autoridad oficial ni de un organismo de alerta, y su hipótesis <strong>aún no ha sido validada científicamente</strong>. No lo use para tomar decisiones de seguridad; ante un sismo, siga los protocolos oficiales.</p>
     </section>
     <p class="sr-only" id="trendLive" aria-live="polite"></p>
+
+    <!-- ============ HISTORIAL DE AVISOS ============ -->
+    <section class="alert-history" id="alertHistory" aria-labelledby="alertHistoryTitle">
+        <div class="alert-history-head">
+            <h2 id="alertHistoryTitle">Historial de avisos</h2>
+            <span class="alert-history-time" id="alertHistoryTime"></span>
+        </div>
+        <p class="alert-history-note">Avisos detectados por el observatorio. Se actualiza automáticamente cada 10 minutos.</p>
+        <ul class="alert-history-list" id="alertHistoryList" aria-live="polite">
+            <li class="alert-history-empty">Cargando historial…</li>
+        </ul>
+        <p class="alert-history-foot">Un pico o una anomalía estadística no predicen terremotos. Información experimental.</p>
+    </section>
 
     <!-- Datos en tiempo real -->
     <div class="data-container" id="dataContainer">
@@ -1503,6 +1621,7 @@
             const TREND_COLORS = {
                 estable: '#00E676',
                 vigilancia: '#FFC107',
+                pico: '#FF9800',
                 alerta: '#FF5252',
                 nodata: '#9E9E9E'
             };
@@ -1519,6 +1638,10 @@
                 alerta: {
                     title: '⚠️ Anomalía estadística multivariable detectada',
                     detail: 'Se detectó una variación sostenida en {n} variable(s) de {groups} familia(s) de medición. La coincidencia entre familias es un indicador experimental; no predice terremotos.'
+                },
+                pico: {
+                    title: '🟠 Pico detectado en los sensores',
+                    detail: 'Se detectó un pico aislado en {n} variable(s) de {groups} familia(s) de medición. Puede ser una variación brusca real o un dato atípico; no predice terremotos.'
                 },
                 nodata: {
                     title: '⚪ Estado de anomalías no disponible',
@@ -1573,7 +1696,8 @@
                 // Un pico extremo se evalúa aparte: no depende de que cambie la mediana reciente.
                 else if (Math.abs(vals[vals.length - 1] - baseMed) >= cfg.minDelta && Math.abs(zLast) >= TREND.zSpike) state = 'spike';
 
-                return { state, zRecent, zLast, delta, baseMed, recentMed, last: vals[vals.length - 1] };
+                const direction = (state === 'spike' ? (vals[vals.length - 1] - baseMed) : delta) >= 0 ? 'up' : 'down';
+                return { state, zRecent, zLast, delta, baseMed, recentMed, last: vals[vals.length - 1], direction };
             }
 
             function evaluateTrend(feeds1, feeds2) {
@@ -1600,7 +1724,8 @@
                 }
                 let level = 'estable';
                 if (strongGroups.length >= 2) level = 'alerta';
-                else if (coreStrong.length || coreWatch.length || coreSpike.length) level = 'vigilancia';
+                else if (coreSpike.length) level = 'pico';
+                else if (coreStrong.length || coreWatch.length) level = 'vigilancia';
                 return { level, signals, coreStrong, coreWatch, coreSpike, strongGroups, activeGroups,
                     evaluatedAt: new Date(), stale: false };
             }
@@ -1688,6 +1813,11 @@
                                 { id: 'molecularPhysics', label: 'Física Molecular', unit: 'u', core: true, group: 'molecular', state: 'watch', zRecent: 4.8, delta: 12 }
                             ];
                             result.activeGroups = ['molecular'];
+                        } else if (level === 'pico') {
+                            signals = [
+                                { id: 'accelResult', label: 'Acel. Result.', unit: 'm/s²', core: true, group: 'aceleracion', state: 'spike', zLast: -12.4, delta: -0.38, direction: 'down' }
+                            ];
+                            result.activeGroups = ['aceleracion'];
                         }
                     }
                 }
@@ -1724,7 +1854,10 @@
                         const abs = Math.abs(r.delta);
                         const zShown = r.state === 'spike' ? r.zLast : r.zRecent;
                         const dec = abs >= 10 ? 0 : (abs >= 1 ? 1 : 2);
-                        li.textContent = `${r.label}: Δ ${sign}${abs.toFixed(dec)} ${r.unit} · z=${Number.isFinite(zShown) ? zShown.toFixed(1) : 'N/D'}${r.state === 'spike' ? ' (pico)' : ''}${r.core ? '' : ' · contexto'}`;
+                        const dirText = r.state === 'spike'
+                            ? (r.direction === 'down' ? 'pico a la baja' : 'pico al alza')
+                            : '';
+                        li.textContent = `${r.label}: Δ ${sign}${abs.toFixed(dec)} ${r.unit} · z=${Number.isFinite(zShown) ? zShown.toFixed(1) : 'N/D'}${dirText ? ' (' + dirText + ')' : ''}${r.core ? '' : ' · contexto'}`;
                         if (r.state === 'strong') li.className = 'strong';
                         list.appendChild(li);
                     });
@@ -1742,11 +1875,109 @@
                 if (!trendDemo) {
                     document.title = level === 'alerta'
                         ? '⚠️ Anomalía multivariable detectada — Observatorio de Partículas del TOA'
-                        : (level === 'nodata'
-                            ? '⚠️ Sin datos — Observatorio de Partículas del TOA'
-                            : 'Observatorio de Partículas del TOA - Prof. Rosa');
+                        : (level === 'pico'
+                            ? '⚠️ Pico detectado — Observatorio de Partículas del TOA'
+                            : (level === 'nodata'
+                                ? '⚠️ Sin datos — Observatorio de Partículas del TOA'
+                                : 'Observatorio de Partículas del TOA - Prof. Rosa'));
                 }
 
+            }
+
+            function formatHistoryTime(value) {
+                if (!value) return '';
+                const date = new Date(value);
+                if (isNaN(date.getTime())) return '';
+                try {
+                    return new Intl.DateTimeFormat('es-PR', {
+                        dateStyle: 'medium', timeStyle: 'short', timeZone: 'America/Puerto_Rico'
+                    }).format(date);
+                } catch (e) {
+                    return date.toLocaleString();
+                }
+            }
+
+            function renderAlertHistory(data) {
+                const list = document.getElementById('alertHistoryList');
+                const time = document.getElementById('alertHistoryTime');
+                if (!list) return;
+                list.innerHTML = '';
+                const events = data && Array.isArray(data.events) ? data.events : [];
+                if (time) time.textContent = data && data.updated_at ? 'Actualizado: ' + formatHistoryTime(data.updated_at) : '';
+                if (!events.length) {
+                    const empty = document.createElement('li');
+                    empty.className = 'alert-history-empty';
+                    empty.textContent = 'Aún no hay avisos registrados. El historial se actualiza automáticamente cada 10 minutos.';
+                    list.appendChild(empty);
+                    return;
+                }
+                events.slice(0, 50).forEach(event => {
+                    const item = document.createElement('li');
+                    item.className = 'alert-history-item ' + (event.level === 'pico' ? 'pico' : 'alerta');
+                    const row = document.createElement('div');
+                    row.className = 'alert-history-row';
+                    const level = document.createElement('span');
+                    level.className = 'alert-history-level';
+                    level.textContent = event.level === 'pico' ? '⚡ Pico detectado' : '⚠️ Anomalía multivariable';
+                    const when = document.createElement('time');
+                    when.dateTime = event.timestamp || '';
+                    when.textContent = formatHistoryTime(event.timestamp);
+                    row.appendChild(level);
+                    row.appendChild(when);
+                    item.appendChild(row);
+
+                    const direction = event.direction === 'down' ? 'a la baja' : (event.direction === 'up' ? 'al alza' : 'mixta');
+                    const summarize = (event.groups || []).map(g => g === 'particulas' ? 'partículas' : (g === 'molecular' ? 'física molecular' : 'aceleración')).join(' y ');
+                    const summary = document.createElement('p');
+                    summary.className = 'alert-history-summary';
+                    summary.textContent = (event.level === 'pico' ? 'Pico ' + direction : 'Variación ' + direction) + (summarize ? ' en ' + summarize : '') + '.';
+                    item.appendChild(summary);
+
+                    if (Array.isArray(event.variables) && event.variables.length) {
+                        const vars = document.createElement('p');
+                        vars.className = 'alert-history-vars';
+                        vars.textContent = 'Variables: ' + event.variables.map(v => v.label).join(', ');
+                        item.appendChild(vars);
+                    }
+                    list.appendChild(item);
+                });
+            }
+
+            async function loadAlertHistory() {
+                const list = document.getElementById('alertHistoryList');
+                if (!list) return;
+                try {
+                    if (typeof fetch !== 'function') throw new Error('fetch no disponible');
+                    const stamp = Date.now();
+                    const urls = [
+                        'alertas.json?t=' + stamp,
+                        'https://raw.githubusercontent.com/raymondrosa/particulas-sismicas/main/alertas.json?t=' + stamp
+                    ];
+                    let best = null;
+                    let bestTime = -Infinity;
+                    for (const url of urls) {
+                        try {
+                            const response = await fetch(url, { cache: 'no-store' });
+                            if (!response.ok) continue;
+                            const data = await response.json();
+                            const t = data && data.updated_at ? new Date(data.updated_at).getTime() : 0;
+                            if (!best || (Number.isFinite(t) && t > bestTime)) {
+                                best = data;
+                                bestTime = Number.isFinite(t) ? t : 0;
+                            }
+                        } catch (e) {
+                            // Probar la siguiente fuente
+                        }
+                    }
+                    if (!best) throw new Error('sin datos');
+                    renderAlertHistory(best);
+                } catch (error) {
+                    list.innerHTML = '';
+                    const empty = document.createElement('li');
+                    empty.className = 'alert-history-empty';
+                    empty.textContent = 'El historial todavía no está disponible. Se actualizará cuando el sistema registre el primer aviso.';
+                    list.appendChild(empty);
+                }
             }
 
             function updateTrend(feeds1, feeds2) {
@@ -2285,6 +2516,9 @@
                         }
                     });
                 }
+
+                loadAlertHistory();
+                setInterval(loadAlertHistory, 600000);
 
                 setInterval(updateCharts, 20000);
                 // Los sismos M>=6 no cambian con la misma frecuencia que el sensor;
