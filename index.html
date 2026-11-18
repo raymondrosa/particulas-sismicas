@@ -1226,22 +1226,37 @@
             const LEGEND_COLOR = '#1F2937';
             const MAX_COLOR = '#FFB000';
             const MAX_BORDER = '#1F2937';
+            const MIN_COLOR = '#00BFFF';
+            const MIN_BORDER = '#1F2937';
 
+            // Marca el valor máximo (ámbar) y el mínimo (azul) de cada serie.
+            // Las marcas son pequeñas para no tapar la línea.
             function highlightMax(data, baseColor) {
                 let maxIdx = -1;
                 let maxVal = -Infinity;
+                let minIdx = -1;
+                let minVal = Infinity;
                 for (let i = 0; i < data.length; i++) {
                     const v = data[i];
-                    if (typeof v === 'number' && isFinite(v) && v > maxVal) {
+                    if (typeof v !== 'number' || !isFinite(v)) continue;
+                    if (v > maxVal) {
                         maxVal = v;
                         maxIdx = i;
                     }
+                    if (v < minVal) {
+                        minVal = v;
+                        minIdx = i;
+                    }
                 }
-                const bg = data.map((_, i) => i === maxIdx ? MAX_COLOR : baseColor);
-                const border = data.map((_, i) => i === maxIdx ? MAX_BORDER : baseColor);
-                const width = data.map((_, i) => i === maxIdx ? 2 : 0);
-                const radius = data.map((_, i) => i === maxIdx ? 4 : 1);
-                return { maxIdx: maxIdx, maxVal: maxVal, bg: bg, border: border, width: width, radius: radius };
+                const bg = data.map((_, i) => i === maxIdx ? MAX_COLOR : (i === minIdx ? MIN_COLOR : baseColor));
+                const border = data.map((_, i) => i === maxIdx ? MAX_BORDER : (i === minIdx ? MIN_BORDER : baseColor));
+                const width = data.map((_, i) => (i === maxIdx || i === minIdx) ? 1 : 0);
+                const radius = data.map((_, i) => i === maxIdx ? 2.5 : (i === minIdx ? 2.5 : 1));
+                return {
+                    maxIdx: maxIdx, maxVal: maxVal,
+                    minIdx: minIdx, minVal: minVal,
+                    bg: bg, border: border, width: width, radius: radius
+                };
             }
 
             function formatMaxValue(value) {
@@ -2144,7 +2159,9 @@
                         const ctx = canvas.getContext('2d');
 
                         const hl = highlightMax(data, cfg.color);
-                        setMaxCaption(cfg.id, data.length ? formatMaxValue(hl.maxVal) : '');
+                        setMaxCaption(cfg.id, (data.length && hl.maxIdx >= 0)
+                            ? `${formatMaxValue(hl.maxVal)} · mín: ${formatMaxValue(hl.minVal)}`
+                            : '');
 
                         if (chartInstances[cfg.id]) {
                             const ds = chartInstances[cfg.id].data.datasets[0];
@@ -2171,7 +2188,7 @@
                                             pointBorderColor: hl.border,
                                             pointBorderWidth: hl.width,
                                             pointRadius: hl.radius,
-                                            pointHoverRadius: 5,
+                                            pointHoverRadius: 4,
                                             fill: true,
                                             tension: 0.2
                                         }]
@@ -2234,7 +2251,7 @@
                                 pointBackgroundColor: hl.bg,
                                 pointBorderColor: hl.border,
                                 pointBorderWidth: hl.width,
-                                pointRadius: data.map((_, i) => i === hl.maxIdx ? 4 : 0.5),
+                                pointRadius: data.map((_, i) => (i === hl.maxIdx || i === hl.minIdx) ? 2.5 : 0.5),
                                 fill: false,
                                 tension: 0.2
                             });
