@@ -7,6 +7,7 @@ Archivos incluidos:
 - index.html
 - alertas.json
 - .github/workflows/actualizar-alertas.yml
+- .github/workflows/publicar-pagina.yml
 - scripts/actualizar_alertas.py
 
 PASO 1. Sube o reemplaza los archivos
@@ -17,23 +18,30 @@ rama main:
 1. index.html
 2. alertas.json
 3. .github/workflows/actualizar-alertas.yml
-4. scripts/actualizar_alertas.py
+4. .github/workflows/publicar-pagina.yml
+5. scripts/actualizar_alertas.py
 
-PASO 1B. Si la página publicada no muestra los cambios
----------------------------------------------------------
-Si abres la página y sigues viendo la versión vieja (sin "Historial de avisos"):
+PASO 1B. Publica la página en GitHub Pages
+------------------------------------------
+La página publicada se quedó en la versión del 15 de noviembre porque el
+workflow que publicaba Pages se borró. Hay dos formas de arreglarlo:
 
-Settings → Pages → Build and deployment
-- Source: "Deploy from a branch"
-- Branch: main
-- Folder: /(root)
-- Save
+OPCIÓN A (recomendada): GitHub Actions
+1. Sube .github/workflows/publicar-pagina.yml.
+2. Ve a Settings → Pages → Build and deployment.
+3. En Source elige "GitHub Actions".
+4. Ve a Actions → "Publicar página" → Run workflow.
+5. Espera a que termine y recarga la página sin caché (Ctrl+F5).
 
-Eso hace que GitHub Pages publique el index.html y alertas.json de la rama
-main. Espera 1-3 minutos y recarga sin caché (Ctrl+F5).
+OPCIÓN B: publicar desde la rama
+1. Settings → Pages → Build and deployment.
+2. Source: "Deploy from a branch".
+3. Branch: main; Folder: /(root).
+4. Save y espera 1-3 minutos.
+5. Recarga sin caché.
 
-Si ya estaba en "Deploy from a branch", pulsa "Retry deployment" o revisa
-el error del último despliegue en la misma pantalla.
+Con cualquiera de las dos, la página nueva (con el historial) se publica.
+Si usas la Opción B, el workflow publicar-pagina.yml no es necesario.
 
 PASO 2. Elimina o desactiva el workflow viejo de Facebook
 ---------------------------------------------------------
@@ -57,9 +65,11 @@ Guarda.
 
 Sin esto, el workflow podrá leer los sensores pero no guardar alertas.json.
 
-PASO 4. Ejecuta el workflow una vez
------------------------------------
-Actions → "Actualizar historial de avisos" → Run workflow.
+PASO 4. Ejecuta los workflows una vez
+-------------------------------------
+Primero: Actions → "Publicar página" → Run workflow (si usas Opción A).
+
+Después: Actions → "Actualizar historial de avisos" → Run workflow.
 
 Qué hace:
 - Cada 10 minutos lee los canales de ThingSpeak.
