@@ -1033,7 +1033,7 @@
         <ul class="trend-signals" id="trendSignals" hidden></ul>
         <details class="trend-method">
             <summary>¿Cómo se calcula este aviso?</summary>
-            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a picos aislados. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no un pico de un solo dato) que supera un umbral estadístico y un cambio mínimo. Los picos aislados, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de pico. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado no predice terremotos.</p>
+            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a anomalías aisladas. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no una anomalía de un solo dato) que supera un umbral estadístico y un cambio mínimo. Las anomalías aisladas, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de anomalía puntual. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado es un pronóstico experimental sujeto a validación.</p>
         </details>
         <p class="trend-disclaimer"><strong>Información de un estudio en desarrollo.</strong> Este aviso no proviene de una autoridad oficial ni de un organismo de alerta, y su hipótesis <strong>aún no ha sido validada científicamente</strong>. No lo use para tomar decisiones de seguridad; ante un sismo, siga los protocolos oficiales.</p>
     </section>
@@ -1049,7 +1049,7 @@
         <ul class="alert-history-list" id="alertHistoryList" aria-live="polite">
             <li class="alert-history-empty">Cargando historial…</li>
         </ul>
-        <p class="alert-history-foot">Un pico o una anomalía estadística no predicen terremotos. Información experimental.</p>
+        <p class="alert-history-foot">El historial registra anomalías; su lectura es un pronóstico experimental.</p>
     </section>
 
     <!-- Datos en tiempo real -->
@@ -1652,11 +1652,11 @@
                 },
                 alerta: {
                     title: '⚠️ Anomalía estadística multivariable detectada',
-                    detail: 'Se detectó una variación sostenida en {n} variable(s) de {groups} familia(s) de medición. La coincidencia entre familias es un indicador experimental; no predice terremotos.'
+                    detail: 'Se detectó una variación sostenida en {n} variable(s) de {groups} familia(s) de medición. La coincidencia entre familias es un indicador experimental; su interpretación es un pronóstico experimental.'
                 },
                 pico: {
-                    title: '🟠 Pico detectado en los sensores',
-                    detail: 'Se detectó un pico aislado en {n} variable(s) de {groups} familia(s) de medición. Puede ser una variación brusca real o un dato atípico; no predice terremotos.'
+                    title: '🟠 Anomalía puntual detectada en los sensores',
+                    detail: 'Se detectó una anomalía puntual en {n} variable(s) de {groups} familia(s) de medición. Puede ser una variación brusca real o un dato atípico; su interpretación es un pronóstico experimental.'
                 },
                 nodata: {
                     title: '⚪ Estado de anomalías no disponible',
@@ -1870,7 +1870,7 @@
                         const zShown = r.state === 'spike' ? r.zLast : r.zRecent;
                         const dec = abs >= 10 ? 0 : (abs >= 1 ? 1 : 2);
                         const dirText = r.state === 'spike'
-                            ? (r.direction === 'down' ? 'pico a la baja' : 'pico al alza')
+                            ? (r.direction === 'down' ? 'anomalía a la baja' : 'anomalía al alza')
                             : '';
                         li.textContent = `${r.label}: Δ ${sign}${abs.toFixed(dec)} ${r.unit} · z=${Number.isFinite(zShown) ? zShown.toFixed(1) : 'N/D'}${dirText ? ' (' + dirText + ')' : ''}${r.core ? '' : ' · contexto'}`;
                         if (r.state === 'strong') li.className = 'strong';
@@ -1891,7 +1891,7 @@
                     document.title = level === 'alerta'
                         ? '⚠️ Anomalía multivariable detectada — Observatorio de Partículas del TOA'
                         : (level === 'pico'
-                            ? '⚠️ Pico detectado — Observatorio de Partículas del TOA'
+                            ? '⚠️ Anomalía puntual detectada — Observatorio de Partículas del TOA'
                             : (level === 'nodata'
                                 ? '⚠️ Sin datos — Observatorio de Partículas del TOA'
                                 : 'Observatorio de Partículas del TOA - Prof. Rosa'));
@@ -1933,7 +1933,7 @@
                     row.className = 'alert-history-row';
                     const level = document.createElement('span');
                     level.className = 'alert-history-level';
-                    level.textContent = event.level === 'pico' ? '⚡ Pico detectado' : '⚠️ Anomalía multivariable';
+                    level.textContent = event.level === 'pico' ? '⚡ Anomalía puntual' : '⚠️ Anomalía multivariable';
                     const when = document.createElement('time');
                     when.dateTime = event.timestamp || '';
                     when.textContent = formatHistoryTime(event.timestamp);
@@ -1945,7 +1945,7 @@
                     const summarize = (event.groups || []).map(g => g === 'particulas' ? 'partículas' : (g === 'molecular' ? 'física molecular' : 'aceleración')).join(' y ');
                     const summary = document.createElement('p');
                     summary.className = 'alert-history-summary';
-                    summary.textContent = (event.level === 'pico' ? 'Pico ' + direction : 'Variación ' + direction) + (summarize ? ' en ' + summarize : '') + '.';
+                    summary.textContent = (event.level === 'pico' ? 'Anomalía ' + direction : 'Variación ' + direction) + (summarize ? ' en ' + summarize : '') + '.';
                     item.appendChild(summary);
 
                     if (Array.isArray(event.variables) && event.variables.length) {
