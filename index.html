@@ -584,6 +584,15 @@
             font-variant-numeric: tabular-nums;
         }
 
+        .alert-history-check {
+            font-size: 0.76rem;
+            color: rgba(255, 255, 255, 0.55);
+            font-variant-numeric: tabular-nums;
+            white-space: nowrap;
+        }
+
+        .alert-history-check:empty { display: none; }
+
         .alert-history-note,
         .alert-history-foot {
             margin: 6px 0 0;
@@ -1044,8 +1053,9 @@
         <div class="alert-history-head">
             <h2 id="alertHistoryTitle">Historial de avisos</h2>
             <span class="alert-history-time" id="alertHistoryTime"></span>
+            <span class="alert-history-check" id="alertHistoryCheck"></span>
         </div>
-        <p class="alert-history-note">Avisos detectados por el observatorio. Se actualiza automáticamente cada 10 minutos.</p>
+        <p class="alert-history-note">Avisos detectados por el observatorio. Se revisa automáticamente; solo se agrega una fila cuando se detecta una anomalía.</p>
         <ul class="alert-history-list" id="alertHistoryList" aria-live="polite">
             <li class="alert-history-empty">Cargando historial…</li>
         </ul>
@@ -1918,7 +1928,8 @@
                 if (!list) return;
                 list.innerHTML = '';
                 const events = data && Array.isArray(data.events) ? data.events : [];
-                if (time) time.textContent = data && data.updated_at ? 'Actualizado: ' + formatHistoryTime(data.updated_at) : '';
+                const latest = events[0];
+                if (time) time.textContent = latest ? 'Último aviso: ' + formatHistoryTime(latest.timestamp) : 'Sin avisos registrados';
                 if (!events.length) {
                     const empty = document.createElement('li');
                     empty.className = 'alert-history-empty';
@@ -1956,6 +1967,25 @@
                     }
                     list.appendChild(item);
                 });
+            }
+
+            async function loadLastRevision() {
+                const el = document.getElementById('alertHistoryCheck');
+                if (!el) return;
+                try {
+                    const url = 'https://api.github.com/repos/raymondrosa/particulas-sismicas/actions/workflows/actualizar-alertas.yml/runs?per_page=1';
+                    const response = await fetch(url, { cache: 'no-store' });
+                    if (!response.ok) throw new Error('HTTP ' + response.status);
+                    const data = await response.json();
+                    const run = data.workflow_runs && data.workflow_runs[0];
+                    if (!run) throw new Error('sin ejecuciones');
+                    const when = run.updated_at || run.created_at;
+                    const estado = run.conclusion === 'success' ? 'exitosa'
+                        : (run.conclusion === 'failure' ? 'fallida' : 'en curso');
+                    el.textContent = 'Última revisión: ' + formatHistoryTime(when) + ' (' + estado + ')';
+                } catch (error) {
+                    el.textContent = '';
+                }
             }
 
             async function loadAlertHistory() {
@@ -2535,7 +2565,8 @@
                 }
 
                 loadAlertHistory();
-                setInterval(loadAlertHistory, 600000);
+                loadLastRevision();
+                setInterval(() => { loadAlertHistory(); loadLastRevision(); }, 600000);
 
                 setInterval(updateCharts, 20000);
                 // Los sismos M>=6 no cambian con la misma frecuencia que el sensor;
