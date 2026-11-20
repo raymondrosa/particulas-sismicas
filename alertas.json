@@ -1,7 +1,27 @@
 {
   "version": 1,
-  "updated_at": "2026-11-20T02:41:38.818796Z",
+  "updated_at": "2026-11-20T18:51:36.511835Z",
   "events": [
+    {
+      "id": "20261120T171215Z-pico",
+      "timestamp": "2026-11-20T17:12:15Z",
+      "level": "pico",
+      "direction": "up",
+      "groups": [
+        "molecular"
+      ],
+      "variables": [
+        {
+          "label": "Física molecular",
+          "state": "spike",
+          "group": "molecular",
+          "unit": "u",
+          "delta": 215.0,
+          "z": 14.5,
+          "direction": "up"
+        }
+      ]
+    },
     {
       "id": "20261119T205437Z-pico",
       "timestamp": "2026-11-19T20:54:37Z",
