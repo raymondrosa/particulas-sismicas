@@ -1,7 +1,37 @@
 {
   "version": 1,
-  "updated_at": "2026-11-21T03:08:36.005094Z",
+  "updated_at": "2026-11-21T07:46:32.955757Z",
   "events": [
+    {
+      "id": "20261121T070141Z-pico",
+      "timestamp": "2026-11-21T07:01:41Z",
+      "level": "pico",
+      "direction": "mixed",
+      "groups": [
+        "molecular",
+        "particulas"
+      ],
+      "variables": [
+        {
+          "label": "Física molecular",
+          "state": "spike",
+          "group": "molecular",
+          "unit": "u",
+          "delta": 170.0,
+          "z": 16.38,
+          "direction": "up"
+        },
+        {
+          "label": "Partículas reales",
+          "state": "spike",
+          "group": "particulas",
+          "unit": "u",
+          "delta": -104.0,
+          "z": -6.93,
+          "direction": "down"
+        }
+      ]
+    },
     {
       "id": "20261121T030516Z-pico",
       "timestamp": "2026-11-21T03:05:16Z",
