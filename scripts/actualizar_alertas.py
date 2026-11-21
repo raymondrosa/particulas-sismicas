@@ -59,6 +59,11 @@ MAX_FEEDS = 8000
 
 COOLDOWN_ALERTA = timedelta(hours=6)
 COOLDOWN_PICO = timedelta(hours=2)
+SCAN_HOURS = 6  # ventana de respaldo para cubrir retrasos del workflow
+# (umbral z de pico, cambio relativo mínimo respecto a la línea base)
+SPIKE_RULES = {
+    "Partículas reales": (5.5, 0.10),
+}
 MAX_EVENTS = 100
 
 
@@ -122,14 +127,18 @@ def analyze(feeds_by_channel):
         z_recent = delta / sigma
         z_last = (values[-1] - center) / sigma
         meaningful = abs(delta) >= min_delta
+        spike_z, min_relative = SPIKE_RULES.get(label, (Z_SPIKE, 0.0))
 
         state = "normal"
         if meaningful and abs(z_recent) >= Z_STRONG:
             state = "strong"
         elif meaningful and abs(z_recent) >= Z_WATCH:
             state = "watch"
-        elif abs(values[-1] - center) >= min_delta and abs(z_last) >= Z_SPIKE:
-            state = "spike"
+        else:
+            last_change = abs(values[-1] - center)
+            relative_ok = not min_relative or last_change >= abs(center) * min_relative
+            if last_change >= min_delta and relative_ok and abs(z_last) >= spike_z:
+                state = "spike"
 
         direction_value = (values[-1] - center) if state == "spike" else delta
         results.append(
@@ -145,11 +154,17 @@ def analyze(feeds_by_channel):
             }
         )
 
-        # Revisar también los últimos 240 puntos (~1 h) para no perder un pico
-        # entre dos ejecuciones del workflow.
-        for value, created_at in pairs[-RECENT_POINTS:]:
-            z_spike = (value - center) / sigma
-            if abs(value - center) >= min_delta and abs(z_spike) >= Z_SPIKE:
+        # Revisar las últimas 6 horas (por tiempo, no por cantidad de puntos)
+        # para no perder picos cuando GitHub retrasa el workflow.
+        latest_time = parse_time(pairs[-1][1]) if pairs else None
+        scan_start = latest_time - timedelta(hours=SCAN_HOURS) if latest_time else None
+        for value, created_at in pairs:
+            timestamp = parse_time(created_at)
+            if scan_start and timestamp and timestamp < scan_start:
+                continue
+            change = abs(value - center)
+            relative_ok = not min_relative or change >= abs(center) * min_relative
+            if change >= min_delta and relative_ok and abs((value - center) / sigma) >= spike_z:
                 recent_spikes.append(
                     {
                         "label": label,
@@ -157,8 +172,8 @@ def analyze(feeds_by_channel):
                         "group": group,
                         "state": "spike",
                         "delta": value - center,
-                        "z_recent": z_spike,
-                        "z_last": z_spike,
+                        "z_recent": (value - center) / sigma,
+                        "z_last": (value - center) / sigma,
                         "direction": "up" if value >= center else "down",
                         "timestamp": created_at,
                     }
@@ -169,11 +184,18 @@ def analyze(feeds_by_channel):
     active = [r for r in results if r["state"] != "normal"]
     strong_groups = sorted({r["group"] for r in strong})
 
-    # Un pico por variable: el más extremo de la última hora.
+    # Un pico por variable: el más extremo de la ventana.
     by_label = {}
     for spike in recent_spikes:
         current = by_label.get(spike["label"])
-        if current is None or abs(spike["z_last"]) > abs(current["z_last"]):
+        if current is None:
+            by_label[spike["label"]] = spike
+            continue
+        current_time = parse_time(current.get("timestamp", ""))
+        spike_time = parse_time(spike.get("timestamp", ""))
+        if spike_time and (current_time is None or spike_time > current_time):
+            by_label[spike["label"]] = spike
+        elif spike_time == current_time and abs(spike["z_last"]) > abs(current["z_last"]):
             by_label[spike["label"]] = spike
     spikes = sorted(by_label.values(), key=lambda item: abs(item["z_last"]), reverse=True)[:5]
 
@@ -225,7 +247,7 @@ def parse_time(value):
         return None
 
 
-def already_recorded(events, level, direction, groups, now):
+def already_recorded(events, level, direction, groups, reference_time):
     cooldown = COOLDOWN_ALERTA if level == "alerta" else COOLDOWN_PICO
     group_key = tuple(groups)
     for event in events:
@@ -236,7 +258,7 @@ def already_recorded(events, level, direction, groups, now):
         if event.get("direction") != direction:
             continue
         timestamp = parse_time(event.get("timestamp", ""))
-        if timestamp and now - timestamp < cooldown:
+        if timestamp and abs((reference_time - timestamp).total_seconds()) < cooldown.total_seconds():
             return True
     return False
 
@@ -284,7 +306,7 @@ def main():
             event_time = max(spike_times)
     events = load_events()
 
-    if already_recorded(events, level, direction, groups, now):
+    if already_recorded(events, level, direction, groups, event_time):
         print(f"Evento ya registrado en las últimas {cooldown}: no se duplica.")
         return 0
 
@@ -308,6 +330,7 @@ def main():
         ],
     }
     events.insert(0, event)
+    events.sort(key=lambda item: parse_time(item.get("timestamp", "")) or datetime.min.replace(tzinfo=timezone.utc), reverse=True)
     events = events[:MAX_EVENTS]
     payload = {
         "version": 1,
