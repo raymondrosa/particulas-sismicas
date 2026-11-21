@@ -1039,10 +1039,11 @@
         </div>
         <p class="trend-detail" id="trendDetail">Esperando datos de los sensores…</p>
         <p class="trend-context" id="trendContext"></p>
+        <p class="trend-context" id="trendContext10d"></p>
         <ul class="trend-signals" id="trendSignals" hidden></ul>
         <details class="trend-method">
             <summary>¿Cómo se calcula este aviso?</summary>
-            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a anomalías aisladas. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no una anomalía de un solo dato) que supera un umbral estadístico y un cambio mínimo. Las anomalías aisladas, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de anomalía puntual. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado es un pronóstico experimental sujeto a validación.</p>
+            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a anomalías aisladas. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no una anomalía de un solo dato) que supera un umbral estadístico y un cambio mínimo. Las anomalías aisladas, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de anomalía puntual. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado es un pronóstico experimental sujeto a validación. Además, el nivel actual se compara con el promedio de los últimos 10 días como contexto de largo plazo.</p>
         </details>
         <p class="trend-disclaimer"><strong>Información de un estudio en desarrollo.</strong> Este aviso no proviene de una autoridad oficial ni de un organismo de alerta, y su hipótesis <strong>aún no ha sido validada científicamente</strong>. No lo use para tomar decisiones de seguridad; ante un sismo, siga los protocolos oficiales.</p>
     </section>
@@ -1142,10 +1143,14 @@
             // --- CONFIGURACIÓN SISMOS USGS (M >= 6.0), mismo periodo que la recopilación de datos ---
             // Nota: por defecto es GLOBAL. Para limitar a la región del Caribe/Puerto Rico,
             // añade estos parámetros a la URL: &minlatitude=14&maxlatitude=24&minlongitude=-72&maxlongitude=-60
-            const USGS_START = startDate.toISOString().slice(0, 10);
-            const USGS_END = now.toISOString().slice(0, 10);
-            const USGS_URL =
-                `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${USGS_START}&endtime=${USGS_END}&minmagnitude=6&orderby=time`;
+            function getUSGSURL() {
+                const end = new Date();
+                const start = new Date(end);
+                start.setDate(start.getDate() - 7);
+                const startParam = encodeURIComponent(start.toISOString());
+                const endParam = encodeURIComponent(end.toISOString());
+                return `https://earthquake.usgs.gov/fdsnws/event/1/query?format=geojson&starttime=${startParam}&endtime=${endParam}&minmagnitude=6&orderby=time`;
+            }
 
             // --- CONFIGURACIÓN DE GRÁFICAS ---
             const CHART_CONFIGS = [{
@@ -1675,8 +1680,11 @@
             };
 
             const trendDemo = new URLSearchParams(window.location.search).get('demo');
-            const DATA_FRESH_MS = 5 * 60 * 1000; // 5 minutos sin datos -> En Reposo
+            const DATA_FRESH_MS = 15 * 60 * 1000; // 15 min de gracia por retrasos de subida
             let lastTrendResult = null;
+            let context10d = null;
+            let context10dDays = 0;
+            let context10dError = false;
             let lastQuakePoints = [];
             let trendStale = false;
 
@@ -1750,14 +1758,14 @@
                 if (coreResults.length < TREND.core.length) {
                     return { level: 'nodata', reason: 'partial', availableCore: coreResults.length,
                         requiredCore: TREND.core.length, signals, coreStrong, coreWatch, coreSpike,
-                        strongGroups, activeGroups, evaluatedAt: new Date(), stale: false };
+                        strongGroups, activeGroups, results, evaluatedAt: new Date(), stale: false };
                 }
                 let level = 'estable';
                 if (strongGroups.length >= 2) level = 'alerta';
                 else if (coreSpike.length) level = 'pico';
                 else if (coreStrong.length || coreWatch.length) level = 'vigilancia';
                 return { level, signals, coreStrong, coreWatch, coreSpike, strongGroups, activeGroups,
-                    evaluatedAt: new Date(), stale: false };
+                    results, evaluatedAt: new Date(), stale: false };
             }
 
             function updateQuakeContext() {
@@ -1902,6 +1910,8 @@
                 updateQuakeContext();
                 markChartAnomalies(level === 'nodata' ? [] : signals);
 
+                renderContext10d();
+
                 if (!trendDemo) {
                     document.title = level === 'alerta'
                         ? '⚠️ Anomalía multivariable detectada — Observatorio de Partículas del TOA'
@@ -2030,6 +2040,87 @@
                 }
             }
 
+            function renderContext10d() {
+                const el = document.getElementById('trendContext10d');
+                if (!el) return;
+                if (context10dError) {
+                    el.textContent = 'Contexto 10 días: no disponible por ahora.';
+                    return;
+                }
+                if (!context10d) {
+                    el.textContent = 'Contexto 10 días: cargando…';
+                    return;
+                }
+                if (!lastTrendResult || !Array.isArray(lastTrendResult.results)) {
+                    el.textContent = 'Contexto 10 días: esperando datos…';
+                    return;
+                }
+
+                const findings = [];
+                TREND.core.forEach(id => {
+                    const result = lastTrendResult.results.find(r => r.id === id);
+                    const cfg = TREND.series[id];
+                    const chart = CHART_CONFIGS.find(c => c.id === id);
+                    if (!result || !cfg || !chart) return;
+                    const feeds = context10d[chart.channel] || [];
+                    const vals = [];
+                    for (const feed of feeds) {
+                        const raw = feed[chart.field];
+                        if (raw === null || raw === undefined || raw === '') continue;
+                        const value = parseFloat(raw);
+                        if (!isNaN(value)) vals.push(value);
+                    }
+                    if (vals.length < 24) return;
+                    const center = trendMedian(vals);
+                    const sigma = Math.max(trendMad(vals, center), Math.abs(center) * 0.005, cfg.minSigma, 1e-9);
+                    const change = result.recentMed - center;
+                    const z = change / sigma;
+                    if (Math.abs(z) >= 3 && Math.abs(change) >= cfg.minDelta) {
+                        findings.push({ label: result.label, z: z, change: change });
+                    }
+                });
+
+                if (!findings.length) {
+                    const days = context10dDays ? context10dDays.toFixed(1) : '10';
+                    el.textContent = `Contexto 10 días: dentro del rango habitual (${days} días de datos).`;
+                    return;
+                }
+                findings.sort((a, b) => Math.abs(b.z) - Math.abs(a.z));
+                const parts = findings.slice(0, 2).map(f =>
+                    `${f.z >= 0 ? '+' : ''}${f.z.toFixed(1)}σ en ${f.label} (${f.change >= 0 ? 'al alza' : 'a la baja'})`
+                );
+                el.textContent = `Contexto 10 días: ${parts.join('; ')}.`;
+            }
+
+            async function loadContext10d() {
+                try {
+                    const urls = [
+                        `https://api.thingspeak.com/channels/${CHANNEL1}/feeds.json?api_key=${KEY1}&days=10&average=60&results=8000`,
+                        `https://api.thingspeak.com/channels/${CHANNEL2}/feeds.json?api_key=${KEY2}&days=10&average=60&results=8000`
+                    ];
+                    const responses = await Promise.all(urls.map(url => fetch(url, { cache: 'no-store' })));
+                    if (!responses.every(response => response.ok)) throw new Error('respuesta no válida');
+                    const [data1, data2] = await Promise.all(responses.map(response => response.json()));
+                    context10d = { 1: data1.feeds || [], 2: data2.feeds || [] };
+                    const times = [];
+                    [data1, data2].forEach(data => {
+                        (data.feeds || []).forEach(feed => {
+                            if (!feed.created_at) return;
+                            const t = Date.parse(feed.created_at);
+                            if (!isNaN(t)) times.push(t);
+                        });
+                    });
+                    if (times.length) {
+                        context10dDays = (Math.max(...times) - Math.min(...times)) / (24 * 60 * 60 * 1000);
+                    }
+                    context10dError = false;
+                } catch (error) {
+                    context10d = null;
+                    context10dError = true;
+                }
+                renderContext10d();
+            }
+
             function updateTrend(feeds1, feeds2) {
                 feeds1 = Array.isArray(feeds1) ? feeds1 : [];
                 feeds2 = Array.isArray(feeds2) ? feeds2 : [];
@@ -2112,11 +2203,16 @@
                 consider(feeds2);
 
                 const receivingData = latest > 0 && (Date.now() - latest) <= DATA_FRESH_MS;
+                let ageText = '';
+                if (latest > 0) {
+                    const ageMin = Math.floor((Date.now() - latest) / 60000);
+                    ageText = ageMin < 1 ? ' · último dato hace menos de 1 min' : ` · último dato hace ${ageMin} min`;
+                }
                 if (receivingData) {
-                    statusText.textContent = '🟢 En Monitoreo Activo';
+                    statusText.textContent = '🟢 En Monitoreo Activo' + ageText;
                     statusCircle.style.backgroundColor = '#00E676';
                 } else {
-                    statusText.textContent = '🟠 En Reposo';
+                    statusText.textContent = '🟠 En Reposo' + ageText;
                     statusCircle.style.backgroundColor = '#FF9800';
                 }
             }
@@ -2398,7 +2494,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 20000);
 
-                fetch(USGS_URL, { signal: controller.signal })
+                fetch(getUSGSURL(), { signal: controller.signal })
                     .then(r => r.ok ? r.json() : Promise.reject('Error USGS'))
                     .then(geojson => {
                         clearTimeout(timeoutId);
@@ -2571,7 +2667,9 @@
 
                 loadAlertHistory();
                 loadLastRevision();
+                loadContext10d();
                 setInterval(() => { loadAlertHistory(); loadLastRevision(); }, 600000);
+                setInterval(loadContext10d, 1800000);
 
                 setInterval(updateCharts, 20000);
                 // Los sismos M>=6 no cambian con la misma frecuencia que el sensor;

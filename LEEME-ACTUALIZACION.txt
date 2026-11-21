@@ -1,5 +1,5 @@
-ACTUALIZACIÓN: SENSIBILIDAD DE PICOS + PAYPAL
-=============================================
+ACTUALIZACIÓN: ESTADO, SISMOS, 10 DÍAS Y PAYPAL
+================================================
 
 Sube SOLO estos dos archivos:
 1. index.html
@@ -7,30 +7,57 @@ Sube SOLO estos dos archivos:
 
 NO reemplaces alertas.json: contiene el historial actual.
 
-QUÉ CAMBIÓ
-----------
-- El panel ahora puede detectar picos grandes de PARTÍCULAS REALES con:
-  * cambio >= 10 % respecto a la línea base, y
-  * z >= 5.5.
-  Esto habría registrado la caída de partículas reales de las 00:05 UTC
-  (432 frente a una base de 521, z ~ -5.9).
+QUÉ SE CORRIGIÓ
+---------------
+1. ESTADO "EN REPOSO"
+   El sensor tuvo un hueco de unos 12 minutos en ThingSpeak (03:09 a 03:21 UTC).
+   Ahora:
+   - Se toleran hasta 15 minutos de retraso de subida antes de marcar reposo.
+   - El estado muestra la edad del último dato:
+     "En Monitoreo Activo · último dato hace menos de 1 min".
+   - Durante un retraso: "En Monitoreo Activo · último dato hace 12 min".
+   - Si pasan más de 15 minutos: "En Reposo · último dato hace X min".
 
-- El historial revisa las últimas 6 HORAS por tiempo (no por cantidad de
-  puntos) para no perder picos cuando GitHub retrasa el workflow.
-  Con eso se habría registrado también el pico molecular de las 20:00 UTC,
-  que antes se perdió porque no hubo ejecución entre las 18:51 y las 00:42.
+2. GRÁFICA DE SISMOS
+   La consulta a USGS terminaba en la fecha de hoy a las 00:00, no a la hora
+   actual. Por eso el M6.7 de Perú (00:09 UTC) no aparecía.
+   Ahora el rango llega hasta la hora actual y la gráfica debe mostrar:
+   - 2026-11-21 00:09 UTC · M6.7 · Carhuamayo, Perú.
 
-- Se evita duplicar el mismo pico en ejecuciones consecutivas.
-- Los eventos se guardan ordenados del más reciente al más antiguo.
-- La sección de PayPal/donativos quedó más compacta.
+3. VENTANA DE 10 DÍAS
+   Se agregó una línea "Contexto 10 días" debajo del panel de anomalías.
+   - Usa promedios horarios de hasta 10 días (según los datos disponibles).
+   - Compara el nivel actual con ese promedio de largo plazo.
+   - Si no hay desviación sostenida, dice: "dentro del rango habitual".
+   - Si hay una desviación ≥ 3σ y un cambio mínimo, la muestra.
+   IMPORTANTE: en el evento de Perú, el contexto de 10 días no mostró una
+   desviación sostenida (todas las variables quedaron por debajo de 1σ).
+   La línea sirve para observar ese periodo, pero no convierte el sistema en
+   un predictor.
+
+4. PICO DE PARTÍCULAS REALES
+   Ahora detecta un pico si hay:
+   - cambio ≥ 10 % respecto a la línea base, y
+   - z ≥ 5.5.
+   Eso habría registrado la caída de partículas reales de las 00:05 UTC
+   (432 frente a una base de 521, z ≈ -5.9).
+
+5. HISTORIAL CON VENTANA DE 6 HORAS
+   El workflow revisa las últimas 6 horas por tiempo para no perder picos
+   cuando GitHub retrasa las ejecuciones. Evita duplicados y ordena los
+   eventos del más reciente al más antiguo.
+
+6. PAYPAL
+   La sección de donativos quedó más compacta: menos ancho, menos relleno,
+   textos y botón más pequeños.
 
 LO QUE NO CAMBIÓ
 ----------------
 - El aviso multivariable sigue exigiendo 2 familias de medición.
 - No se bajaron los umbrales de partículas imaginarias ni de la aceleración
   resultante: en los datos del sismo de Perú no mostraron un cambio
-  significativo (z < 1). Bajarlos habría producido falsos avisos.
-- No se cambió alertas.json.
+  significativo (z < 1).
+- No se reemplazó alertas.json.
 
 CÓMO APLICARLO
 --------------
@@ -41,9 +68,8 @@ CÓMO APLICARLO
 3. Ejecuta Actions → "Publicar página" (o deja que el push lo haga).
 4. Recarga la página con Ctrl+F5.
 
-NOTA
-----
-Este cambio hace el historial más sensible a picos grandes de partículas
-reales. No convierte el sistema en un predictor de terremotos: un pico puede
-ser una variación real o un dato atípico del sensor. Hay que validarlo con
-más eventos antes de sacar conclusiones.
+NOTA CIENTÍFICA
+---------------
+Un pico puede ser una variación real o un dato atípico. El contexto de
+10 días y el historial son herramientas de observación; no predicen
+terremotos y deben validarse con muchos más eventos.
