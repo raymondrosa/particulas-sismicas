@@ -1,0 +1,49 @@
+ACTUALIZACIÓN: SENSIBILIDAD DE PICOS + PAYPAL
+=============================================
+
+Sube SOLO estos dos archivos:
+1. index.html
+2. scripts/actualizar_alertas.py
+
+NO reemplaces alertas.json: contiene el historial actual.
+
+QUÉ CAMBIÓ
+----------
+- El panel ahora puede detectar picos grandes de PARTÍCULAS REALES con:
+  * cambio >= 10 % respecto a la línea base, y
+  * z >= 5.5.
+  Esto habría registrado la caída de partículas reales de las 00:05 UTC
+  (432 frente a una base de 521, z ~ -5.9).
+
+- El historial revisa las últimas 6 HORAS por tiempo (no por cantidad de
+  puntos) para no perder picos cuando GitHub retrasa el workflow.
+  Con eso se habría registrado también el pico molecular de las 20:00 UTC,
+  que antes se perdió porque no hubo ejecución entre las 18:51 y las 00:42.
+
+- Se evita duplicar el mismo pico en ejecuciones consecutivas.
+- Los eventos se guardan ordenados del más reciente al más antiguo.
+- La sección de PayPal/donativos quedó más compacta.
+
+LO QUE NO CAMBIÓ
+----------------
+- El aviso multivariable sigue exigiendo 2 familias de medición.
+- No se bajaron los umbrales de partículas imaginarias ni de la aceleración
+  resultante: en los datos del sismo de Perú no mostraron un cambio
+  significativo (z < 1). Bajarlos habría producido falsos avisos.
+- No se cambió alertas.json.
+
+CÓMO APLICARLO
+--------------
+1. Sube index.html y scripts/actualizar_alertas.py a la rama main.
+2. Ejecuta Actions → "Actualizar historial de avisos" → Run workflow.
+   Debe agregar el pico de partículas reales de las 00:05 y el molecular
+   de las 20:00 si están dentro de la ventana de 6 horas.
+3. Ejecuta Actions → "Publicar página" (o deja que el push lo haga).
+4. Recarga la página con Ctrl+F5.
+
+NOTA
+----
+Este cambio hace el historial más sensible a picos grandes de partículas
+reales. No convierte el sistema en un predictor de terremotos: un pico puede
+ser una variación real o un dato atípico del sensor. Hay que validarlo con
+más eventos antes de sacar conclusiones.
