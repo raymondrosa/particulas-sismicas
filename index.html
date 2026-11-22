@@ -658,15 +658,189 @@
             list-style: none;
         }
 
+        /* ===== NAVEGACIÓN Y SECCIONES ===== */
+        .section-nav {
+            max-width: 1400px;
+            margin: 0 auto 12px;
+            padding: 0 14px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .section-nav a {
+            font-size: 0.76rem;
+            color: #8ECAE6;
+            text-decoration: none;
+            padding: 4px 10px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 999px;
+            background: rgba(0, 0, 0, 0.25);
+        }
+
+        .section-nav a:hover {
+            color: #fff;
+            border-color: #8ECAE6;
+        }
+
+        .section-title {
+            max-width: 1400px;
+            margin: 18px auto 8px;
+            padding: 0 14px 0 12px;
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #fff;
+            border-left: 4px solid #8ECAE6;
+            line-height: 1.3;
+        }
+
+        .trend-method-link {
+            margin: 8px 0 0;
+            font-size: 0.82rem;
+        }
+
+        .trend-method-link a {
+            color: #8ECAE6;
+            font-weight: 700;
+        }
+
+        /* ===== METODOLOGÍA ===== */
+        .methodology {
+            max-width: 1400px;
+            margin: 22px auto 0;
+            padding: 16px 18px;
+            background: rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-left: 6px solid #8ECAE6;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-card);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+        }
+
+        .methodology-head {
+            display: flex;
+            align-items: baseline;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .methodology-head h2 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .methodology-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #FFD700;
+            border: 1px solid rgba(255, 215, 0, 0.35);
+            border-radius: 999px;
+            padding: 2px 8px;
+        }
+
+        .methodology-intro {
+            margin: 8px 0 0;
+            font-size: 0.86rem;
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .method-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .method-card {
+            padding: 10px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 10px;
+        }
+
+        .method-card h3 {
+            margin: 0 0 6px;
+            font-size: 0.9rem;
+            color: #FFD700;
+        }
+
+        .method-card p,
+        .method-card li {
+            margin: 4px 0;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .method-card ul {
+            margin: 4px 0;
+            padding-left: 18px;
+        }
+
+        .formula {
+            margin: 6px 0;
+            padding: 7px 9px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(142, 202, 230, 0.25);
+            border-radius: 6px;
+            font-family: ui-monospace, Consolas, 'Courier New', monospace;
+            font-size: 0.78rem;
+            line-height: 1.55;
+            color: #BFE8FF;
+            overflow-x: auto;
+        }
+
+        .criteria-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 6px;
+            font-size: 0.76rem;
+        }
+
+        .criteria-table th,
+        .criteria-table td {
+            padding: 4px 6px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        .criteria-table th {
+            color: #FFD700;
+            font-weight: 700;
+        }
+
+        .methodology-notes {
+            margin-top: 10px;
+            font-size: 0.82rem;
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .methodology-notes summary {
+            cursor: pointer;
+            color: #8ECAE6;
+            font-weight: 700;
+        }
+
+        .methodology-notes p {
+            margin: 6px 0 0;
+            line-height: 1.55;
+        }
+
         /* ===== DONATIVOS ===== */
         .donation {
-            max-width: 860px;
-            margin: 16px auto 0;
+            max-width: 680px;
+            margin: 14px auto 0;
             scroll-margin-top: 16px;
         }
 
         .donation-card {
-            padding: clamp(14px, 2vw, 20px);
+            padding: 10px 14px;
             border-radius: var(--radius);
             border: 1px solid rgba(255, 215, 0, 0.4);
             background: linear-gradient(135deg, rgba(8, 26, 42, 0.96), rgba(4, 14, 24, 0.96));
@@ -684,17 +858,17 @@
         }
 
         .donation-card h2 {
-            margin: 4px 0 6px;
-            font-size: clamp(1.15rem, 2.2vw, 1.5rem);
+            margin: 2px 0 4px;
+            font-size: 1.05rem;
             line-height: 1.2;
         }
 
         .donation-text {
-            max-width: 58ch;
-            margin: 0 auto 12px;
+            max-width: 52ch;
+            margin: 0 auto 8px;
             color: rgba(255, 255, 255, 0.92);
-            font-size: 0.92rem;
-            line-height: 1.45;
+            font-size: 0.8rem;
+            line-height: 1.35;
         }
 
         .donate-btn {
@@ -702,15 +876,15 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            min-height: 44px;
-            padding: 9px 22px;
+            min-height: 36px;
+            padding: 7px 16px;
             border-radius: 999px;
             background: #FFC439;
             color: #08213A;
-            font-size: 0.95rem;
+            font-size: 0.82rem;
             font-weight: 800;
             text-decoration: none;
-            box-shadow: 0 6px 18px rgba(255, 196, 57, 0.28);
+            box-shadow: 0 4px 12px rgba(255, 196, 57, 0.22);
             transition: background-color 0.15s ease, transform 0.15s ease;
         }
 
@@ -721,16 +895,16 @@
         }
 
         .donation-note {
-            margin: 8px 0 0;
-            font-size: 0.82rem;
+            margin: 6px 0 0;
+            font-size: 0.72rem;
             color: rgba(255, 255, 255, 0.8);
         }
 
         .donation-alt {
-            margin: 10px 0 0;
-            padding-top: 10px;
+            margin: 8px 0 0;
+            padding-top: 8px;
             border-top: 1px dashed rgba(255, 255, 255, 0.18);
-            font-size: 0.82rem;
+            font-size: 0.72rem;
             color: rgba(255, 255, 255, 0.82);
         }
 
@@ -1029,6 +1203,15 @@
         </div>
     </div>
 
+    <nav class="section-nav" aria-label="Secciones de la página">
+        <a href="#trendPanel">Estado</a>
+        <a href="#alertHistory">Historial</a>
+        <a href="#datos">Datos</a>
+        <a href="#graficas">Gráficas</a>
+        <a href="#metodologia">Metodología</a>
+        <a href="#donativos">Donativos</a>
+    </nav>
+
     <!-- ============ AVISO DE TENDENCIA SÍSMICA (EXPERIMENTAL) ============ -->
     <section class="trend-panel" id="trendPanel" data-level="nodata" aria-labelledby="trendTitle">
         <div class="trend-top">
@@ -1041,10 +1224,7 @@
         <p class="trend-context" id="trendContext"></p>
         <p class="trend-context" id="trendContext10d"></p>
         <ul class="trend-signals" id="trendSignals" hidden></ul>
-        <details class="trend-method">
-            <summary>¿Cómo se calcula este aviso?</summary>
-            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a anomalías aisladas. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no una anomalía de un solo dato) que supera un umbral estadístico y un cambio mínimo. Las anomalías aisladas, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de anomalía puntual. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. La física molecular se muestra solo como referencia y no dispara avisos, porque el sensor está dentro de una oficina y puede recibir interferencias del entorno. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado es un pronóstico experimental sujeto a validación. Además, el nivel actual se compara con el promedio de los últimos 10 días como contexto de largo plazo.</p>
-        </details>
+        <p class="trend-method-link"><a href="#metodologia">Ver metodología y criterios de detección →</a></p>
         <p class="trend-disclaimer"><strong>Información de un estudio en desarrollo.</strong> Este aviso no proviene de una autoridad oficial ni de un organismo de alerta, y su hipótesis <strong>aún no ha sido validada científicamente</strong>. No lo use para tomar decisiones de seguridad; ante un sismo, siga los protocolos oficiales.</p>
     </section>
     <p class="sr-only" id="trendLive" aria-live="polite"></p>
@@ -1063,7 +1243,7 @@
         <p class="alert-history-foot">El historial registra anomalías; su lectura es un pronóstico experimental.</p>
     </section>
 
-    <!-- Datos en tiempo real -->
+    <h2 class="section-title" id="datos">Datos en tiempo real</h2>
     <div class="data-container" id="dataContainer">
         <div class="data" id="realParticles">🔬 Partículas Reales: ⏳</div>
         <div class="data" id="imaginaryParticles">🌀 Partículas Imag.: ⏳</div>
@@ -1079,15 +1259,104 @@
         <div class="data" id="earthquakeCount">🌍 Sismos M≥6: ⏳</div>
     </div>
 
-    <!-- Gráficas -->
+    <h2 class="section-title" id="graficas">Gráficas de las últimas horas</h2>
     <div class="charts-grid" id="chartsGrid"></div>
+
+    <!-- ============ METODOLOGÍA ============ -->
+    <section class="methodology" id="metodologia" aria-labelledby="metodologiaTitle">
+        <div class="methodology-head">
+            <h2 id="metodologiaTitle">Metodología de detección</h2>
+            <span class="methodology-badge">Experimental</span>
+        </div>
+        <p class="methodology-intro">El sistema clasifica desviaciones observadas en las series mediante estadísticos robustos. No ajusta un modelo de predicción sísmica ni emite alertas oficiales: compara la distribución reciente con una línea base y con el contexto de largo plazo.</p>
+
+        <div class="method-grid">
+            <article class="method-card">
+                <h3>1. Variables y agrupación</h3>
+                <p>Se analizan seis variables esenciales:</p>
+                <ul>
+                    <li>Partículas reales e imaginarias.</li>
+                    <li>Aceleración X, Y, Z y resultante.</li>
+                </ul>
+                <p>Se agrupan en dos familias: <strong>partículas</strong> y <strong>aceleración</strong>. La física molecular se muestra solo como referencia y no participa en los umbrales.</p>
+            </article>
+
+            <article class="method-card">
+                <h3>2. Ventanas de análisis</h3>
+                <p>Para cada variable se definen:</p>
+                <div class="formula">
+                    R<sub>t</sub> = últimas 240 muestras ≈ 1 h<br>
+                    B<sub>t</sub> = 1200 muestras anteriores ≈ 5 h
+                </div>
+                <p>Se requieren al menos 120 muestras recientes y 90 de línea base. Si falta una variable esencial, la evaluación se marca como parcial y no se clasifica como estable.</p>
+            </article>
+
+            <article class="method-card">
+                <h3>3. Estadísticos robustos</h3>
+                <div class="formula">
+                    m<sub>B</sub> = mediana(B<sub>t</sub>)<br>
+                    MAD(B<sub>t</sub>) = mediana(|x<sub>i</sub> − m<sub>B</sub>|)<br>
+                    s<sub>B</sub> = max(1.4826·MAD(B<sub>t</sub>), 0.005·|m<sub>B</sub>|, s<sub>min</sub>)<br>
+                    m<sub>R</sub> = mediana(R<sub>t</sub>)<br>
+                    Δ = m<sub>R</sub> − m<sub>B</sub><br>
+                    z<sub>R</sub> = Δ / s<sub>B</sub><br>
+                    z<sub>t</sub> = (x<sub>t</sub> − m<sub>B</sub>) / s<sub>B</sub>
+                </div>
+                <p>La mediana y la MAD reducen la influencia de valores atípicos. <var>s</var><sub>min</sub> es el mínimo de escala de cada variable.</p>
+            </article>
+
+            <article class="method-card">
+                <h3>4. Criterios de clasificación</h3>
+                <p>Con <var>δ</var><sub>min</sub> como cambio mínimo absoluto:</p>
+                <table class="criteria-table">
+                    <thead><tr><th>Estado</th><th>Criterio</th></tr></thead>
+                    <tbody>
+                        <tr><td>Fuerte</td><td>|Δ| ≥ δ<sub>min</sub> y |z<sub>R</sub>| ≥ 6</td></tr>
+                        <tr><td>Vigilancia</td><td>|Δ| ≥ δ<sub>min</sub> y 4.5 ≤ |z<sub>R</sub>| &lt; 6</td></tr>
+                        <tr><td>Pico*</td><td>|x<sub>t</sub> − m<sub>B</sub>| ≥ δ<sub>min</sub> y |z<sub>t</sub>| ≥ 10</td></tr>
+                        <tr><td>Pico de partículas reales*</td><td>cambio ≥ 10 % de |m<sub>B</sub>| y |z<sub>t</sub>| ≥ 5.5</td></tr>
+                    </tbody>
+                </table>
+                <p>* El pico se evalúa solo si la variable no cumple antes el criterio de fuerte o vigilancia.</p>
+                <p>Valores de referencia: partículas, <var>s</var><sub>min</sub> = 15 u y <var>δ</var><sub>min</sub> = 20 u; aceleración, 0.05 m/s² y 0.15 m/s²; resultante, 0.10 m/s² y 0.20 m/s².</p>
+            </article>
+
+            <article class="method-card">
+                <h3>5. Aviso multivariable y picos</h3>
+                <p>Sea <var>G</var><sub>fuerte</sub> el conjunto de familias con al menos una variable en estado fuerte:</p>
+                <div class="formula">
+                    alerta = (|G<sub>fuerte</sub>| ≥ 2)<br>
+                    pico = (no alerta) y (existe pico en variable esencial)<br>
+                    vigilancia = (no alerta) y (no pico) y (hay señal fuerte o de vigilancia)<br>
+                    estable = (ninguna de las anteriores)
+                </div>
+                <p>La alerta multivariable exige coincidencia en dos familias; un pico aislado se informa como anomalía puntual. Los picos se evalúan igual al alza y a la baja.</p>
+            </article>
+
+            <article class="method-card">
+                <h3>6. Contexto de 10 días</h3>
+                <p>Con promedios horarios de hasta 10 días se calcula una referencia de largo plazo:</p>
+                <div class="formula">
+                    m<sub>10</sub> = mediana(H<sub>10</sub>)<br>
+                    s<sub>10</sub> = max(1.4826·MAD(H<sub>10</sub>), 0.005·|m<sub>10</sub>|, s<sub>min</sub>)<br>
+                    z<sub>10</sub> = (m<sub>R</sub> − m<sub>10</sub>) / s<sub>10</sub>
+                </div>
+                <p>Se muestra una desviación de contexto cuando |z<sub>10</sub>| ≥ 3 y el cambio supera <var>δ</var><sub>min</sub>. Es una referencia descriptiva, no un criterio de alerta.</p>
+            </article>
+        </div>
+
+        <details class="methodology-notes">
+            <summary>Limitaciones y alcance</summary>
+            <p>Los umbrales son experimentales y requieren validación retrospectiva con un número suficiente de eventos. Un pico puede ser una variación real o un dato atípico del sensor. El sistema no predice terremotos, no sustituye a las autoridades oficiales y no debe usarse para decisiones de seguridad.</p>
+        </details>
+    </section>
 
     <!-- ============ DONATIVOS ============ -->
     <section class="donation" id="donativos">
         <div class="donation-card">
             <p class="donation-kicker">Apoya el proyecto</p>
-            <h2>Tu donativo sostiene esta investigación</h2>
-            <p class="donation-text">El Observatorio de Partículas del TOA y el Proyecto EESE son una iniciativa independiente de investigación científica. Tu aporte ayuda a mantener los sensores, la plataforma de monitoreo y la divulgación de los resultados.</p>
+            <h2>Apoya esta investigación</h2>
+            <p class="donation-text">El Observatorio es una iniciativa independiente; tu aporte ayuda a mantener los sensores y la plataforma de monitoreo.</p>
             <a class="donate-btn" href="https://www.paypal.com/ncp/payment/5NS4XFJZK5UE8" target="_blank" rel="noopener noreferrer" aria-label="Donar con PayPal (se abre en una pestaña nueva)">
                 <span aria-hidden="true">❤</span> Donar con PayPal
             </a>
