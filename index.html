@@ -1043,7 +1043,7 @@
         <ul class="trend-signals" id="trendSignals" hidden></ul>
         <details class="trend-method">
             <summary>¿Cómo se calcula este aviso?</summary>
-            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a anomalías aisladas. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no una anomalía de un solo dato) que supera un umbral estadístico y un cambio mínimo. Las anomalías aisladas, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de anomalía puntual. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado es un pronóstico experimental sujeto a validación. Además, el nivel actual se compara con el promedio de los últimos 10 días como contexto de largo plazo.</p>
+            <p>Se toman las últimas muestras de las variables relevantes (partículas, física molecular y aceleraciones) y se comparan con su comportamiento de las horas previas usando la mediana y la desviación absoluta mediana (MAD), una medida robusta frente a anomalías aisladas. Las coordenadas y el ángulo se muestran solo como contexto y no disparan el aviso. El aviso se activa cuando una o más variables relevantes presentan una variación sostenida (no una anomalía de un solo dato) que supera un umbral estadístico y un cambio mínimo. Las anomalías aisladas, tanto al alza como a la baja, se evalúan por separado de los cambios sostenidos y pueden mostrarse como aviso de anomalía puntual. Las variables relacionadas se agrupan para reducir el doble conteo de señales correlacionadas. La física molecular se muestra solo como referencia y no dispara avisos, porque el sensor está dentro de una oficina y puede recibir interferencias del entorno. Si faltan datos de canales esenciales, se informa una evaluación incompleta. Los umbrales son experimentales y requieren validación retrospectiva; el resultado es un pronóstico experimental sujeto a validación. Además, el nivel actual se compara con el promedio de los últimos 10 días como contexto de largo plazo.</p>
         </details>
         <p class="trend-disclaimer"><strong>Información de un estudio en desarrollo.</strong> Este aviso no proviene de una autoridad oficial ni de un organismo de alerta, y su hipótesis <strong>aún no ha sido validada científicamente</strong>. No lo use para tomar decisiones de seguridad; ante un sismo, siga los protocolos oficiales.</p>
     </section>
@@ -1056,7 +1056,7 @@
             <span class="alert-history-time" id="alertHistoryTime"></span>
             <span class="alert-history-check" id="alertHistoryCheck"></span>
         </div>
-        <p class="alert-history-note">Avisos detectados por el observatorio. Se revisa automáticamente; solo se agrega una fila cuando se detecta una anomalía.</p>
+        <p class="alert-history-note">Avisos basados en partículas reales, partículas imaginarias y aceleración. La física molecular se muestra en su gráfica como referencia, pero no genera avisos. Se revisa automáticamente; solo se agrega una fila cuando se detecta una anomalía.</p>
         <ul class="alert-history-list" id="alertHistoryList" aria-live="polite">
             <li class="alert-history-empty">Cargando historial…</li>
         </ul>
@@ -1635,12 +1635,11 @@
                 zWatch: 4.5,
                 zStrong: 6,
                 zSpike: 10,
-                core: ['realParticles', 'imaginaryParticles', 'molecularPhysics', 'accelX', 'accelY', 'accelZ', 'accelResult'],
-                groups: { realParticles: 'particulas', imaginaryParticles: 'particulas', molecularPhysics: 'molecular', accelX: 'aceleracion', accelY: 'aceleracion', accelZ: 'aceleracion', accelResult: 'aceleracion' },
+                core: ['realParticles', 'imaginaryParticles', 'accelX', 'accelY', 'accelZ', 'accelResult'],
+                groups: { realParticles: 'particulas', imaginaryParticles: 'particulas', accelX: 'aceleracion', accelY: 'aceleracion', accelZ: 'aceleracion', accelResult: 'aceleracion' },
                 series: {
                     realParticles: { minSigma: 15, minDelta: 20, unit: 'u', spikeZ: 5.5, minRelative: 0.10 },
                     imaginaryParticles: { minSigma: 15, minDelta: 20, unit: 'u' },
-                    molecularPhysics: { minSigma: 8, minDelta: 10, unit: 'u' },
                     accelX: { minSigma: 0.05, minDelta: 0.15, unit: 'm/s²' },
                     accelY: { minSigma: 0.05, minDelta: 0.15, unit: 'm/s²' },
                     accelZ: { minSigma: 0.05, minDelta: 0.15, unit: 'm/s²' },
@@ -1942,7 +1941,14 @@
                 const time = document.getElementById('alertHistoryTime');
                 if (!list) return;
                 list.innerHTML = '';
-                const events = data && Array.isArray(data.events) ? data.events : [];
+                const events = (data && Array.isArray(data.events) ? data.events : []).filter(event => {
+                    const groups = Array.isArray(event.groups) ? event.groups : [];
+                    const variables = Array.isArray(event.variables) ? event.variables : [];
+                    const groupsOnlyMolecular = groups.length > 0 && groups.every(g => g === 'molecular');
+                    const varsOnlyMolecular = groups.length === 0 && variables.length > 0 &&
+                        variables.every(v => v && v.group === 'molecular');
+                    return !groupsOnlyMolecular && !varsOnlyMolecular;
+                });
                 const latest = events[0];
                 if (time) time.textContent = latest ? 'Último aviso: ' + formatHistoryTime(latest.timestamp) : 'Sin avisos registrados';
                 if (!events.length) {

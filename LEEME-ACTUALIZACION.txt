@@ -51,6 +51,15 @@ QUÉ SE CORRIGIÓ
    La sección de donativos quedó más compacta: menos ancho, menos relleno,
    textos y botón más pequeños.
 
+FÍSICA MOLECULAR
+---------------
+Los avisos y el historial ya NO consideran la física molecular.
+- Se sigue mostrando en su gráfica como referencia.
+- No dispara alertas, picos, contexto de 10 días ni filas nuevas del historial.
+- Los picos antiguos de molecular quedan ocultos en la página; el historial
+  visible empieza con eventos de partículas reales, imaginarias o aceleración.
+- Esto evita los falsos positivos por estar el sensor dentro de una oficina.
+
 LO QUE NO CAMBIÓ
 ----------------
 - El aviso multivariable sigue exigiendo 2 familias de medición.
