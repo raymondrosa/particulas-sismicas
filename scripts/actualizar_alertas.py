@@ -40,7 +40,6 @@ CHANNELS = {
 SERIES = [
     ("ch1", "field1", "Partículas reales", "u", "particulas", 15.0, 20.0),
     ("ch1", "field2", "Partículas imaginarias", "u", "particulas", 15.0, 20.0),
-    ("ch1", "field3", "Física molecular", "u", "molecular", 8.0, 10.0),
     ("ch2", "field1", "Aceleración X", "m/s²", "aceleracion", 0.05, 0.15),
     ("ch2", "field2", "Aceleración Y", "m/s²", "aceleracion", 0.05, 0.15),
     ("ch2", "field3", "Aceleración Z", "m/s²", "aceleracion", 0.05, 0.15),
@@ -230,12 +229,23 @@ def direction_of(items):
     return "mixed"
 
 
+def event_is_molecular_only(event):
+    groups = event.get("groups") or []
+    variables = event.get("variables") or []
+    groups_only = bool(groups) and all(group == "molecular" for group in groups)
+    vars_only = not groups and bool(variables) and all(
+        item.get("group") == "molecular" for item in variables if isinstance(item, dict)
+    )
+    return groups_only or vars_only
+
+
 def load_events():
     if not ALERTAS_PATH.exists():
         return []
     try:
         data = json.loads(ALERTAS_PATH.read_text(encoding="utf-8"))
-        return data.get("events", []) if isinstance(data, dict) else []
+        events = data.get("events", []) if isinstance(data, dict) else []
+        return [event for event in events if not event_is_molecular_only(event)]
     except (OSError, ValueError):
         return []
 
