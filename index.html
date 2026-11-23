@@ -1413,10 +1413,10 @@
         <div class="data" id="y">📍 Coord. y: ⏳</div>
         <div class="data" id="z">📍 Coord. z: ⏳</div>
         <div class="data" id="angle">📐 Ángulo: ⏳</div>
-        <div class="data" id="accelX">⬆ Acel. X: ⏳</div>
-        <div class="data" id="accelY">⬆ Acel. Y: ⏳</div>
-        <div class="data" id="accelZ">⬆ Acel. Z (g₀): ⏳</div>
-        <div class="data" id="accelResult">📊 Acel. Result.: ⏳</div>
+        <div class="data" id="accelX">⬆ Acel. X (cero op.): ⏳</div>
+        <div class="data" id="accelY">⬆ Acel. Y (cero op.): ⏳</div>
+        <div class="data" id="accelZ">⬆ Acel. Z (cero op.): ⏳</div>
+        <div class="data" id="accelResult">📊 Acel. result. dinámica: ⏳</div>
         <div class="data" id="earthquakeCount">🌍 Sismos M≥6: ⏳</div>
     </div>
 
@@ -1439,7 +1439,14 @@
                     <li>Partículas reales e imaginarias.</li>
                     <li>Aceleración X, Y, Z y resultante.</li>
                 </ul>
-                <p>Se agrupan en dos familias: <strong>partículas</strong> y <strong>aceleración</strong>. La física molecular se muestra solo como referencia y no participa en los umbrales. La aceleración Z se corrige restando <var>g</var><sub>0</sub> = 9.78 m/s², la gravedad media en Puerto Rico, y se presenta como aceleración dinámica.</p>
+                <p>Se agrupan en dos familias: <strong>partículas</strong> y <strong>aceleración</strong>. La física molecular se muestra solo como referencia y no participa en los umbrales. Las tres componentes del acelerómetro usan un <strong>cero operacional</strong> calculado con la mediana robusta de reposo del módulo, y la resultante se recalcula desde las componentes corregidas.</p>
+                <div class="formula">
+                    x<sub>0</sub> = mediana(X<sub>cal</sub>),  y<sub>0</sub> = mediana(Y<sub>cal</sub>),  z<sub>0</sub> = mediana(Z<sub>cal</sub>)<br>
+                    a<sub>X</sub><sup>op</sup> = a<sub>X</sub><sup>raw</sup> − x<sub>0</sub><br>
+                    a<sub>Y</sub><sup>op</sup> = a<sub>Y</sub><sup>raw</sup> − y<sub>0</sub><br>
+                    a<sub>Z</sub><sup>op</sup> = a<sub>Z</sub><sup>raw</sup> − z<sub>0</sub><br>
+                    a<sub>res</sub><sup>op</sup> = √[(a<sub>X</sub><sup>op</sup>)² + (a<sub>Y</sub><sup>op</sup>)² + (a<sub>Z</sub><sup>op</sup>)²]
+                </div>
             </article>
 
             <article class="method-card">
@@ -1479,7 +1486,7 @@
                     </tbody>
                 </table>
                 <p>* El pico se evalúa solo si la variable no cumple antes el criterio de fuerte o vigilancia.</p>
-                <p>Valores de referencia: partículas, <var>s</var><sub>min</sub> = 15 u y <var>δ</var><sub>min</sub> = 20 u; aceleración, 0.05 m/s² y 0.15 m/s²; resultante, 0.10 m/s² y 0.20 m/s².</p>
+                <p>Valores de referencia: partículas, <var>s</var><sub>min</sub> = 15 u y <var>δ</var><sub>min</sub> = 20 u; aceleración X/Y/Z, 0.05 m/s² y 0.15 m/s²; resultante dinámica, 0.03 m/s² y 0.10 m/s².</p>
             </article>
 
             <article class="method-card">
@@ -1556,7 +1563,8 @@
             const KEY1 = 'BCX6UVTLQZ7VMK4F';
             const CHANNEL2 = 2972050;
             const KEY2 = '8LMMRSTHHX26Z4MI';
-            const GRAVITY_PR = 9.78; // gravedad media en Puerto Rico (m/s²)
+            const ACCEL_ZERO_DEFAULT = { x: 0.12, y: -1.88, z: 9.14 };
+            let accelOffsets = { ...ACCEL_ZERO_DEFAULT };
 
             const UTC_DATETIME_FORMAT = new Intl.DateTimeFormat('es-PR', {
                 dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC', hour12: false
@@ -1664,27 +1672,26 @@
                 channel: 1
             }, {
                 id: 'accelX',
-                label: 'Acel. X',
-                field: 'field1',
+                label: 'Acel. X (cero op.)',
+                field: '_ax',
                 color: '#FF5733',
                 channel: 2
             }, {
                 id: 'accelY',
-                label: 'Acel. Y',
-                field: 'field2',
+                label: 'Acel. Y (cero op.)',
+                field: '_ay',
                 color: '#33FF57',
                 channel: 2
             }, {
                 id: 'accelZ',
-                label: 'Acel. Z dinámica',
-                field: 'field3',
+                label: 'Acel. Z (cero op.)',
+                field: '_az',
                 color: '#5733FF',
-                channel: 2,
-                offset: -GRAVITY_PR
+                channel: 2
             }, {
                 id: 'accelResult',
-                label: 'Acel. Result.',
-                field: 'field4',
+                label: 'Acel. resultante dinámica',
+                field: '_ares',
                 color: '#FF33A1',
                 channel: 2
             }];
@@ -1827,6 +1834,26 @@
                 }
 
                 return result;
+            }
+
+            function calibrateAccelFeeds(feeds, offsets) {
+                return (feeds || []).map(feed => {
+                    const ax = parseFloat(feed.field1);
+                    const ay = parseFloat(feed.field2);
+                    const az = parseFloat(feed.field3);
+                    if (!Number.isFinite(ax) || !Number.isFinite(ay) || !Number.isFinite(az)) {
+                        return Object.assign({}, feed);
+                    }
+                    const dx = ax - offsets.x;
+                    const dy = ay - offsets.y;
+                    const dz = az - offsets.z;
+                    return Object.assign({}, feed, {
+                        _ax: dx,
+                        _ay: dy,
+                        _az: dz,
+                        _ares: Math.sqrt(dx * dx + dy * dy + dz * dz)
+                    });
+                });
             }
 
             // --- DECODIFICADOR DE SISMOS USGS ---
@@ -2110,8 +2137,8 @@
                     imaginaryParticles: { minSigma: 15, minDelta: 20, unit: 'u' },
                     accelX: { minSigma: 0.05, minDelta: 0.15, unit: 'm/s²' },
                     accelY: { minSigma: 0.05, minDelta: 0.15, unit: 'm/s²' },
-                    accelZ: { minSigma: 0.05, minDelta: 0.15, unit: 'm/s²', offset: -GRAVITY_PR },
-                    accelResult: { minSigma: 0.10, minDelta: 0.20, unit: 'm/s²' }
+                    accelZ: { minSigma: 0.05, minDelta: 0.15, unit: 'm/s²' },
+                    accelResult: { minSigma: 0.03, minDelta: 0.10, unit: 'm/s²' }
                 }
             };
 
@@ -2663,10 +2690,10 @@
                     angle: 'field7'
                 };
                 const map2 = {
-                    accelX: 'field1',
-                    accelY: 'field2',
-                    accelZ: 'field3',
-                    accelResult: 'field4'
+                    accelX: '_ax',
+                    accelY: '_ay',
+                    accelZ: '_az',
+                    accelResult: '_ares'
                 };
 
                 Object.keys(map1).forEach(key => {
@@ -2687,11 +2714,7 @@
                         const val = latestFeed2 && latestFeed2[field] !== undefined && latestFeed2[field] !==
                             null && latestFeed2[field] !== '' ? latestFeed2[field] : 'En Reposo';
                         const label = el.textContent.split(':')[0];
-                        let shown = val;
-                        if (key === 'accelZ' && val !== 'En Reposo') {
-                            const numeric = parseFloat(val);
-                            if (!isNaN(numeric)) shown = (numeric - GRAVITY_PR).toFixed(2) + ' m/s²';
-                        }
+                        const shown = val !== 'En Reposo' ? `${val} m/s²` : val;
                         el.textContent = `${label}: ${shown}`;
                     }
                 });
@@ -2764,7 +2787,18 @@
                     const feeds1 = data1.feeds || [];
                     const feeds2 = data2.feeds || [];
                     const latestFeed1 = feeds1.length ? feeds1[feeds1.length - 1] : null;
-                    const latestFeed2 = feeds2.length ? feeds2[feeds2.length - 1] : null;
+
+                    const samples = field => feeds2
+                        .map(feed => parseFloat(feed[field]))
+                        .filter(value => Number.isFinite(value));
+                    const xSamples = samples('field1');
+                    const ySamples = samples('field2');
+                    const zSamples = samples('field3');
+                    if (xSamples.length) accelOffsets.x = trendMedian(xSamples);
+                    if (ySamples.length) accelOffsets.y = trendMedian(ySamples);
+                    if (zSamples.length) accelOffsets.z = trendMedian(zSamples);
+                    const feeds2c = calibrateAccelFeeds(feeds2, accelOffsets);
+                    const latestFeed2 = feeds2c.length ? feeds2c[feeds2c.length - 1] : null;
 
                     // Rango real de fechas de las muestras recibidas (puede ser más angosto que
                     // el rango solicitado, p. ej. si el sensor estuvo apagado parte del tiempo).
@@ -2789,13 +2823,13 @@
 
                     updateLiveData(latestFeed1, latestFeed2);
                     updateStationStatusFromFeeds(feeds1, feeds2);
-                    updateTrend(feeds1, feeds2);
+                    updateTrend(feeds1, feeds2c);
 
                     const combinedDatasets = [];
                     let allLabels = [];
 
                     CHART_CONFIGS.forEach(cfg => {
-                        const feeds = cfg.channel === 2 ? feeds2 : feeds1;
+                        const feeds = cfg.channel === 2 ? feeds2c : feeds1;
                         const { labels, data } = processFeeds(feeds, cfg.field, 500, cfg.offset || 0);
                         const canvas = document.getElementById(`chart-${cfg.id}`);
                         if (!canvas) return;

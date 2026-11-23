@@ -28,10 +28,18 @@ CAMBIOS
    - Los eventos nuevos guardan esos valores.
    - Los eventos viejos que no tengan esos datos muestran lo disponible.
 
-4. ACELERACIÓN Z CON GRAVEDAD DE PUERTO RICO
-   - Se resta g0 = 9.78 m/s² (gravedad media en Puerto Rico).
-   - La variable se llama "Acel. Z dinámica".
-   - Se aplica en la gráfica, la tarjeta en vivo y el análisis del historial.
+4. CALIBRACIÓN VECTORIAL DEL ACELERÓMETRO
+   - Cero operacional para X, Y y Z:
+       x0 = mediana(X_cal), y0 = mediana(Y_cal), z0 = mediana(Z_cal)
+       aX_op = aX_raw − x0
+       aY_op = aY_raw − y0
+       aZ_op = aZ_raw − z0
+   - La resultante se recalcula con las tres componentes corregidas:
+       a_res = √(aX_op² + aY_op² + aZ_op²)
+   - Umbrales recalibrados:
+       X/Y/Z: s_min = 0.05 m/s², δ_min = 0.15 m/s²
+       resultante dinámica: s_min = 0.03 m/s², δ_min = 0.10 m/s²
+   - Se aplica en gráficas, tarjetas en vivo, análisis e historial.
 
 5. GRÁFICA COMBINADA
    - Ahora muestra todas las variables normalizadas en z (desviaciones robustas).
