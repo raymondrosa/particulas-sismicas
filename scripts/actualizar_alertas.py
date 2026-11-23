@@ -55,6 +55,7 @@ Z_WATCH = 4.5
 Z_STRONG = 6.0
 Z_SPIKE = 10.0
 MAX_FEEDS = 8000
+GRAVITY_PR = 9.78  # gravedad media en Puerto Rico (m/s²)
 
 COOLDOWN_ALERTA = timedelta(hours=6)
 COOLDOWN_PICO = timedelta(hours=2)
@@ -100,13 +101,14 @@ def analyze(feeds_by_channel):
     results = []
     recent_spikes = []
     for channel, field, label, unit, group, min_sigma, min_delta in SERIES:
+        offset = -GRAVITY_PR if label == "Aceleración Z" else 0.0
         pairs = []
         for feed in feeds_by_channel.get(channel, []):
             raw = feed.get(field)
             if raw is None or raw == "":
                 continue
             try:
-                pairs.append((float(raw), feed.get("created_at")))
+                pairs.append((float(raw) + offset, feed.get("created_at")))
             except (TypeError, ValueError):
                 continue
 
@@ -140,6 +142,7 @@ def analyze(feeds_by_channel):
                 state = "spike"
 
         direction_value = (values[-1] - center) if state == "spike" else delta
+        z_threshold = Z_STRONG if state == "strong" else (Z_WATCH if state == "watch" else (spike_z if state == "spike" else None))
         results.append(
             {
                 "label": label,
@@ -149,6 +152,13 @@ def analyze(feeds_by_channel):
                 "delta": delta,
                 "z_recent": z_recent,
                 "z_last": z_last,
+                "baseline": center,
+                "sigma": sigma,
+                "min_delta": min_delta,
+                "min_relative": min_relative,
+                "z_threshold": z_threshold,
+                "recent_median": recent_center,
+                "last_value": values[-1],
                 "direction": "up" if direction_value >= 0 else "down",
             }
         )
@@ -173,6 +183,13 @@ def analyze(feeds_by_channel):
                         "delta": value - center,
                         "z_recent": (value - center) / sigma,
                         "z_last": (value - center) / sigma,
+                        "baseline": center,
+                        "sigma": sigma,
+                        "min_delta": min_delta,
+                        "min_relative": min_relative,
+                        "z_threshold": spike_z,
+                        "recent_median": recent_center,
+                        "last_value": value,
                         "direction": "up" if value >= center else "down",
                         "timestamp": created_at,
                     }
@@ -334,6 +351,13 @@ def main():
                 "unit": item["unit"],
                 "delta": round(item["delta"], 4),
                 "z": round(item["z_last"] if item["state"] == "spike" else item["z_recent"], 2),
+                "baseline": round(item.get("baseline", 0.0), 4),
+                "sigma": round(item.get("sigma", 0.0), 4),
+                "minDelta": round(item.get("min_delta", 0.0), 4),
+                "zThreshold": round(item.get("z_threshold") or 0.0, 2),
+                "recentMedian": round(item.get("recent_median", 0.0), 4),
+                "lastValue": round(item.get("last_value", 0.0), 4),
+                "relative": None if item["group"] == "aceleracion" else round(abs(item.get("delta", 0.0)) / abs(item.get("baseline") or 1.0), 4),
                 "direction": item["direction"],
             }
             for item in items
