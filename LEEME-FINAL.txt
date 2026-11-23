@@ -1,0 +1,70 @@
+ACTUALIZACIÓN FINAL: DISEÑO, UTC, DETALLES, GRAVEDAD Y GRÁFICAS
+================================================================
+
+Sube SOLO estos dos archivos:
+1. index.html
+2. scripts/actualizar_alertas.py
+
+NO reemplaces alertas.json: contiene el historial actual.
+
+CAMBIOS
+-------
+1. BANNER SUPERIOR
+   - La imagen fondo.png ahora se usa como banner superior.
+   - El fondo general es un gradiente científico con rejilla.
+   - Cabecera tipo observatorio internacional:
+     "International TOA Particle Observatory".
+   - Se agregaron navegación y títulos de sección.
+
+2. HORARIOS EN UTC
+   - Todos los horarios visibles se muestran en UTC:
+     panel de estado, historial, última revisión, gráficas y tooltips.
+   - Los ejes de la gráfica de sismos también muestran UTC.
+
+3. DETALLES DEL CÓMPUTO EN EL HISTORIAL
+   - Cada aviso tiene un desplegable "Ver cálculo".
+   - Muestra por variable:
+     m_B, m_R, x_t, Δ, s_B, z, umbral |z| y cambio relativo.
+   - Los eventos nuevos guardan esos valores.
+   - Los eventos viejos que no tengan esos datos muestran lo disponible.
+
+4. ACELERACIÓN Z CON GRAVEDAD DE PUERTO RICO
+   - Se resta g0 = 9.78 m/s² (gravedad media en Puerto Rico).
+   - La variable se llama "Acel. Z dinámica".
+   - Se aplica en la gráfica, la tarjeta en vivo y el análisis del historial.
+
+5. GRÁFICA COMBINADA
+   - Ahora muestra todas las variables normalizadas en z (desviaciones robustas).
+   - Líneas más limpias, sin puntos, leyenda inferior, eje z y resaltado de cero.
+   - Las variables de contexto aparecen con línea discontinua.
+
+6. DISEÑO FUTURISTA
+   - Paleta cian/azul, paneles de vidrio, bordes luminosos, rejilla de fondo.
+   - Navegación superior y secciones ordenadas.
+   - Sección de metodología con fórmulas y criterios matemáticos.
+
+7. PAYPAL
+   - Bloque más pequeño al final.
+   - Ancho máximo 680 px, menos relleno y botón compacto.
+
+8. FÍSICA MOLECULAR
+   - Sigue solo como gráfica de referencia; no genera avisos.
+
+QUÉ NO CAMBIÓ
+-------------
+- Los avisos usan partículas reales, imaginarias y aceleración.
+- El aviso multivariable sigue exigiendo 2 familias.
+- No se reemplazó alertas.json.
+- Los eventos viejos de física molecular quedan ocultos.
+
+CÓMO APLICARLO
+--------------
+1. Sube index.html y scripts/actualizar_alertas.py a la rama main.
+2. Ejecuta Actions → "Actualizar historial de avisos" → Run workflow.
+3. Ejecuta Actions → "Publicar página" o deja que el push lo haga.
+4. Recarga con Ctrl+F5.
+
+NOTA
+----
+Las fórmulas y umbrales son experimentales. El sistema no predice
+terremotos ni sustituye a las autoridades oficiales.
