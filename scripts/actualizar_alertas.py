@@ -16,6 +16,7 @@ mínimo respecto a la línea base.
 """
 
 import json
+import math
 import os
 import sys
 import urllib.parse
@@ -40,10 +41,10 @@ CHANNELS = {
 SERIES = [
     ("ch1", "field1", "Partículas reales", "u", "particulas", 15.0, 20.0),
     ("ch1", "field2", "Partículas imaginarias", "u", "particulas", 15.0, 20.0),
-    ("ch2", "field1", "Aceleración X", "m/s²", "aceleracion", 0.05, 0.15),
-    ("ch2", "field2", "Aceleración Y", "m/s²", "aceleracion", 0.05, 0.15),
-    ("ch2", "field3", "Aceleración Z", "m/s²", "aceleracion", 0.05, 0.15),
-    ("ch2", "field4", "Aceleración resultante", "m/s²", "aceleracion", 0.10, 0.20),
+    ("ch2", "_ax", "Aceleración X", "m/s²", "aceleracion", 0.05, 0.15),
+    ("ch2", "_ay", "Aceleración Y", "m/s²", "aceleracion", 0.05, 0.15),
+    ("ch2", "_az", "Aceleración Z", "m/s²", "aceleracion", 0.05, 0.15),
+    ("ch2", "_ares", "Aceleración resultante dinámica", "m/s²", "aceleracion", 0.03, 0.10),
 ]
 CORE_COUNT = len(SERIES)
 
@@ -55,7 +56,7 @@ Z_WATCH = 4.5
 Z_STRONG = 6.0
 Z_SPIKE = 10.0
 MAX_FEEDS = 8000
-GRAVITY_PR = 9.78  # gravedad media en Puerto Rico (m/s²)
+ACCEL_ZERO_DEFAULT = {"x": 0.12, "y": -1.88, "z": 9.14}  # referencia inicial del módulo
 
 COOLDOWN_ALERTA = timedelta(hours=6)
 COOLDOWN_PICO = timedelta(hours=2)
@@ -100,15 +101,52 @@ def fetch_feeds(channel_id, api_key):
 def analyze(feeds_by_channel):
     results = []
     recent_spikes = []
+
+    # Cero operacional vectorial del acelerómetro.
+    raw_ch2 = feeds_by_channel.get("ch2", [])
+    axes = {"x": [], "y": [], "z": []}
+    for feed in raw_ch2:
+        for key, field in (("x", "field1"), ("y", "field2"), ("z", "field3")):
+            raw = feed.get(field)
+            if raw is None or raw == "":
+                continue
+            try:
+                axes[key].append(float(raw))
+            except (TypeError, ValueError):
+                continue
+    offsets = {
+        key: (median(values) if values else ACCEL_ZERO_DEFAULT[key])
+        for key, values in axes.items()
+    }
+
+    calibrated = []
+    for feed in raw_ch2:
+        try:
+            ax = float(feed["field1"])
+            ay = float(feed["field2"])
+            az = float(feed["field3"])
+        except (KeyError, TypeError, ValueError):
+            continue
+        dx = ax - offsets["x"]
+        dy = ay - offsets["y"]
+        dz = az - offsets["z"]
+        item = dict(feed)
+        item["_ax"] = dx
+        item["_ay"] = dy
+        item["_az"] = dz
+        item["_ares"] = math.sqrt(dx * dx + dy * dy + dz * dz)
+        calibrated.append(item)
+    feeds_by_channel = dict(feeds_by_channel)
+    feeds_by_channel["ch2"] = calibrated
+
     for channel, field, label, unit, group, min_sigma, min_delta in SERIES:
-        offset = -GRAVITY_PR if label == "Aceleración Z" else 0.0
         pairs = []
         for feed in feeds_by_channel.get(channel, []):
             raw = feed.get(field)
             if raw is None or raw == "":
                 continue
             try:
-                pairs.append((float(raw) + offset, feed.get("created_at")))
+                pairs.append((float(raw), feed.get("created_at")))
             except (TypeError, ValueError):
                 continue
 
