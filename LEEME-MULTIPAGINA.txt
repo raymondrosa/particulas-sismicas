@@ -14,7 +14,7 @@ NO reemplaces alertas.json. Conserva fondo.png y logo.jpg.
 ESTRUCTURA NUEVA
 ----------------
 - index.html: guía general, estado, avisos, historial y datos en vivo.
-- graficas.html: panel completo de gráficas individuales, multivariable y sismos.
+- graficas.html: gráficas individuales con escala propia y sismos.
 - metodologia.html: fórmulas, criterios, calibración y limitaciones.
 - styles.css: diseño compartido, banner y navegación.
 - graficas.js: lógica del panel de gráficas.
@@ -65,10 +65,14 @@ a las autoridades oficiales.
 AMPLIAR GRÁFICAS Y MARCAR AVISOS
 --------------------------------
 - Clic en cualquier gráfica para abrirla en grande.
-- Las líneas verticales rojas/naranjas marcan los avisos del historial
-  que caen dentro del periodo mostrado.
-- El eje y de gráficas de aceleración se mantiene legible; las tarjetas y
-  los detalles del cálculo redondean las aceleraciones a 4 decimales.
+- Las líneas verticales y los puntos rojos/naranjas marcan las anomalías
+  del historial sobre la variable exacta; ya no se marcan por familia.
+- La etiqueta de la línea dice "Anomalía".
+- Al pasar el ratón se muestran los valores y la hora UTC.
+- Se retiró la gráfica normalizada superpuesta: cada variable conserva su
+  propia escala, evitando el solapamiento.
+- Las tarjetas y los detalles del cálculo redondean las aceleraciones a
+  4 decimales.
 
 RESULTANTE
 ----------

@@ -55,6 +55,30 @@
         { id: 'accelResult', label: 'Acel. result. (g_PR)', field: '_ares', color: '#FF33A1', channel: 2, core: true, group: 'aceleracion' }
     ];
 
+    const LABEL_ALIASES = {
+        realParticles: ['partículas reales', 'particulas reales'],
+        imaginaryParticles: ['partículas imaginarias', 'particulas imaginarias', 'partículas imag.'],
+        molecularPhysics: ['física molecular', 'fisica molecular'],
+        accelX: ['aceleración x', 'aceleracion x'],
+        accelY: ['aceleración y', 'aceleracion y'],
+        accelZ: ['aceleración z', 'aceleracion z'],
+        accelResult: ['aceleración resultante', 'aceleracion resultante',
+            'aceleración resultante (g_pr)', 'aceleracion resultante (g_pr)',
+            'aceleración resultante dinámica']
+    };
+
+    function normalizeLabel(value) {
+        return String(value || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+    }
+
+    function eventMatchesConfig(event, cfg) {
+        const aliases = (LABEL_ALIASES[cfg.id] || []).map(normalizeLabel);
+        const labels = (event.variables || []).map(variable => normalizeLabel(variable.label));
+        if (labels.length) return labels.some(label => aliases.includes(label));
+        const groups = event.groups || [];
+        return groups.includes(cfg.group);
+    }
+
     const chartInstances = {};
     let combinedChart = null;
     let seismicChart = null;
@@ -228,26 +252,6 @@
             grid.appendChild(wrapper);
         });
 
-        const combinedWrapper = document.createElement('div');
-        combinedWrapper.className = 'chart-wrapper combined';
-        combinedWrapper.dataset.chartId = 'combined';
-        combinedWrapper.title = 'Clic para ampliar la gráfica';
-        combinedWrapper.addEventListener('click', () => openChartModal('combined', 'Panel multivariable'), { passive: true });
-        const combinedLabel = document.createElement('div');
-        combinedLabel.className = 'chart-label';
-        combinedLabel.textContent = '📊 Panel multivariable · variables normalizadas (z)';
-        combinedWrapper.appendChild(combinedLabel);
-        const combinedCanvas = document.createElement('canvas');
-        combinedCanvas.id = 'chart-combined';
-        combinedCanvas.width = 600;
-        combinedCanvas.height = 220;
-        combinedWrapper.appendChild(combinedCanvas);
-        const combinedHint = document.createElement('span');
-        combinedHint.className = 'expand-hint';
-        combinedHint.textContent = '🔍 Ampliar';
-        combinedWrapper.appendChild(combinedHint);
-        grid.appendChild(combinedWrapper);
-
         const seismicWrapper = document.createElement('div');
         seismicWrapper.className = 'chart-wrapper seismic';
         seismicWrapper.dataset.chartId = 'earthquakes';
@@ -278,14 +282,18 @@
             responsive: true,
             maintainAspectRatio: true,
             animation: { duration: 150 },
+            interaction: { mode: 'nearest', intersect: false },
             plugins: {
                 legend: { display: false },
                 alertLines: { lines: lines || [] },
                 tooltip: {
-                    mode: 'index',
+                    enabled: true,
+                    mode: 'nearest',
                     intersect: false,
                     callbacks: {
-                        label: ctx => ctx.parsed.y !== null ? ctx.parsed.y.toFixed(4) : 'N/A'
+                        title: items => items && items[0] ? items[0].label : '',
+                        label: ctx => ctx.parsed.y !== null
+                            ? ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(4) : 'N/A'
                     }
                 }
             },
@@ -320,8 +328,16 @@
         const labels = parsed.labels;
         const data = parsed.data;
         chartMeta[cfg.id] = { labels: parsed.labels, times: parsed.times };
-        const lines = buildAlertLines(chartMeta[cfg.id], cfg.group, false);
+        const lines = buildAlertLines(chartMeta[cfg.id], cfg, false);
         const hl = highlight(data, cfg.color);
+        lines.forEach(line => {
+            if (Number.isInteger(line.index) && line.index >= 0 && line.index < data.length) {
+                hl.bg[line.index] = line.color;
+                hl.border[line.index] = '#1F2937';
+                hl.width[line.index] = 1;
+                hl.radius[line.index] = 4;
+            }
+        });
         setCaption(cfg.id, data.length && hl.maxIdx >= 0
             ? 'máx: ' + formatValue(hl.maxVal) + ' · mín: ' + formatValue(hl.minVal)
             : '');
@@ -353,7 +369,8 @@
                     pointBorderColor: hl.border,
                     pointBorderWidth: hl.width,
                     pointRadius: hl.radius,
-                    pointHoverRadius: 4,
+                    pointHoverRadius: 5,
+                    pointHitRadius: 10,
                     fill: true,
                     tension: 0.2
                 }]
@@ -479,7 +496,6 @@
             CHART_CONFIGS.forEach(cfg => {
                 renderIndividual(cfg, cfg.channel === 2 ? feeds2c : feeds1);
             });
-            renderCombined(feeds1, feeds2c);
             setStatus('Datos actualizados: ' + utcDateTime(new Date()));
         } catch (error) {
             setStatus('No se pudieron actualizar las gráficas: ' + error.message);
@@ -626,16 +642,13 @@
         return groupsOnly || varsOnly;
     }
 
-    function buildAlertLines(meta, group, timeAxis) {
+    function buildAlertLines(meta, cfg, timeAxis) {
         if (!meta || !meta.times || !meta.times.length || !historyEvents.length) return [];
         const maxGap = 2 * 60 * 60 * 1000;
         const lines = [];
         const seen = new Set();
         historyEvents.forEach(event => {
-            if (group) {
-                const groups = event.groups || [];
-                if (!groups.includes(group)) return;
-            }
+            if (cfg && !eventMatchesConfig(event, cfg)) return;
             const eventTime = parseEventTime(event.timestamp);
             if (!Number.isFinite(eventTime)) return;
 
@@ -653,11 +666,11 @@
             const value = timeAxis ? eventTime : (meta.labels[bestIndex] || null);
             if (!value) return;
             const color = event.level === 'alerta' ? '#FF5252' : '#FF9800';
-            const label = event.level === 'alerta' ? 'Aviso' : 'Pico';
+            const label = 'Anomalía';
             const key = String(value) + color;
             if (seen.has(key)) return;
             seen.add(key);
-            lines.push({ value, color, label });
+            lines.push({ value, color, label, index: bestIndex });
         });
         return lines;
     }
@@ -667,13 +680,19 @@
             const chart = chartInstances[cfg.id];
             const meta = chartMeta[cfg.id];
             if (!chart || !meta) return;
-            chart.options.plugins.alertLines = { lines: buildAlertLines(meta, cfg.group, false) };
+            const lines = buildAlertLines(meta, cfg, false);
+            const dataset = chart.data.datasets[0];
+            lines.forEach(line => {
+                if (Number.isInteger(line.index) && line.index >= 0 && line.index < dataset.data.length) {
+                    dataset.pointBackgroundColor[line.index] = line.color;
+                    dataset.pointBorderColor[line.index] = '#1F2937';
+                    dataset.pointBorderWidth[line.index] = 1;
+                    dataset.pointRadius[line.index] = 4;
+                }
+            });
+            chart.options.plugins.alertLines = { lines: lines };
             chart.update('none');
         });
-        if (combinedChart && chartMeta.combined) {
-            combinedChart.options.plugins.alertLines = { lines: buildAlertLines(chartMeta.combined, null, false) };
-            combinedChart.update('none');
-        }
         if (seismicChart && chartMeta.earthquakes) {
             seismicChart.options.plugins.alertLines = { lines: buildAlertLines(chartMeta.earthquakes, null, true) };
             seismicChart.update('none');

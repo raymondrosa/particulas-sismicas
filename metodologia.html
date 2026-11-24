@@ -93,24 +93,24 @@
                     <tbody>
                         <tr><td>Fuerte</td><td>|Δ| ≥ δ<sub>min</sub> y |z<sub>R</sub>| ≥ 6</td></tr>
                         <tr><td>Vigilancia</td><td>|Δ| ≥ δ<sub>min</sub> y 4.5 ≤ |z<sub>R</sub>| &lt; 6</td></tr>
-                        <tr><td>Pico*</td><td>|x<sub>t</sub> − m<sub>B</sub>| ≥ δ<sub>min</sub> y |z<sub>t</sub>| ≥ 10</td></tr>
-                        <tr><td>Pico de partículas reales*</td><td>cambio ≥ 10 % de |m<sub>B</sub>| y |z<sub>t</sub>| ≥ 5.5</td></tr>
+                        <tr><td>Anomalía puntual*</td><td>|x<sub>t</sub> − m<sub>B</sub>| ≥ δ<sub>min</sub> y |z<sub>t</sub>| ≥ 10</td></tr>
+                        <tr><td>Anomalía puntual de partículas reales*</td><td>cambio ≥ 10 % de |m<sub>B</sub>| y |z<sub>t</sub>| ≥ 5.5</td></tr>
                     </tbody>
                 </table>
-                <p>* El pico se evalúa solo si la variable no cumple antes el criterio de fuerte o vigilancia.</p>
+                <p>* La anomalía puntual se evalúa solo si la variable no cumple antes el criterio de fuerte o vigilancia.</p>
                 <p>Valores de referencia: partículas, <var>s</var><sub>min</sub> = 15 u y <var>δ</var><sub>min</sub> = 20 u; aceleración X/Y/Z, 0.05 m/s² y 0.15 m/s²; resultante referida a g_PR, 0.03 m/s² y 0.10 m/s².</p>
             </article>
 
             <article class="method-card">
-                <h3>5. Aviso multivariable y picos</h3>
+                <h3>5. Aviso multivariable y anomalías puntuales</h3>
                 <p>Sea <var>G</var><sub>fuerte</sub> el conjunto de familias con al menos una variable en estado fuerte:</p>
                 <div class="formula">
                     alerta = (|G<sub>fuerte</sub>| ≥ 2)<br>
-                    pico = (no alerta) y (existe pico en variable esencial)<br>
-                    vigilancia = (no alerta) y (no pico) y (hay señal fuerte o de vigilancia)<br>
+                    anomalía puntual = (no alerta) y (existe anomalía puntual en variable esencial)<br>
+                    vigilancia = (no alerta) y (no anomalía puntual) y (hay señal fuerte o de vigilancia)<br>
                     estable = (ninguna de las anteriores)
                 </div>
-                <p>La alerta multivariable exige coincidencia en dos familias; un pico aislado se informa como anomalía puntual. Los picos se evalúan igual al alza y a la baja.</p>
+                <p>La alerta multivariable exige coincidencia en dos familias; una anomalía puntual aislada se informa como anomalía puntual. Las anomalías puntuales se evalúan igual al alza y a la baja.</p>
             </article>
 
             <article class="method-card">
@@ -127,7 +127,7 @@
 
         <details class="methodology-notes">
             <summary>Limitaciones y alcance</summary>
-            <p>Los umbrales son experimentales y requieren validación retrospectiva con un número suficiente de eventos. Un pico puede ser una variación real o un dato atípico del sensor. El historial permite desplegar “Ver cálculo” en cada aviso para revisar m_B, s_B, Δ, z y el umbral aplicado. El sistema no predice terremotos, no sustituye a las autoridades oficiales y no debe usarse para decisiones de seguridad.</p>
+            <p>Los umbrales son experimentales y requieren validación retrospectiva con un número suficiente de eventos. Una anomalía puntual puede ser una variación real o un dato atípico del sensor. El historial permite desplegar “Ver cálculo” en cada aviso para revisar m_B, s_B, Δ, z y el umbral aplicado. El sistema no predice terremotos, no sustituye a las autoridades oficiales y no debe usarse para decisiones de seguridad.</p>
         </details>
     </section>
 
