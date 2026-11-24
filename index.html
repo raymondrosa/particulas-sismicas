@@ -1069,9 +1069,10 @@
                     const math = document.createElement('div');
                     math.className = 'alert-history-math';
 
-                    const fmt = value => {
+                    const fmt = (value, unit) => {
                         const n = Number(value);
                         if (!Number.isFinite(n)) return '—';
+                        if (unit === 'm/s²') return n.toFixed(4);
                         const a = Math.abs(n);
                         if (a >= 100) return n.toFixed(1);
                         if (a >= 10) return n.toFixed(2);
@@ -1083,14 +1084,14 @@
                     const lines = ['Δ_R = m_R − m_B;  z_R = Δ_R / s_B;  Δ_t = x_t − m_B;  z_t = Δ_t / s_B'];
                     (event.variables || []).forEach(v => {
                         const parts = [];
-                        if (Number.isFinite(Number(v.baseline))) parts.push(`m_B=${fmt(v.baseline)}${v.unit ? ' ' + v.unit : ''}`);
-                        if (Number.isFinite(Number(v.recentMedian))) parts.push(`m_R=${fmt(v.recentMedian)}${v.unit ? ' ' + v.unit : ''}`);
-                        if (Number.isFinite(Number(v.lastValue))) parts.push(`x_t=${fmt(v.lastValue)}${v.unit ? ' ' + v.unit : ''}`);
-                        if (Number.isFinite(Number(v.delta))) parts.push(`Δ=${fmt(v.delta)}`);
-                        if (Number.isFinite(Number(v.sigma))) parts.push(`s_B=${fmt(v.sigma)}`);
+                        if (Number.isFinite(Number(v.baseline))) parts.push(`m_B=${fmt(v.baseline, v.unit)}${v.unit ? ' ' + v.unit : ''}`);
+                        if (Number.isFinite(Number(v.recentMedian))) parts.push(`m_R=${fmt(v.recentMedian, v.unit)}${v.unit ? ' ' + v.unit : ''}`);
+                        if (Number.isFinite(Number(v.lastValue))) parts.push(`x_t=${fmt(v.lastValue, v.unit)}${v.unit ? ' ' + v.unit : ''}`);
+                        if (Number.isFinite(Number(v.delta))) parts.push(`Δ=${fmt(v.delta, v.unit)}`);
+                        if (Number.isFinite(Number(v.sigma))) parts.push(`s_B=${fmt(v.sigma, v.unit)}`);
                         if (Number.isFinite(Number(v.z))) parts.push(`z=${fmt(v.z)}`);
                         if (Number.isFinite(Number(v.zThreshold)) && Number(v.zThreshold) > 0) parts.push(`|z|≥${fmt(v.zThreshold)}`);
-                        if (Number.isFinite(Number(v.minDelta))) parts.push(`δ_min=${fmt(v.minDelta)}`);
+                        if (Number.isFinite(Number(v.minDelta))) parts.push(`δ_min=${fmt(v.minDelta, v.unit)}`);
                         if (v.relative !== null && v.relative !== undefined && Number.isFinite(Number(v.relative))) parts.push(`cambio=${(Number(v.relative) * 100).toFixed(2)}%`);
                         lines.push(`• ${v.label || 'variable'} [${stateName(v.state)}]: ${parts.join(' · ') || 'sin detalle numérico'}`);
                     });
@@ -1298,7 +1299,9 @@
                         const val = latestFeed2 && latestFeed2[field] !== undefined && latestFeed2[field] !==
                             null && latestFeed2[field] !== '' ? latestFeed2[field] : 'En Reposo';
                         const label = el.textContent.split(':')[0];
-                        const shown = val !== 'En Reposo' ? `${val} m/s²` : val;
+                        const numeric = Number(val);
+                        const shown = val !== 'En Reposo' && Number.isFinite(numeric)
+                            ? `${numeric.toFixed(4)} m/s²` : val;
                         el.textContent = `${label}: ${shown}`;
                     }
                 });

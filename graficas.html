@@ -40,7 +40,7 @@
 
     <main>
         <h2 class="section-title" id="graficas">Gráficas de las últimas horas</h2>
-        <p class="page-note">Series individuales con valores máximos y mínimos, panel multivariable normalizado en z y sismicidad global M≥6.0. Aceleración X, Y y Z con cero operacional; resultante referida a la gravedad media de Puerto Rico. Todos los horarios están en UTC.</p>
+        <p class="page-note">Series individuales con valores máximos y mínimos, panel multivariable normalizado en z y sismicidad global M≥6.0. Aceleración X, Y y Z con cero operacional; resultante referida a la gravedad media de Puerto Rico. Todos los horarios están en UTC. Clic en cualquier gráfica para ampliarla; las líneas verticales marcan avisos del historial.</p>
         <div class="charts-grid" id="chartsGrid"></div>
     </main>
 
@@ -48,6 +48,16 @@
         <h2>Volver al resumen</h2>
         <p>Estado del monitoreo, avisos recientes y datos generales de la estación.</p>
         <a href="index.html">Ir al inicio →</a>
+    </div>
+
+    <div class="modal-overlay" id="chartModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Gráfica</h2>
+                <button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">&times;</button>
+            </div>
+            <canvas id="modalCanvas"></canvas>
+        </div>
     </div>
 
     <div class="footer">

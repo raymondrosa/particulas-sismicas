@@ -42,23 +42,54 @@
     }
 
     const CHART_CONFIGS = [
-        { id: 'realParticles', label: 'Partículas Reales', field: 'field1', color: '#36A2EB', channel: 1, core: true },
-        { id: 'imaginaryParticles', label: 'Partículas Imag.', field: 'field2', color: '#FF6384', channel: 1, core: true },
-        { id: 'molecularPhysics', label: 'Física Molecular', field: 'field3', color: '#4BC0C0', channel: 1, core: false },
-        { id: 'xCoord', label: 'Coord. x', field: 'field4', color: '#FF9F40', channel: 1, core: false },
-        { id: 'yCoord', label: 'Coord. y', field: 'field5', color: '#9966FF', channel: 1, core: false },
-        { id: 'zCoord', label: 'Coord. z', field: 'field6', color: '#FFCD56', channel: 1, core: false },
-        { id: 'angle', label: 'Ángulo', field: 'field7', color: '#C9CBCF', channel: 1, core: false },
-        { id: 'accelX', label: 'Acel. X (cero op.)', field: '_ax', color: '#FF5733', channel: 2, core: true },
-        { id: 'accelY', label: 'Acel. Y (cero op.)', field: '_ay', color: '#33FF57', channel: 2, core: true },
-        { id: 'accelZ', label: 'Acel. Z (cero op.)', field: '_az', color: '#5733FF', channel: 2, core: true },
-        { id: 'accelResult', label: 'Acel. result. (g_PR)', field: '_ares', color: '#FF33A1', channel: 2, core: true }
+        { id: 'realParticles', label: 'Partículas Reales', field: 'field1', color: '#36A2EB', channel: 1, core: true, group: 'particulas' },
+        { id: 'imaginaryParticles', label: 'Partículas Imag.', field: 'field2', color: '#FF6384', channel: 1, core: true, group: 'particulas' },
+        { id: 'molecularPhysics', label: 'Física Molecular', field: 'field3', color: '#4BC0C0', channel: 1, core: false, group: 'molecular' },
+        { id: 'xCoord', label: 'Coord. x', field: 'field4', color: '#FF9F40', channel: 1, core: false, group: 'contexto' },
+        { id: 'yCoord', label: 'Coord. y', field: 'field5', color: '#9966FF', channel: 1, core: false, group: 'contexto' },
+        { id: 'zCoord', label: 'Coord. z', field: 'field6', color: '#FFCD56', channel: 1, core: false, group: 'contexto' },
+        { id: 'angle', label: 'Ángulo', field: 'field7', color: '#C9CBCF', channel: 1, core: false, group: 'contexto' },
+        { id: 'accelX', label: 'Acel. X (cero op.)', field: '_ax', color: '#FF5733', channel: 2, core: true, group: 'aceleracion' },
+        { id: 'accelY', label: 'Acel. Y (cero op.)', field: '_ay', color: '#33FF57', channel: 2, core: true, group: 'aceleracion' },
+        { id: 'accelZ', label: 'Acel. Z (cero op.)', field: '_az', color: '#5733FF', channel: 2, core: true, group: 'aceleracion' },
+        { id: 'accelResult', label: 'Acel. result. (g_PR)', field: '_ares', color: '#FF33A1', channel: 2, core: true, group: 'aceleracion' }
     ];
 
     const chartInstances = {};
     let combinedChart = null;
     let seismicChart = null;
     let accelOffsets = Object.assign({}, ACCEL_ZERO_DEFAULT);
+    let historyEvents = [];
+    const chartMeta = {};
+    let modalChart = null;
+
+    const alertLinesPlugin = {
+        id: 'alertLines',
+        afterDatasetsDraw(chart, args, options) {
+            const lines = options && options.lines ? options.lines : [];
+            if (!lines.length) return;
+            const { ctx, chartArea, scales } = chart;
+            ctx.save();
+            lines.forEach(line => {
+                const position = scales.x.getPixelForValue(line.value);
+                if (!Number.isFinite(position) || position < chartArea.left || position > chartArea.right) return;
+                ctx.beginPath();
+                ctx.setLineDash([4, 3]);
+                ctx.lineWidth = 1.5;
+                ctx.strokeStyle = line.color;
+                ctx.moveTo(position, chartArea.top);
+                ctx.lineTo(position, chartArea.bottom);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = line.color;
+                ctx.font = 'bold 10px system-ui, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText(line.label, position + 3, chartArea.top + 10);
+            });
+            ctx.restore();
+        }
+    };
+    if (window.Chart) Chart.register(alertLinesPlugin);
 
     function median(values) {
         if (!values.length) return NaN;
@@ -101,7 +132,7 @@
 
     function processFeeds(feeds, field, maxPoints = 500) {
         if (!feeds || !feeds.length) return { labels: [], data: [] };
-        const result = { labels: [], data: [] };
+        const result = { labels: [], data: [], times: [] };
         const total = feeds.length;
         const step = total > maxPoints ? Math.max(1, Math.floor(total / maxPoints)) : 1;
         for (let i = 0; i < total; i += step) {
@@ -110,6 +141,7 @@
             if (Number.isFinite(value)) {
                 result.labels.push(utcLabel(feed.created_at));
                 result.data.push(value);
+                result.times.push(Date.parse(feed.created_at));
             }
         }
         const last = feeds[total - 1];
@@ -119,6 +151,7 @@
             if (!result.labels.length || result.labels[result.labels.length - 1] !== lastLabel) {
                 result.labels.push(lastLabel);
                 result.data.push(lastValue);
+                result.times.push(Date.parse(last.created_at));
             }
         }
         return result;
@@ -172,6 +205,9 @@
         CHART_CONFIGS.forEach(cfg => {
             const wrapper = document.createElement('div');
             wrapper.className = 'chart-wrapper';
+            wrapper.dataset.chartId = cfg.id;
+            wrapper.title = 'Clic para ampliar la gráfica';
+            wrapper.addEventListener('click', () => openChartModal(cfg.id, cfg.label), { passive: true });
             const label = document.createElement('div');
             label.className = 'chart-label';
             label.textContent = cfg.label;
@@ -185,11 +221,18 @@
             canvas.width = 300;
             canvas.height = 150;
             wrapper.appendChild(canvas);
+            const hint = document.createElement('span');
+            hint.className = 'expand-hint';
+            hint.textContent = '🔍 Ampliar';
+            wrapper.appendChild(hint);
             grid.appendChild(wrapper);
         });
 
         const combinedWrapper = document.createElement('div');
         combinedWrapper.className = 'chart-wrapper combined';
+        combinedWrapper.dataset.chartId = 'combined';
+        combinedWrapper.title = 'Clic para ampliar la gráfica';
+        combinedWrapper.addEventListener('click', () => openChartModal('combined', 'Panel multivariable'), { passive: true });
         const combinedLabel = document.createElement('div');
         combinedLabel.className = 'chart-label';
         combinedLabel.textContent = '📊 Panel multivariable · variables normalizadas (z)';
@@ -199,10 +242,17 @@
         combinedCanvas.width = 600;
         combinedCanvas.height = 220;
         combinedWrapper.appendChild(combinedCanvas);
+        const combinedHint = document.createElement('span');
+        combinedHint.className = 'expand-hint';
+        combinedHint.textContent = '🔍 Ampliar';
+        combinedWrapper.appendChild(combinedHint);
         grid.appendChild(combinedWrapper);
 
         const seismicWrapper = document.createElement('div');
         seismicWrapper.className = 'chart-wrapper seismic';
+        seismicWrapper.dataset.chartId = 'earthquakes';
+        seismicWrapper.title = 'Clic para ampliar la gráfica';
+        seismicWrapper.addEventListener('click', () => openChartModal('earthquakes', 'Sismos M≥6.0 (USGS)'), { passive: true });
         const seismicLabel = document.createElement('div');
         seismicLabel.className = 'chart-label';
         seismicLabel.textContent = '🌍 Sismos M≥6.0 (USGS) · UTC';
@@ -216,16 +266,21 @@
         seismicCanvas.width = 600;
         seismicCanvas.height = 200;
         seismicWrapper.appendChild(seismicCanvas);
+        const seismicHint = document.createElement('span');
+        seismicHint.className = 'expand-hint';
+        seismicHint.textContent = '🔍 Ampliar';
+        seismicWrapper.appendChild(seismicHint);
         grid.appendChild(seismicWrapper);
     }
 
-    function individualOptions() {
+    function individualOptions(lines) {
         return {
             responsive: true,
             maintainAspectRatio: true,
             animation: { duration: 150 },
             plugins: {
                 legend: { display: false },
+                alertLines: { lines: lines || [] },
                 tooltip: {
                     mode: 'index',
                     intersect: false,
@@ -261,7 +316,11 @@
         const canvas = document.getElementById('chart-' + cfg.id);
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
-        const { labels, data } = processFeeds(feeds, cfg.field);
+        const parsed = processFeeds(feeds, cfg.field);
+        const labels = parsed.labels;
+        const data = parsed.data;
+        chartMeta[cfg.id] = { labels: parsed.labels, times: parsed.times };
+        const lines = buildAlertLines(chartMeta[cfg.id], cfg.group, false);
         const hl = highlight(data, cfg.color);
         setCaption(cfg.id, data.length && hl.maxIdx >= 0
             ? 'máx: ' + formatValue(hl.maxVal) + ' · mín: ' + formatValue(hl.minVal)
@@ -275,6 +334,7 @@
             chart.data.datasets[0].pointBorderColor = hl.border;
             chart.data.datasets[0].pointBorderWidth = hl.width;
             chart.data.datasets[0].pointRadius = hl.radius;
+            chart.options.plugins.alertLines = { lines: lines };
             chart.update('none');
             return;
         }
@@ -298,7 +358,7 @@
                     tension: 0.2
                 }]
             },
-            options: individualOptions()
+            options: individualOptions(lines)
         });
     }
 
@@ -308,9 +368,11 @@
         const ctx = canvas.getContext('2d');
         const datasets = [];
         let labels = [];
+        let meta = null;
         CHART_CONFIGS.forEach(cfg => {
             const feeds = cfg.channel === 2 ? feeds2 : feeds1;
             const parsed = processFeeds(feeds, cfg.field);
+            if (!meta && parsed.labels.length) meta = { labels: parsed.labels.slice(), times: parsed.times.slice() };
             if (parsed.labels.length && labels.length === 0) labels = parsed.labels.slice();
             if (!parsed.data.length) return;
             datasets.push({
@@ -327,9 +389,12 @@
                 spanGaps: true
             });
         });
+        chartMeta.combined = meta;
+        const lines = buildAlertLines(meta, null, false);
         if (combinedChart) {
             combinedChart.data.labels = labels;
             combinedChart.data.datasets = datasets;
+            combinedChart.options.plugins.alertLines = { lines: lines };
             combinedChart.update('none');
             return;
         }
@@ -385,6 +450,10 @@
                 elements: { point: { radius: 0, hoverRadius: 3 }, line: { borderJoinStyle: 'round' } }
             }
         });
+        if (combinedChart) {
+            combinedChart.options.plugins.alertLines = { lines: lines };
+            combinedChart.update('none');
+        }
     }
 
     async function updateChartsData() {
@@ -451,7 +520,8 @@
             const width = points.map((_, index) => index === maxIdx ? 2 : 1);
             const radius = points.map((_, index) => index === maxIdx ? 6 : 4);
             setCaption('earthquakes', points.length ? 'M' + maxVal.toFixed(1) : '');
-
+            chartMeta.earthquakes = { labels: [], times: points.map(point => point.x) };
+            const lines = buildAlertLines(chartMeta.earthquakes, null, true);
             const range = { min: Date.now() - 7 * 24 * 60 * 60 * 1000, max: Date.now() };
             if (seismicChart) {
                 const dataset = seismicChart.data.datasets[0];
@@ -462,6 +532,7 @@
                 dataset.pointRadius = radius;
                 seismicChart.options.scales.x.min = range.min;
                 seismicChart.options.scales.x.max = range.max;
+                seismicChart.options.plugins.alertLines = { lines: lines };
                 seismicChart.update('none');
                 return;
             }
@@ -532,17 +603,177 @@
                     }
                 }
             });
+            if (seismicChart) {
+                seismicChart.options.plugins.alertLines = { lines: lines };
+                seismicChart.update('none');
+            }
         } catch (error) {
             setCaption('earthquakes', 'Error USGS');
         }
     }
 
+    function parseEventTime(value) {
+        if (!value) return NaN;
+        return Date.parse(value);
+    }
+
+    function isMolecularOnly(event) {
+        const groups = event.groups || [];
+        const variables = event.variables || [];
+        const groupsOnly = groups.length > 0 && groups.every(group => group === 'molecular');
+        const varsOnly = groups.length === 0 && variables.length > 0 &&
+            variables.every(variable => variable && variable.group === 'molecular');
+        return groupsOnly || varsOnly;
+    }
+
+    function buildAlertLines(meta, group, timeAxis) {
+        if (!meta || !meta.times || !meta.times.length || !historyEvents.length) return [];
+        const maxGap = 2 * 60 * 60 * 1000;
+        const lines = [];
+        const seen = new Set();
+        historyEvents.forEach(event => {
+            if (group) {
+                const groups = event.groups || [];
+                if (!groups.includes(group)) return;
+            }
+            const eventTime = parseEventTime(event.timestamp);
+            if (!Number.isFinite(eventTime)) return;
+
+            let bestIndex = -1;
+            let bestDiff = Infinity;
+            meta.times.forEach((time, index) => {
+                const diff = Math.abs(time - eventTime);
+                if (diff < bestDiff) {
+                    bestDiff = diff;
+                    bestIndex = index;
+                }
+            });
+            if (bestIndex < 0 || bestDiff > maxGap) return;
+
+            const value = timeAxis ? eventTime : (meta.labels[bestIndex] || null);
+            if (!value) return;
+            const color = event.level === 'alerta' ? '#FF5252' : '#FF9800';
+            const label = event.level === 'alerta' ? 'Aviso' : 'Pico';
+            const key = String(value) + color;
+            if (seen.has(key)) return;
+            seen.add(key);
+            lines.push({ value, color, label });
+        });
+        return lines;
+    }
+
+    function applyHistoryLines() {
+        CHART_CONFIGS.forEach(cfg => {
+            const chart = chartInstances[cfg.id];
+            const meta = chartMeta[cfg.id];
+            if (!chart || !meta) return;
+            chart.options.plugins.alertLines = { lines: buildAlertLines(meta, cfg.group, false) };
+            chart.update('none');
+        });
+        if (combinedChart && chartMeta.combined) {
+            combinedChart.options.plugins.alertLines = { lines: buildAlertLines(chartMeta.combined, null, false) };
+            combinedChart.update('none');
+        }
+        if (seismicChart && chartMeta.earthquakes) {
+            seismicChart.options.plugins.alertLines = { lines: buildAlertLines(chartMeta.earthquakes, null, true) };
+            seismicChart.update('none');
+        }
+    }
+
+    async function loadHistory() {
+        try {
+            let data;
+            try {
+                data = await fetchJSON('alertas.json?t=' + Date.now());
+            } catch (error) {
+                data = await fetchJSON('https://raw.githubusercontent.com/raymondrosa/particulas-sismicas/main/alertas.json?t=' + Date.now());
+            }
+            historyEvents = (data.events || []).filter(event => event.timestamp && !isMolecularOnly(event));
+            applyHistoryLines();
+        } catch (error) {
+            historyEvents = [];
+            applyHistoryLines();
+        }
+    }
+
+    function closeChartModal() {
+        const modal = document.getElementById('chartModal');
+        const canvas = document.getElementById('modalCanvas');
+        if (canvas && canvas._chart) {
+            canvas._chart.destroy();
+            canvas._chart = null;
+        }
+        if (modal) modal.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    function openChartModal(chartId, title) {
+        const source = chartId === 'combined' ? combinedChart
+            : chartId === 'earthquakes' ? seismicChart
+            : chartInstances[chartId];
+        if (!source) return;
+        const modal = document.getElementById('chartModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalCanvas = document.getElementById('modalCanvas');
+        if (!modal || !modalTitle || !modalCanvas) return;
+
+        if (modalCanvas._chart) {
+            modalCanvas._chart.destroy();
+            modalCanvas._chart = null;
+        }
+
+        modalTitle.textContent = title;
+        const data = JSON.parse(JSON.stringify(source.data));
+        const options = {
+            responsive: true,
+            maintainAspectRatio: true,
+            animation: { duration: 0 },
+            parsing: source.options.parsing,
+            interaction: source.options.interaction,
+            plugins: {
+                legend: {
+                    display: chartId === 'combined',
+                    position: 'bottom',
+                    labels: { color: LEGEND_COLOR, font: { size: 13 }, boxWidth: 10, padding: 10 }
+                },
+                tooltip: source.options.plugins ? source.options.plugins.tooltip : undefined,
+                alertLines: source.options.plugins && source.options.plugins.alertLines
+                    ? source.options.plugins.alertLines : { lines: [] }
+            },
+            scales: source.options.scales,
+            elements: source.options.elements
+        };
+
+        modalCanvas._chart = new Chart(modalCanvas.getContext('2d'), {
+            type: source.config.type,
+            data: data,
+            options: options
+        });
+        modal.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
     function init() {
         buildWrappers();
+        loadHistory();
         updateChartsData();
         updateSeismic();
         setInterval(updateChartsData, 20000);
         setInterval(updateSeismic, 300000);
+        setInterval(loadHistory, 600000);
+
+        const closeButton = document.getElementById('modalCloseBtn');
+        const modal = document.getElementById('chartModal');
+        if (closeButton) closeButton.addEventListener('click', event => {
+            event.stopPropagation();
+            closeChartModal();
+        });
+        if (modal) modal.addEventListener('click', event => {
+            if (event.target === modal) closeChartModal();
+        });
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') closeChartModal();
+        });
     }
 
     if (document.readyState === 'loading') {

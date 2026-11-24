@@ -60,3 +60,19 @@ NOTA
 ----
 Los umbrales son experimentales. El sistema no predice terremotos ni sustituye
 a las autoridades oficiales.
+
+
+AMPLIAR GRÁFICAS Y MARCAR AVISOS
+--------------------------------
+- Clic en cualquier gráfica para abrirla en grande.
+- Las líneas verticales rojas/naranjas marcan los avisos del historial
+  que caen dentro del periodo mostrado.
+- El eje y de gráficas de aceleración se mantiene legible; las tarjetas y
+  los detalles del cálculo redondean las aceleraciones a 4 decimales.
+
+RESULTANTE
+----------
+La resultante se calcula con las componentes corregidas y la gravedad media
+de Puerto Rico:
+  a_res = sqrt(aX_op² + aY_op² + (g_PR + aZ_op)²)
+  g_PR = 9.78 m/s²
