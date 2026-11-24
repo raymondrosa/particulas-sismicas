@@ -7,9 +7,12 @@ Sube estos archivos a la rama main:
 3. graficas.js
 4. mapa.html
 5. mapa.js
-6. metodologia.html
-7. styles.css
-8. scripts/actualizar_alertas.py
+6. mundo.geojson
+7. leaflet.css
+8. leaflet.js
+9. metodologia.html
+10. styles.css
+11. scripts/actualizar_alertas.py
 
 NO reemplaces alertas.json. Conserva fondo.png y logo.jpg.
 
@@ -19,6 +22,8 @@ ESTRUCTURA NUEVA
 - graficas.html: gráficas individuales con escala propia y sismos.
 - mapa.html: mapa mundial genérico con los sismos M≥6 de los últimos 7 días.
 - mapa.js: lógica del mapa, marcadores, lista y detalles.
+- mundo.geojson: fronteras de países para dibujar el mapa sin teselas externas.
+- leaflet.css / leaflet.js: Leaflet local, sin depender de CDN.
 - metodologia.html: fórmulas, criterios, calibración y limitaciones.
 - styles.css: diseño compartido, banner y navegación.
 - graficas.js: lógica del panel de gráficas.
@@ -55,15 +60,16 @@ de eso la página entra en reposo si no llegan muestras.
 
 CÓMO APLICARLO
 --------------
-1. Sube los ocho archivos.
+1. Sube los once archivos.
 2. Deja que "Publicar página" despliegue o ejecútalo manualmente.
 3. Ejecuta "Actualizar historial de avisos" si quieres actualizar el historial.
 4. Recarga con Ctrl+F5.
 
 MAPA SÍSMICO
 ------------
-- La página mapa.html usa un mapa mundial genérico con Leaflet y teselas
-  oscuras de CARTO/OpenStreetMap.
+- La página mapa.html usa un mapa mundial vectorial local con Leaflet
+  (mundo.geojson). No depende de teselas externas.
+- Si el archivo local faltara, intenta un respaldo de teselas de CARTO.
 - Marca los mismos sismos M≥6 de los últimos 7 días que alimentan la gráfica.
 - Cada marcador muestra magnitud, lugar, hora UTC, profundidad y enlace a USGS.
 - La lista lateral permite centrar el mapa y abrir el detalle del evento.

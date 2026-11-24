@@ -214,15 +214,37 @@
             zoomControl: true
         }).setView([15, 0], 2);
 
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-            subdomains: 'abcd',
-            maxZoom: 19,
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-        }).addTo(map);
+        map.createPane('countries');
+        map.getPane('countries').style.zIndex = 200;
+        map.attributionControl.addAttribution('Natural Earth / world.geo.json');
 
         markerLayer = L.layerGroup().addTo(map);
+        loadWorld();
         load();
         setInterval(load, 300000);
+    }
+
+    async function loadWorld() {
+        try {
+            const world = await fetchJSON('mundo.geojson');
+            L.geoJSON(world, {
+                pane: 'countries',
+                interactive: false,
+                style: {
+                    color: '#2A6077',
+                    weight: 0.65,
+                    opacity: 0.95,
+                    fillColor: '#0E2233',
+                    fillOpacity: 1
+                }
+            }).addTo(map);
+        } catch (error) {
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                subdomains: 'abcd',
+                maxZoom: 19,
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+            }).addTo(map);
+        }
     }
 
     if (document.readyState === 'loading') {
