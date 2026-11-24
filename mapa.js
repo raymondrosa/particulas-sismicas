@@ -226,15 +226,15 @@
 
     async function loadWorld() {
         try {
-            const world = await fetchJSON('mundo.geojson');
+            const world = await fetchJSON('mundo.geojson?v=4');
             L.geoJSON(world, {
                 pane: 'countries',
                 interactive: false,
                 style: {
-                    color: '#2A6077',
-                    weight: 0.65,
-                    opacity: 0.95,
-                    fillColor: '#0E2233',
+                    color: '#58C7E8',
+                    weight: 0.8,
+                    opacity: 1,
+                    fillColor: '#123A50',
                     fillOpacity: 1
                 }
             }).addTo(map);
