@@ -5,9 +5,11 @@ Sube estos archivos a la rama main:
 1. index.html
 2. graficas.html
 3. graficas.js
-4. metodologia.html
-5. styles.css
-6. scripts/actualizar_alertas.py
+4. mapa.html
+5. mapa.js
+6. metodologia.html
+7. styles.css
+8. scripts/actualizar_alertas.py
 
 NO reemplaces alertas.json. Conserva fondo.png y logo.jpg.
 
@@ -15,6 +17,8 @@ ESTRUCTURA NUEVA
 ----------------
 - index.html: guía general, estado, avisos, historial y datos en vivo.
 - graficas.html: gráficas individuales con escala propia y sismos.
+- mapa.html: mapa mundial genérico con los sismos M≥6 de los últimos 7 días.
+- mapa.js: lógica del mapa, marcadores, lista y detalles.
 - metodologia.html: fórmulas, criterios, calibración y limitaciones.
 - styles.css: diseño compartido, banner y navegación.
 - graficas.js: lógica del panel de gráficas.
@@ -51,10 +55,19 @@ de eso la página entra en reposo si no llegan muestras.
 
 CÓMO APLICARLO
 --------------
-1. Sube los seis archivos.
+1. Sube los ocho archivos.
 2. Deja que "Publicar página" despliegue o ejecútalo manualmente.
 3. Ejecuta "Actualizar historial de avisos" si quieres actualizar el historial.
 4. Recarga con Ctrl+F5.
+
+MAPA SÍSMICO
+------------
+- La página mapa.html usa un mapa mundial genérico con Leaflet y teselas
+  oscuras de CARTO/OpenStreetMap.
+- Marca los mismos sismos M≥6 de los últimos 7 días que alimentan la gráfica.
+- Cada marcador muestra magnitud, lugar, hora UTC, profundidad y enlace a USGS.
+- La lista lateral permite centrar el mapa y abrir el detalle del evento.
+- No necesita claves de API.
 
 NOTA
 ----
@@ -67,7 +80,8 @@ AMPLIAR GRÁFICAS Y MARCAR AVISOS
 - Clic en cualquier gráfica para abrirla en grande.
 - Las líneas verticales y los puntos rojos/naranjas marcan las anomalías
   del historial sobre la variable exacta; ya no se marcan por familia.
-- La etiqueta de la línea dice "Anomalía".
+- La línea no lleva texto encima: solo la marca vertical y el punto, para
+  evitar solapamientos.
 - Al pasar el ratón se muestran los valores y la hora UTC.
 - Se retiró la gráfica normalizada superpuesta: cada variable conserva su
   propia escala, evitando el solapamiento.

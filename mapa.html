@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="description" content="Mapa mundial de los sismos M≥6 registrados por USGS en los últimos 7 días, con magnitud, lugar, profundidad y hora UTC.">
+    <title>Mapa sísmico · Observatorio Internacional de Partículas del TOA</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" defer></script>
+    <script src="mapa.js" defer></script>
+</head>
+<body class="map-page-body">
+
+    <div class="header-container">
+        <div class="header-row">
+            <img src="logo.jpg" alt="Logo Observatorio Internacional de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto" decoding="async">
+            <div class="header-copy">
+                <p class="header-kicker">International TOA Particle Observatory</p>
+                <h1>Observatorio de Partículas del TOA</h1>
+                <p class="header-subtitle">Mapa sísmico mundial · M≥6.0 · últimos 7 días · UTC</p>
+            </div>
+            <div class="status">
+                <span class="status-circle" style="background-color: #22D3EE;"></span>
+                <span id="mapStatus">Cargando mapa…</span>
+            </div>
+        </div>
+    </div>
+
+    <nav class="section-nav" aria-label="Secciones del sitio">
+        <a href="index.html">Inicio</a>
+        <a href="index.html#trendPanel">Estado</a>
+        <a href="index.html#alertHistory">Historial</a>
+        <a href="index.html#datos">Datos</a>
+        <a href="graficas.html">Gráficas</a>
+        <a href="mapa.html" aria-current="page">Mapa</a>
+        <a href="metodologia.html">Metodología</a>
+        <a href="index.html#donativos">Donativos</a>
+    </nav>
+
+    <main class="map-page">
+        <h2 class="section-title" id="mapa">Mapa sísmico mundial</h2>
+        <p class="page-note">Sismos M≥6.0 registrados por USGS en los últimos 7 días. El tamaño y el color del marcador representan la magnitud. Clic en un evento de la lista para centrar el mapa y abrir su detalle.</p>
+
+        <div class="map-layout">
+            <div class="map-shell">
+                <div id="worldMap" role="application" aria-label="Mapa mundial de sismos M≥6"></div>
+                <div class="map-legend" aria-label="Leyenda de magnitudes">
+                    <span><i style="background:#FFB000;"></i> M6</span>
+                    <span><i style="background:#FF6B00;"></i> M7</span>
+                    <span><i style="background:#FF2D2D;"></i> M8+</span>
+                </div>
+            </div>
+
+            <aside class="map-panel" aria-label="Eventos sísmicos">
+                <div class="map-stats">
+                    <div class="map-stat">
+                        <span>Eventos</span>
+                        <strong id="mapCount">—</strong>
+                    </div>
+                    <div class="map-stat">
+                        <span>Mayor</span>
+                        <strong id="mapMax">—</strong>
+                    </div>
+                    <div class="map-stat">
+                        <span>Más reciente</span>
+                        <strong id="mapLast">—</strong>
+                    </div>
+                </div>
+                <h3>Eventos recientes</h3>
+                <div class="map-event-list" id="mapEventList">
+                    <p class="map-empty">Cargando eventos…</p>
+                </div>
+                <p class="map-source">Fuente: USGS Earthquake Hazards Program. Horarios en UTC.</p>
+            </aside>
+        </div>
+    </main>
+
+    <div class="page-cta">
+        <h2>Volver al panel</h2>
+        <p>Consulta las series de partículas, aceleración y el detalle de las anomalías.</p>
+        <a href="graficas.html">Abrir gráficas →</a>
+        <a href="index.html">Ir al inicio →</a>
+    </div>
+
+    <div class="footer">
+        <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio Internacional de Partículas del TOA &bull; 2026
+    </div>
+
+</body>
+</html>

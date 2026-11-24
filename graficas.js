@@ -105,10 +105,6 @@
                 ctx.lineTo(position, chartArea.bottom);
                 ctx.stroke();
                 ctx.setLineDash([]);
-                ctx.fillStyle = line.color;
-                ctx.font = 'bold 10px system-ui, sans-serif';
-                ctx.textAlign = 'left';
-                ctx.fillText(line.label, position + 3, chartArea.top + 10);
             });
             ctx.restore();
         }
@@ -666,7 +662,7 @@
             const value = timeAxis ? eventTime : (meta.labels[bestIndex] || null);
             if (!value) return;
             const color = event.level === 'alerta' ? '#FF5252' : '#FF9800';
-            const label = 'Anomalía';
+            const label = '';
             const key = String(value) + color;
             if (seen.has(key)) return;
             seen.add(key);
