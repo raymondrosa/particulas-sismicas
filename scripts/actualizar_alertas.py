@@ -44,7 +44,7 @@ SERIES = [
     ("ch2", "_ax", "Aceleración X", "m/s²", "aceleracion", 0.05, 0.15),
     ("ch2", "_ay", "Aceleración Y", "m/s²", "aceleracion", 0.05, 0.15),
     ("ch2", "_az", "Aceleración Z", "m/s²", "aceleracion", 0.05, 0.15),
-    ("ch2", "_ares", "Aceleración resultante dinámica", "m/s²", "aceleracion", 0.03, 0.10),
+    ("ch2", "_ares", "Aceleración resultante (g_PR)", "m/s²", "aceleracion", 0.03, 0.10),
 ]
 CORE_COUNT = len(SERIES)
 
@@ -57,6 +57,7 @@ Z_STRONG = 6.0
 Z_SPIKE = 10.0
 MAX_FEEDS = 8000
 ACCEL_ZERO_DEFAULT = {"x": 0.12, "y": -1.88, "z": 9.14}  # referencia inicial del módulo
+GRAVITY_PR = 9.78  # gravedad media en Puerto Rico (m/s²)
 
 COOLDOWN_ALERTA = timedelta(hours=6)
 COOLDOWN_PICO = timedelta(hours=2)
@@ -134,7 +135,7 @@ def analyze(feeds_by_channel):
         item["_ax"] = dx
         item["_ay"] = dy
         item["_az"] = dz
-        item["_ares"] = math.sqrt(dx * dx + dy * dy + dz * dz)
+        item["_ares"] = math.sqrt(dx * dx + dy * dy + (dz + GRAVITY_PR) * (dz + GRAVITY_PR))
         calibrated.append(item)
     feeds_by_channel = dict(feeds_by_channel)
     feeds_by_channel["ch2"] = calibrated
