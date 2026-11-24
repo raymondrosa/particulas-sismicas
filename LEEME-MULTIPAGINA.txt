@@ -1,0 +1,62 @@
+ACTUALIZACIÓN MULTIPÁGINA DEL OBSERVATORIO
+==========================================
+
+Sube estos archivos a la rama main:
+1. index.html
+2. graficas.html
+3. graficas.js
+4. metodologia.html
+5. styles.css
+6. scripts/actualizar_alertas.py
+
+NO reemplaces alertas.json. Conserva fondo.png y logo.jpg.
+
+ESTRUCTURA NUEVA
+----------------
+- index.html: guía general, estado, avisos, historial y datos en vivo.
+- graficas.html: panel completo de gráficas individuales, multivariable y sismos.
+- metodologia.html: fórmulas, criterios, calibración y limitaciones.
+- styles.css: diseño compartido, banner y navegación.
+- graficas.js: lógica del panel de gráficas.
+
+RESULTANTE DE ACCELERACIÓN
+--------------------------
+Las componentes X, Y y Z usan cero operacional (mediana robusta de reposo).
+La resultante se refiere a la gravedad media de Puerto Rico:
+
+  a_res = sqrt( aX_op² + aY_op² + (g_PR + aZ_op)² )
+  g_PR = 9.78 m/s²
+
+Así la resultante queda alrededor de 9.78 m/s² y sus variaciones siguen siendo
+detectables. Umbrales de aceleración recalibrados:
+- X/Y/Z: s_min 0.05 m/s², delta_min 0.15 m/s².
+- Resultante: s_min 0.03 m/s², delta_min 0.10 m/s².
+
+HORARIOS
+--------
+Todas las marcas de tiempo de las páginas se muestran en UTC.
+
+HISTORIAL
+---------
+Cada aviso nuevo incluye "Ver cálculo" con m_B, m_R, x_t, delta, s_B, z y
+umbral. Los avisos antiguos de física molecular quedaron ocultos.
+
+PARTÍCULAS IMAGINARIAS
+----------------------
+Se revisaron los datos de hoy. La serie imaginaria se movió entre 509 y 553,
+pero no superó los umbrales estadísticos (z < 4.5) ni formó un cambio
+sostenido. El evento registrado a las 22:18 UTC fue de partículas reales,
+no imaginarias. Además, los datos del sensor terminan a las 22:35 UTC; después
+de eso la página entra en reposo si no llegan muestras.
+
+CÓMO APLICARLO
+--------------
+1. Sube los seis archivos.
+2. Deja que "Publicar página" despliegue o ejecútalo manualmente.
+3. Ejecuta "Actualizar historial de avisos" si quieres actualizar el historial.
+4. Recarga con Ctrl+F5.
+
+NOTA
+----
+Los umbrales son experimentales. El sistema no predice terremotos ni sustituye
+a las autoridades oficiales.

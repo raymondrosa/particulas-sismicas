@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="description" content="Panel de gráficas del Observatorio Internacional de Partículas del TOA: series individuales, variables normalizadas y sismicidad M≥6.">
+    <title>Gráficas · Observatorio Internacional de Partículas del TOA</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js" defer></script>
+    <script src="graficas.js" defer></script>
+</head>
+<body class="charts-page">
+
+    <div class="header-container">
+        <div class="header-row">
+            <img src="logo.jpg" alt="Logo Observatorio Internacional de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto" decoding="async">
+            <div class="header-copy">
+                <p class="header-kicker">International TOA Particle Observatory</p>
+                <h1>Observatorio de Partículas del TOA</h1>
+                <p class="header-subtitle">Panel de gráficas · calibración vectorial · horarios en UTC</p>
+            </div>
+            <div class="status">
+                <span class="status-circle" style="background-color: #22D3EE;"></span>
+                <span class="chart-status" id="chartStatus">Cargando gráficas…</span>
+            </div>
+        </div>
+    </div>
+
+    <nav class="section-nav" aria-label="Secciones del sitio">
+        <a href="index.html">Inicio</a>
+        <a href="index.html#trendPanel">Estado</a>
+        <a href="index.html#alertHistory">Historial</a>
+        <a href="index.html#datos">Datos</a>
+        <a href="graficas.html" aria-current="page">Gráficas</a>
+        <a href="metodologia.html">Metodología</a>
+        <a href="index.html#donativos">Donativos</a>
+    </nav>
+
+    <main>
+        <h2 class="section-title" id="graficas">Gráficas de las últimas horas</h2>
+        <p class="page-note">Series individuales con valores máximos y mínimos, panel multivariable normalizado en z y sismicidad global M≥6.0. Aceleración X, Y y Z con cero operacional; resultante referida a la gravedad media de Puerto Rico. Todos los horarios están en UTC.</p>
+        <div class="charts-grid" id="chartsGrid"></div>
+    </main>
+
+    <div class="page-cta">
+        <h2>Volver al resumen</h2>
+        <p>Estado del monitoreo, avisos recientes y datos generales de la estación.</p>
+        <a href="index.html">Ir al inicio →</a>
+    </div>
+
+    <div class="footer">
+        <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio Internacional de Partículas del TOA &bull; 2026
+    </div>
+
+</body>
+</html>

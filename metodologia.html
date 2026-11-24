@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta name="description" content="Metodología de detección del Observatorio Internacional de Partículas del TOA: estadísticos robustos, criterios y calibración vectorial.">
+    <title>Metodología · Observatorio Internacional de Partículas del TOA</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="header-container">
+        <div class="header-row">
+            <img src="logo.jpg" alt="Logo Observatorio Internacional de Partículas del TOA" class="logo" loading="lazy" width="130" height="auto" decoding="async">
+            <div class="header-copy">
+                <p class="header-kicker">International TOA Particle Observatory</p>
+                <h1>Observatorio de Partículas del TOA</h1>
+                <p class="header-subtitle">Metodología · criterios de detección · calibración vectorial · UTC</p>
+            </div>
+            <div class="status">
+                <span class="status-circle" style="background-color: #22D3EE;"></span>
+                <span>Documento técnico</span>
+            </div>
+        </div>
+    </div>
+
+    <nav class="section-nav" aria-label="Secciones del sitio">
+        <a href="index.html">Inicio</a>
+        <a href="index.html#trendPanel">Estado</a>
+        <a href="index.html#alertHistory">Historial</a>
+        <a href="index.html#datos">Datos</a>
+        <a href="graficas.html">Gráficas</a>
+        <a href="metodologia.html" aria-current="page">Metodología</a>
+        <a href="index.html#donativos">Donativos</a>
+    </nav>
+
+    <main>
+            <!-- ============ METODOLOGÍA ============ -->
+    <section class="methodology" id="metodologia" aria-labelledby="metodologiaTitle">
+        <div class="methodology-head">
+            <h2 id="metodologiaTitle">Metodología de detección</h2>
+            <span class="methodology-badge">Experimental</span>
+        </div>
+        <p class="methodology-intro">El sistema clasifica desviaciones observadas en las series mediante estadísticos robustos. No ajusta un modelo de predicción sísmica ni emite alertas oficiales: compara la distribución reciente con una línea base y con el contexto de largo plazo. Todas las marcas de tiempo se expresan en UTC.</p>
+
+        <div class="method-grid">
+            <article class="method-card">
+                <h3>1. Variables y agrupación</h3>
+                <p>Se analizan seis variables esenciales:</p>
+                <ul>
+                    <li>Partículas reales e imaginarias.</li>
+                    <li>Aceleración X, Y, Z y resultante.</li>
+                </ul>
+                <p>Se agrupan en dos familias: <strong>partículas</strong> y <strong>aceleración</strong>. La física molecular se muestra solo como referencia y no participa en los umbrales. Las tres componentes del acelerómetro usan un <strong>cero operacional</strong> calculado con la mediana robusta de reposo del módulo, y la resultante se calcula desde las componentes corregidas y la gravedad media de Puerto Rico.</p>
+                <div class="formula">
+                    x<sub>0</sub> = mediana(X<sub>cal</sub>),  y<sub>0</sub> = mediana(Y<sub>cal</sub>),  z<sub>0</sub> = mediana(Z<sub>cal</sub>)<br>
+                    a<sub>X</sub><sup>op</sup> = a<sub>X</sub><sup>raw</sup> − x<sub>0</sub><br>
+                    a<sub>Y</sub><sup>op</sup> = a<sub>Y</sub><sup>raw</sup> − y<sub>0</sub><br>
+                    a<sub>Z</sub><sup>op</sup> = a<sub>Z</sub><sup>raw</sup> − z<sub>0</sub><br>
+                    a<sub>res</sub><sup>PR</sup> = √[(a<sub>X</sub><sup>op</sup>)² + (a<sub>Y</sub><sup>op</sup>)² + (g<sub>PR</sub> + a<sub>Z</sub><sup>op</sup>)²],  g<sub>PR</sub> = 9.78 m/s²
+                </div>
+            </article>
+
+            <article class="method-card">
+                <h3>2. Ventanas de análisis</h3>
+                <p>Para cada variable se definen:</p>
+                <div class="formula">
+                    R<sub>t</sub> = últimas 240 muestras ≈ 1 h<br>
+                    B<sub>t</sub> = 1200 muestras anteriores ≈ 5 h
+                </div>
+                <p>Se requieren al menos 120 muestras recientes y 90 de línea base. Si falta una variable esencial, la evaluación se marca como parcial y no se clasifica como estable.</p>
+            </article>
+
+            <article class="method-card">
+                <h3>3. Estadísticos robustos</h3>
+                <div class="formula">
+                    m<sub>B</sub> = mediana(B<sub>t</sub>)<br>
+                    MAD(B<sub>t</sub>) = mediana(|x<sub>i</sub> − m<sub>B</sub>|)<br>
+                    s<sub>B</sub> = max(1.4826·MAD(B<sub>t</sub>), 0.005·|m<sub>B</sub>|, s<sub>min</sub>)<br>
+                    m<sub>R</sub> = mediana(R<sub>t</sub>)<br>
+                    Δ = m<sub>R</sub> − m<sub>B</sub><br>
+                    z<sub>R</sub> = Δ / s<sub>B</sub><br>
+                    z<sub>t</sub> = (x<sub>t</sub> − m<sub>B</sub>) / s<sub>B</sub>
+                </div>
+                <p>La mediana y la MAD reducen la influencia de valores atípicos. <var>s</var><sub>min</sub> es el mínimo de escala de cada variable.</p>
+            </article>
+
+            <article class="method-card">
+                <h3>4. Criterios de clasificación</h3>
+                <p>Con <var>δ</var><sub>min</sub> como cambio mínimo absoluto:</p>
+                <table class="criteria-table">
+                    <thead><tr><th>Estado</th><th>Criterio</th></tr></thead>
+                    <tbody>
+                        <tr><td>Fuerte</td><td>|Δ| ≥ δ<sub>min</sub> y |z<sub>R</sub>| ≥ 6</td></tr>
+                        <tr><td>Vigilancia</td><td>|Δ| ≥ δ<sub>min</sub> y 4.5 ≤ |z<sub>R</sub>| &lt; 6</td></tr>
+                        <tr><td>Pico*</td><td>|x<sub>t</sub> − m<sub>B</sub>| ≥ δ<sub>min</sub> y |z<sub>t</sub>| ≥ 10</td></tr>
+                        <tr><td>Pico de partículas reales*</td><td>cambio ≥ 10 % de |m<sub>B</sub>| y |z<sub>t</sub>| ≥ 5.5</td></tr>
+                    </tbody>
+                </table>
+                <p>* El pico se evalúa solo si la variable no cumple antes el criterio de fuerte o vigilancia.</p>
+                <p>Valores de referencia: partículas, <var>s</var><sub>min</sub> = 15 u y <var>δ</var><sub>min</sub> = 20 u; aceleración X/Y/Z, 0.05 m/s² y 0.15 m/s²; resultante dinámica, 0.03 m/s² y 0.10 m/s².</p>
+            </article>
+
+            <article class="method-card">
+                <h3>5. Aviso multivariable y picos</h3>
+                <p>Sea <var>G</var><sub>fuerte</sub> el conjunto de familias con al menos una variable en estado fuerte:</p>
+                <div class="formula">
+                    alerta = (|G<sub>fuerte</sub>| ≥ 2)<br>
+                    pico = (no alerta) y (existe pico en variable esencial)<br>
+                    vigilancia = (no alerta) y (no pico) y (hay señal fuerte o de vigilancia)<br>
+                    estable = (ninguna de las anteriores)
+                </div>
+                <p>La alerta multivariable exige coincidencia en dos familias; un pico aislado se informa como anomalía puntual. Los picos se evalúan igual al alza y a la baja.</p>
+            </article>
+
+            <article class="method-card">
+                <h3>6. Contexto de 10 días</h3>
+                <p>Con promedios horarios de hasta 10 días se calcula una referencia de largo plazo:</p>
+                <div class="formula">
+                    m<sub>10</sub> = mediana(H<sub>10</sub>)<br>
+                    s<sub>10</sub> = max(1.4826·MAD(H<sub>10</sub>), 0.005·|m<sub>10</sub>|, s<sub>min</sub>)<br>
+                    z<sub>10</sub> = (m<sub>R</sub> − m<sub>10</sub>) / s<sub>10</sub>
+                </div>
+                <p>Se muestra una desviación de contexto cuando |z<sub>10</sub>| ≥ 3 y el cambio supera <var>δ</var><sub>min</sub>. Es una referencia descriptiva, no un criterio de alerta.</p>
+            </article>
+        </div>
+
+        <details class="methodology-notes">
+            <summary>Limitaciones y alcance</summary>
+            <p>Los umbrales son experimentales y requieren validación retrospectiva con un número suficiente de eventos. Un pico puede ser una variación real o un dato atípico del sensor. El historial permite desplegar “Ver cálculo” en cada aviso para revisar m_B, s_B, Δ, z y el umbral aplicado. El sistema no predice terremotos, no sustituye a las autoridades oficiales y no debe usarse para decisiones de seguridad.</p>
+        </details>
+    </section>
+
+
+    </main>
+
+    <div class="page-cta">
+        <h2>Datos y gráficas</h2>
+        <p>Consulta el estado actual, el historial de avisos y el panel completo de gráficas.</p>
+        <a href="index.html">Ir al inicio →</a>
+        <a href="graficas.html">Abrir gráficas →</a>
+    </div>
+
+    <div class="footer">
+        <strong>CC-SA Prof. Raymond Rosa Ávila</strong> &bull; Observatorio Internacional de Partículas del TOA &bull; 2026
+    </div>
+
+</body>
+</html>
