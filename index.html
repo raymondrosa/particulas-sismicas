@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
     <title>Observatorio Internacional de Partículas del TOA</title>
-    <link rel="stylesheet" href="styles.css?v=4">
+    <link rel="stylesheet" href="styles.css?v=5">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js" defer></script>
@@ -63,15 +63,26 @@
     <!-- ============ HISTORIAL DE AVISOS ============ -->
     <section class="alert-history" id="alertHistory" aria-labelledby="alertHistoryTitle">
         <div class="alert-history-head">
-            <h2 id="alertHistoryTitle">Historial de avisos</h2>
+            <h2 id="alertHistoryTitle">Historial de avisos y sismos</h2>
+            <span class="alert-history-counts" id="alertHistoryCounts"></span>
             <span class="alert-history-time" id="alertHistoryTime"></span>
             <span class="alert-history-check" id="alertHistoryCheck"></span>
         </div>
-        <p class="alert-history-note">Avisos basados en partículas reales, partículas imaginarias y aceleración. La física molecular se muestra en su gráfica como referencia, pero no genera avisos. Se revisa automáticamente; solo se agrega una fila cuando se detecta una anomalía.</p>
+        <p class="alert-history-note">Línea de tiempo experimental que combina anomalías de partículas/aceleración con los sismos M≥6.0 de USGS de los últimos 7 días. La física molecular se muestra en su gráfica como referencia, pero no genera avisos. Todo en UTC.</p>
+        <div class="alert-history-toolbar">
+            <div class="history-legend" aria-label="Leyenda del historial">
+                <span><i class="history-dot anomaly"></i> Anomalías</span>
+                <span><i class="history-dot quake"></i> Sismos M≥6</span>
+            </div>
+            <div class="history-sort" role="group" aria-label="Orden del historial">
+                <button type="button" id="historySortAsc" class="active">Orden cronológico</button>
+                <button type="button" id="historySortDesc">Más recientes</button>
+            </div>
+        </div>
         <ul class="alert-history-list" id="alertHistoryList" aria-live="polite">
             <li class="alert-history-empty">Cargando historial…</li>
         </ul>
-        <p class="alert-history-foot">El historial registra anomalías; su lectura es un pronóstico experimental.</p>
+        <p class="alert-history-foot">El historial registra anomalías y sismos; su lectura es un pronóstico experimental.</p>
     </section>
 
     <h2 class="section-title" id="datos">Datos en tiempo real</h2>
@@ -457,7 +468,10 @@
                     points.push({
                         x: props.time,
                         y: mag,
-                        place: props.place || 'Ubicación desconocida'
+                        place: props.place || 'Ubicación desconocida',
+                        depth: f.geometry && f.geometry.coordinates && f.geometry.coordinates.length > 2
+                            ? f.geometry.coordinates[2] : null,
+                        url: props.url || ''
                     });
                 });
 
@@ -1012,29 +1026,184 @@
                 }
             }
 
-            function renderAlertHistory(data) {
+            let historySortOrder = 'asc';
+            let lastHistoryData = null;
+            let lastHistoryQuakes = [];
+
+            function isMolecularOnlyEvent(event) {
+                const groups = Array.isArray(event.groups) ? event.groups : [];
+                const variables = Array.isArray(event.variables) ? event.variables : [];
+                const groupsOnlyMolecular = groups.length > 0 && groups.every(g => g === 'molecular');
+                const varsOnlyMolecular = groups.length === 0 && variables.length > 0 &&
+                    variables.every(v => v && v.group === 'molecular');
+                return groupsOnlyMolecular || varsOnlyMolecular;
+            }
+
+            function formatHistoryDay(value) {
+                const date = new Date(value);
+                if (isNaN(date.getTime())) return '';
+                try {
+                    return new Intl.DateTimeFormat('es-PR', {
+                        weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', timeZone: 'UTC'
+                    }).format(date);
+                } catch (error) {
+                    return formatHistoryTime(value);
+                }
+            }
+
+            function formatHistoryDuration(milliseconds) {
+                const totalMinutes = Math.max(1, Math.round(milliseconds / 60000));
+                if (totalMinutes < 60) return totalMinutes + ' min';
+                const hours = Math.floor(totalMinutes / 60);
+                const minutes = totalMinutes % 60;
+                if (hours < 24) return minutes ? hours + ' h ' + minutes + ' min' : hours + ' h';
+                const days = Math.floor(hours / 24);
+                const remainingHours = hours % 24;
+                return remainingHours ? days + ' d ' + remainingHours + ' h' : days + ' d';
+            }
+
+            function findNearestQuake(timestamp) {
+                let nearest = null;
+                let bestDifference = Infinity;
+                (lastHistoryQuakes || []).forEach(quake => {
+                    const difference = Math.abs(Number(quake.x) - timestamp);
+                    if (Number.isFinite(difference) && difference < bestDifference) {
+                        bestDifference = difference;
+                        nearest = quake;
+                    }
+                });
+                return nearest;
+            }
+
+            function appendHistoryDay(list, timestamp) {
+                const label = formatHistoryDay(timestamp);
+                if (!label) return;
+                const day = document.createElement('li');
+                day.className = 'history-day';
+                day.textContent = label;
+                list.appendChild(day);
+            }
+
+            function createQuakeHistoryItem(quake) {
+                const item = document.createElement('li');
+                item.className = 'alert-history-item quake';
+
+                const row = document.createElement('div');
+                row.className = 'alert-history-row';
+                const level = document.createElement('span');
+                level.className = 'alert-history-level';
+                level.textContent = '🌎 Sismo M' + Number(quake.y).toFixed(1);
+                const when = document.createElement('time');
+                when.dateTime = new Date(quake.x).toISOString();
+                when.textContent = formatHistoryTime(quake.x);
+                row.appendChild(level);
+                row.appendChild(when);
+                item.appendChild(row);
+
+                const summary = document.createElement('p');
+                summary.className = 'alert-history-summary';
+                const depth = Number(quake.depth);
+                summary.textContent = quake.place + (Number.isFinite(depth) ? ' · Profundidad: ' + depth.toFixed(1) + ' km' : '');
+                item.appendChild(summary);
+
+                const nearestAnomaly = (lastHistoryData && Array.isArray(lastHistoryData.events))
+                    ? lastHistoryData.events
+                        .filter(event => event.timestamp && !isMolecularOnlyEvent(event))
+                        .map(event => ({ event: event, time: Date.parse(event.timestamp) }))
+                        .filter(entry => Number.isFinite(entry.time))
+                        .sort((a, b) => Math.abs(a.time - Number(quake.x)) - Math.abs(b.time - Number(quake.x)))[0]
+                    : null;
+                if (nearestAnomaly) {
+                    const difference = nearestAnomaly.time - Number(quake.x);
+                    const nearestText = document.createElement('p');
+                    nearestText.className = 'alert-history-nearest';
+                    nearestText.textContent = 'Anomalía más cercana: ' + formatHistoryTime(nearestAnomaly.time) +
+                        ' · ' + formatHistoryDuration(Math.abs(difference)) +
+                        (difference >= 0 ? ' después del sismo' : ' antes del sismo');
+                    item.appendChild(nearestText);
+                }
+
+                if (quake.url) {
+                    const link = document.createElement('a');
+                    link.className = 'alert-history-usgs-link';
+                    link.href = quake.url;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.textContent = 'Ver detalle en USGS ↗';
+                    item.appendChild(link);
+                }
+
+                return item;
+            }
+
+            function renderAlertHistory(data, quakeData) {
                 const list = document.getElementById('alertHistoryList');
                 const time = document.getElementById('alertHistoryTime');
+                const counts = document.getElementById('alertHistoryCounts');
                 if (!list) return;
                 list.innerHTML = '';
-                const events = (data && Array.isArray(data.events) ? data.events : []).filter(event => {
-                    const groups = Array.isArray(event.groups) ? event.groups : [];
-                    const variables = Array.isArray(event.variables) ? event.variables : [];
-                    const groupsOnlyMolecular = groups.length > 0 && groups.every(g => g === 'molecular');
-                    const varsOnlyMolecular = groups.length === 0 && variables.length > 0 &&
-                        variables.every(v => v && v.group === 'molecular');
-                    return !groupsOnlyMolecular && !varsOnlyMolecular;
-                });
-                const latest = events[0];
-                if (time) time.textContent = latest ? 'Último aviso: ' + formatHistoryTime(latest.timestamp) : 'Sin avisos registrados';
-                if (!events.length) {
+
+                const events = (data && Array.isArray(data.events) ? data.events : [])
+                    .filter(event => !isMolecularOnlyEvent(event))
+                    .filter(event => Number.isFinite(Date.parse(event.timestamp)));
+
+                lastHistoryData = data || { events: [] };
+                lastHistoryQuakes = Array.isArray(quakeData) ? quakeData : [];
+
+                const quakes = lastHistoryQuakes.filter(quake => Number.isFinite(Number(quake.x)) && Number.isFinite(Number(quake.y)));
+                const sortedAlerts = events.slice().sort((a, b) => Date.parse(a.timestamp) - Date.parse(b.timestamp));
+                const latestAlert = sortedAlerts.length ? sortedAlerts[sortedAlerts.length - 1] : null;
+
+                if (time) {
+                    time.textContent = latestAlert
+                        ? 'Último aviso: ' + formatHistoryTime(latestAlert.timestamp)
+                        : 'Sin avisos registrados';
+                }
+                if (counts) {
+                    counts.textContent = events.length + ' anomalía' + (events.length === 1 ? '' : 's') +
+                        ' · ' + quakes.length + ' sismo' + (quakes.length === 1 ? '' : 's') + ' M≥6';
+                }
+
+                const entries = [];
+                events.forEach(event => entries.push({
+                    kind: 'anomaly',
+                    timestamp: Date.parse(event.timestamp),
+                    event: event
+                }));
+                quakes.forEach(quake => entries.push({
+                    kind: 'quake',
+                    timestamp: Number(quake.x),
+                    quake: quake
+                }));
+
+                if (!entries.length) {
                     const empty = document.createElement('li');
                     empty.className = 'alert-history-empty';
-                    empty.textContent = 'Aún no hay avisos registrados. El historial se actualiza automáticamente cada 10 minutos.';
+                    empty.textContent = 'Aún no hay anomalías ni sismos M≥6 en el periodo. El historial se actualiza automáticamente cada 10 minutos.';
                     list.appendChild(empty);
                     return;
                 }
-                events.slice(0, 50).forEach(event => {
+
+                entries.sort((a, b) => historySortOrder === 'asc'
+                    ? a.timestamp - b.timestamp
+                    : b.timestamp - a.timestamp);
+
+                let lastDay = '';
+                entries.slice(0, 80).forEach(entry => {
+                    const day = formatHistoryDay(entry.timestamp);
+                    if (day && day !== lastDay) {
+                        appendHistoryDay(list, entry.timestamp);
+                        lastDay = day;
+                    }
+
+                    if (entry.kind === 'quake') {
+                        list.appendChild(createQuakeHistoryItem(entry.quake));
+                        return;
+                    }
+
+                    const event = entry.event;
+                    const coreVariables = (event.variables || []).filter(v => v && v.group !== 'molecular');
+                    const coreGroups = (event.groups || []).filter(g => g !== 'molecular');
                     const item = document.createElement('li');
                     item.className = 'alert-history-item ' + (event.level === 'pico' ? 'pico' : 'alerta');
                     const row = document.createElement('div');
@@ -1050,16 +1219,28 @@
                     item.appendChild(row);
 
                     const direction = event.direction === 'down' ? 'a la baja' : (event.direction === 'up' ? 'al alza' : 'mixta');
-                    const summarize = (event.groups || []).map(g => g === 'particulas' ? 'partículas' : (g === 'molecular' ? 'física molecular' : 'aceleración')).join(' y ');
+                    const summarize = coreGroups.map(g => g === 'particulas' ? 'partículas' : (g === 'aceleracion' ? 'aceleración' : g)).join(' y ');
                     const summary = document.createElement('p');
                     summary.className = 'alert-history-summary';
                     summary.textContent = (event.level === 'pico' ? 'Anomalía ' + direction : 'Variación ' + direction) + (summarize ? ' en ' + summarize : '') + '.';
                     item.appendChild(summary);
 
-                    if (Array.isArray(event.variables) && event.variables.length) {
+                    const nearest = findNearestQuake(entry.timestamp);
+                    if (nearest) {
+                        const difference = entry.timestamp - Number(nearest.x);
+                        const nearestText = document.createElement('p');
+                        nearestText.className = 'alert-history-nearest';
+                        nearestText.textContent = 'Sismo más cercano: M' + Number(nearest.y).toFixed(1) +
+                            ' · ' + formatHistoryTime(nearest.x) +
+                            ' · ' + formatHistoryDuration(Math.abs(difference)) +
+                            (difference >= 0 ? ' antes del aviso' : ' después del aviso');
+                        item.appendChild(nearestText);
+                    }
+
+                    if (coreVariables.length) {
                         const vars = document.createElement('p');
                         vars.className = 'alert-history-vars';
-                        vars.textContent = 'Variables: ' + event.variables.map(v => v.label).join(', ');
+                        vars.textContent = 'Variables: ' + coreVariables.map(v => v.label).join(', ');
                         item.appendChild(vars);
                     }
 
@@ -1084,7 +1265,7 @@
                         : (state === 'watch' ? 'vigilancia' : (state === 'spike' ? 'pico' : 'normal'));
 
                     const lines = ['Δ_R = m_R − m_B;  z_R = Δ_R / s_B;  Δ_t = x_t − m_B;  z_t = Δ_t / s_B'];
-                    (event.variables || []).forEach(v => {
+                    coreVariables.forEach(v => {
                         const parts = [];
                         if (Number.isFinite(Number(v.baseline))) parts.push(`m_B=${fmt(v.baseline, v.unit)}${v.unit ? ' ' + v.unit : ''}`);
                         if (Number.isFinite(Number(v.recentMedian))) parts.push(`m_R=${fmt(v.recentMedian, v.unit)}${v.unit ? ' ' + v.unit : ''}`);
@@ -1150,8 +1331,20 @@
                             // Probar la siguiente fuente
                         }
                     }
-                    if (!best) throw new Error('sin datos');
-                    renderAlertHistory(best);
+                    let quakes = [];
+                    try {
+                        const quakeResponse = await fetch(getUSGSURL(), { cache: 'no-store' });
+                        if (quakeResponse.ok) {
+                            const quakeData = await quakeResponse.json();
+                            quakes = processEarthquakes(quakeData.features || []);
+                        }
+                    } catch (error) {
+                        // El historial de anomalías sigue disponible aunque USGS falle.
+                    }
+                    lastHistoryData = best;
+                    lastHistoryQuakes = quakes;
+                    if (!best && !quakes.length) throw new Error('sin datos');
+                    renderAlertHistory(best, quakes);
                 } catch (error) {
                     list.innerHTML = '';
                     const empty = document.createElement('li');
@@ -1820,6 +2013,17 @@
 
                 loadAlertHistory();
                 loadLastRevision();
+
+                const historyAsc = document.getElementById('historySortAsc');
+                const historyDesc = document.getElementById('historySortDesc');
+                const setHistoryOrder = order => {
+                    historySortOrder = order;
+                    if (historyAsc) historyAsc.classList.toggle('active', order === 'asc');
+                    if (historyDesc) historyDesc.classList.toggle('active', order === 'desc');
+                    renderAlertHistory(lastHistoryData, lastHistoryQuakes);
+                };
+                if (historyAsc) historyAsc.addEventListener('click', () => setHistoryOrder('asc'));
+                if (historyDesc) historyDesc.addEventListener('click', () => setHistoryOrder('desc'));
                 loadContext10d();
                 setInterval(() => { loadAlertHistory(); loadLastRevision(); }, 600000);
                 setInterval(loadContext10d, 1800000);

@@ -100,3 +100,15 @@ La resultante se calcula con las componentes corregidas y la gravedad media
 de Puerto Rico:
   a_res = sqrt(aX_op² + aY_op² + (g_PR + aZ_op)²)
   g_PR = 9.78 m/s²
+
+
+HISTORIAL COMBINADO
+-------------------
+- index.html ahora mezcla anomalías de partículas/aceleración con los sismos
+  M≥6 de USGS de los últimos 7 días.
+- Se muestran en orden cronológico por defecto; hay un botón para ver los
+  más recientes primero.
+- Cada anomalía indica el sismo más cercano y el tiempo de diferencia.
+- Cada sismo indica la anomalía más cercana y enlace a USGS.
+- Los avisos siguen siendo solo de partículas reales, imaginarias y
+  aceleración; la física molecular se excluye del historial.

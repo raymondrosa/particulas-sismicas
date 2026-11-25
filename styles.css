@@ -1783,3 +1783,140 @@ body {
         min-height: 300px;
     }
 }
+
+
+/* ===== HISTORIAL CRONOLÓGICO: ANOMALÍAS + SISMOS ===== */
+.alert-history-counts {
+    font-size: 0.76rem;
+    color: rgba(255, 255, 255, 0.68);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.alert-history-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    margin-top: 9px;
+}
+
+.history-legend {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.74rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.history-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.history-dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+}
+
+.history-dot.anomaly { background: #FF9800; box-shadow: 0 0 7px rgba(255, 152, 0, 0.6); }
+.history-dot.quake { background: #22D3EE; box-shadow: 0 0 7px rgba(34, 211, 238, 0.6); }
+
+.history-sort {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+}
+
+.history-sort button {
+    font: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #8ECAE6;
+    background: rgba(3, 12, 24, 0.65);
+    border: 1px solid rgba(34, 211, 238, 0.22);
+    border-radius: 999px;
+    padding: 4px 9px;
+    cursor: pointer;
+}
+
+.history-sort button:hover,
+.history-sort button:focus-visible {
+    color: #fff;
+    border-color: #22D3EE;
+    outline: none;
+}
+
+.history-sort button.active {
+    color: #fff;
+    border-color: #22D3EE;
+    background: rgba(34, 211, 238, 0.14);
+}
+
+.history-day {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 5px;
+    list-style: none;
+    font-size: 0.66rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.56);
+}
+
+.history-day::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(34, 211, 238, 0.28), transparent);
+}
+
+.alert-history-item.quake {
+    border-left-color: #22D3EE;
+    background: rgba(34, 211, 238, 0.065);
+}
+
+.alert-history-item.quake .alert-history-level {
+    color: #8FF4FF;
+}
+
+.alert-history-nearest {
+    margin: 4px 0 0;
+    font-size: 0.73rem;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.alert-history-usgs-link {
+    display: inline-block;
+    margin-top: 5px;
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: #22D3EE;
+    text-decoration: none;
+}
+
+.alert-history-usgs-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .alert-history-toolbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .alert-history-time,
+    .alert-history-counts {
+        margin-left: 0;
+        white-space: normal;
+    }
+}
