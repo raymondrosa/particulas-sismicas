@@ -1,7 +1,34 @@
 {
   "version": 1,
-  "updated_at": "2026-11-26T04:08:22.314905Z",
+  "updated_at": "2026-11-26T13:54:48.281021Z",
   "events": [
+    {
+      "id": "20261126T103005Z-pico",
+      "timestamp": "2026-11-26T10:30:05Z",
+      "level": "pico",
+      "direction": "down",
+      "groups": [
+        "particulas"
+      ],
+      "variables": [
+        {
+          "label": "Partículas reales",
+          "state": "spike",
+          "group": "particulas",
+          "unit": "u",
+          "delta": -84.0,
+          "z": -5.6,
+          "baseline": 521.0,
+          "sigma": 15.0,
+          "minDelta": 20.0,
+          "zThreshold": 5.5,
+          "recentMedian": 521.0,
+          "lastValue": 437.0,
+          "relative": 0.1612,
+          "direction": "down"
+        }
+      ]
+    },
     {
       "id": "20261126T040432Z-pico",
       "timestamp": "2026-11-26T04:04:32Z",
